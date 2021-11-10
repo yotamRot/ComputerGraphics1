@@ -21,14 +21,192 @@ Renderer::~Renderer(void)
 {
 }
 
+void Renderer::transformToScreen(vec2& vec)
+{
+	vec.x = (m_width / 2) * (vec.x + 1);
+	vec.y = ((m_height / 2) * (vec.y + 1) / 2);
+}
 
+//void Renderer::RasterizeLine(vec2 ver1, vec2 ver2)
+//{
+//	int xMin = (ver1.x < ver2.x) ? ver1.x : ver2.x;
+//	int xMax = (ver1.x < ver2.x) ? ver2.x : ver1.x;
+//	int slope = (ver1.y - ver2.y) / (ver1.x - ver2.x);
+//	int g = -slope * ver1.x + ver1.y;
+//	int curY = ver1.y;
+//	for (int curX = xMin; curX < xMax; curX++)
+//	{
+//		if (curX < 1 || curX >= m_width || curY < 1 || curY >= m_height)
+//		{
+//			continue;
+//		}
+//		m_outBuffer[INDEX(m_width, curX, curY, 0)] = 1;	m_outBuffer[INDEX(m_width, curX, curY, 1)] = 0;	m_outBuffer[INDEX(m_width, curX, curY, 2)] = 0;
+//		curY += slope;
+//	}
+//
+//}
+
+void Renderer::DrawPixel(int x, int y)
+{
+	if (x < 1 || x >= m_width || y < 1 || x >= m_height)
+		{
+			return;
+		}
+	m_outBuffer[INDEX(m_width, x, y, 0)] = 1;	m_outBuffer[INDEX(m_width, x, y, 1)] = 0;	m_outBuffer[INDEX(m_width, x, y, 2)] = 0;
+}
+
+void RasterizeArrangeVeritcs(vec2& ver1, vec2& ver2)
+{
+	vec2 minVer = (ver1.x < ver2.x) ? ver1 : ver2;
+	vec2 maxVer = (ver1.x < ver2.x) ? ver2 : ver1;
+	ver1 = minVer;
+	ver2 = maxVer;
+}
+
+void Renderer::RasterizeLine(vec2 ver1, vec2 ver2)
+{
+	RasterizeArrangeVeritcs(ver1, ver2);
+	int dX = ver2.x - ver1.x;
+	int dY = ver2.y - ver1.y;
+	if (dY < dX )
+	{
+		if (dX * dY > 0)
+		{
+			RasterizeRegular(ver1, ver2);
+		}
+		else
+		{
+			RasterizeRegularNegetive(ver1, ver2);
+		}
+	}
+	else
+	{
+		if (dX * dY > 0)
+		{
+			RasterizeBig(ver1, ver2);
+		}
+		else
+		{
+			RasterizeBigNegetive(ver1, ver2);
+		}
+	}
+
+
+}
+
+void Renderer::RasterizeRegular(vec2& ver1, vec2& ver2)
+{
+
+	int x = ver1.x;
+	int y = ver1.y;
+	int dX = ver2.x - ver1.x;
+	int dY = ver2.y - ver1.y;
+	int d = 2*dY - dX;
+	int dE = 2*dY;
+	int dNE = 2 * dY - 2 * dX;
+	DrawPixel(x, y);
+	for (int i = x; i < (int)ver2.x; i++)
+	{
+		if (d < 0)
+		{
+			d += dE;
+		}
+		else
+		{
+			y++;
+			d += dNE;
+		}
+		DrawPixel(i, y);
+	}
+}
+
+void Renderer::RasterizeBig(vec2& ver1, vec2& ver2)
+{
+
+	int x = ver1.y;
+	int y = ver1.x;
+	int dX = ver2.y - ver1.y;
+	int dY = ver2.x - ver1.x;
+	int d = 2 * dY - dX;
+	int dE = 2 * dY;
+	int dNE = 2 * dY - 2 * dX;
+	DrawPixel(y, x);
+	for (int i = x; i < (int)ver2.y; i++)
+	{
+		if (d < 0)
+		{
+			d += dE;
+		}
+		else
+		{
+			y++;
+			d += dNE;
+		}
+		DrawPixel(y, i);
+	}
+}
+
+
+void Renderer::RasterizeRegularNegetive(vec2& ver1, vec2& ver2)
+{
+
+	int x = ver1.x;
+	int y = -ver1.y;
+	int dX = ver2.x - ver1.x;
+	int dY = -ver2.y - (-ver1.y);
+	int d = 2 * dY - dX;
+	int dE = 2 * dY;
+	int dNE = 2 * dY - 2 * dX;
+	DrawPixel(x, -y);
+	for (int i = x; i < (int)ver2.x; i++)
+	{
+		if (d < 0)
+		{
+			d += dE;
+		}
+		else
+		{
+			y++;
+			d += dNE;
+		}
+		DrawPixel(i, -y);
+	}
+}
+
+
+void Renderer::RasterizeBigNegetive(vec2& ver1, vec2& ver2)
+{
+
+	int x = ver1.y;
+	int y = -ver1.x;
+	int dX = ver2.y - ver1.y;
+	int dY = -ver2.x - (-1) * ver1.x;
+	int d = 2 * dY - dX;
+	int dE = 2 * dY;
+	int dNE = 2 * dY - 2 * dX;
+	DrawPixel(y, -x);
+	for (int i = x; i < (int)ver2.y; i++)
+	{
+		if (d < 0)
+		{
+			d += dE;
+		}
+		else
+		{
+			y++;
+			d += dNE;
+		}
+		DrawPixel(y, -i);
+	}
+}
 
 void Renderer::CreateBuffers(int width, int height)
 {
-	m_width=width;
-	m_height=height;	
+	m_width = width;
+	m_height = height;
 	CreateOpenGLBuffer(); //Do not remove this line.
 	m_outBuffer = new float[3*m_width*m_height];
+	m_zbuffer = new float[m_width * m_height];
 }
 
 void Renderer::SetDemoBuffer()
@@ -47,6 +225,50 @@ void Renderer::SetDemoBuffer()
 	}
 }
 
+void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals)
+{
+	vec2 triangle [3];
+	for (vector<vec3>::const_iterator it = vertices->begin(); it != vertices->end(); ++it)
+	{
+		/*for (int i = 0; i < 3; i++)
+		{
+			triangle[i] = vec3ToVec2(*it);
+			it++;
+		}*/
+		triangle[0] = vec3ToVec2(*it);
+		it++;
+		triangle[1] = vec3ToVec2(*it);
+		it++;
+		triangle[2] = vec3ToVec2(*it);
+
+
+		RasterizeLine(triangle[0], triangle[1]);
+		RasterizeLine(triangle[1], triangle[2]);
+		RasterizeLine(triangle[2], triangle[0]);
+	}
+}
+vec2 Renderer::vec3ToVec2(const vec3& ver)
+{
+	vec4 tempVec = vec4(ver);
+	vec4 WScale = Scale(1, 1, 1) * tempVec;
+	mat4 Wtranlate = Translate(0, 2.5, -3);
+	//vec4 WScale = Scale(1, 1, 1) * (vec4(ver));
+	vec4 tempWorldTrans = Wtranlate * tempVec;
+	tempVec = this->projection * this->cTransform * tempWorldTrans;
+
+	vec2 point = vec2(tempVec.x / tempVec.w, tempVec.y / tempVec.w);
+	transformToScreen(point);
+	return point;
+}
+void Renderer::SetCameraTransform(const mat4& transform)
+{
+	cTransform = mat4(transform);
+}
+
+void Renderer::SetProjection(const mat4& transform)
+{
+	projection = mat4(transform);
+}
 
 
 
@@ -126,4 +348,14 @@ void Renderer::SwapBuffers()
 	a = glGetError();
 	glutSwapBuffers();
 	a = glGetError();
+}
+
+void Renderer::ClearColorBuffer()
+{
+	memset(m_outBuffer, 0, (sizeof(float) * 3 * m_width * m_height));
+}
+
+void Renderer::ClearDepthBuffer()
+{
+	memset(m_zbuffer, 0, (sizeof(float) * m_width * m_height));
 }

@@ -11,9 +11,22 @@ class Renderer
 	float *m_outBuffer; // 3*width*height
 	float *m_zbuffer; // width*height
 	int m_width, m_height;
+	mat4 cTransform;
+	mat4 projection;
 
 	void CreateBuffers(int width, int height);
 	void CreateLocalBuffer();
+	void RasterizeLine(vec2 verMin, vec2 verMax);
+	void RasterizeBigNegetive(vec2& ver1, vec2& ver2);
+	void RasterizeRegularNegetive(vec2& ver1, vec2& ver2);
+	void RasterizeBig(vec2& ver1, vec2& ver2);
+	void RasterizeRegular(vec2& ver1, vec2& ver2);
+
+	void DrawPixel(int x, int y);
+	void transformToScreen(vec2& vec);
+	vec2 vec3ToVec2(const vec3& ver);
+
+
 
 	//////////////////////////////
 	// openGL stuff. Don't touch.

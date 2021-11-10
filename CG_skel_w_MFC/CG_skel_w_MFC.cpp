@@ -33,13 +33,14 @@ Renderer *renderer;
 
 int last_x,last_y;
 bool lb_down,rb_down,mb_down;
+uint32_t mouse_status = 0;
 
 //----------------------------------------------------------------------------
 // Callbacks
 
 void display( void )
 {
-//Call the scene and ask it to draw itself
+	scene->draw();
 }
 
 void reshape( int width, int height )
@@ -50,21 +51,27 @@ void reshape( int width, int height )
 void keyboard( unsigned char key, int x, int y )
 {
 	switch ( key ) {
-	case 033:
+	case 033:			// escape
 		exit( EXIT_SUCCESS );
 		break;
 	}
+	
+	
+
 }
 
 void mouse(int button, int state, int x, int y)
 {
 	//button = {GLUT_LEFT_BUTTON, GLUT_MIDDLE_BUTTON, GLUT_RIGHT_BUTTON}
 	//state = {GLUT_DOWN,GLUT_UP}
-	
+	vec4 eye = vec4(0, -1, 0, 1);
+	vec4 at = vec4(0, 0, -1, 1);
+	vec4 up = vec4(0, 1, 0, 1);
 	//set down flags
 	switch(button) {
 		case GLUT_LEFT_BUTTON:
 			lb_down = (state==GLUT_UP)?0:1;
+			scene->cameras.at(scene->activeCamera)->LookAt(eye, at, up);
 			break;
 		case GLUT_RIGHT_BUTTON:
 			rb_down = (state==GLUT_UP)?0:1;

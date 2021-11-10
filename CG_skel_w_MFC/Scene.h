@@ -6,10 +6,11 @@
 #include "Renderer.h"
 using namespace std;
 
-class Model {
+class Model { 
+public:
+	void virtual draw(Renderer* renderer) = 0;
 protected:
 	virtual ~Model() {}
-	void virtual draw()=0;
 };
 
 
@@ -18,10 +19,10 @@ class Light {
 };
 
 class Camera {
-	mat4 cTransform;
-	mat4 projection;
 
 public:
+	mat4 cTransform;
+	mat4 projection;
 	void setTransformation(const mat4& transform);
 	void LookAt(const vec4& eye, const vec4& at, const vec4& up );
 	void Ortho( const float left, const float right,
@@ -37,14 +38,16 @@ public:
 
 class Scene {
 
-	vector<Model*> models;
+	
 	vector<Light*> lights;
-	vector<Camera*> cameras;
+	
 	Renderer *m_renderer;
 
 public:
+	vector<Model*> models;
+	vector<Camera*> cameras;
 	Scene() {};
-	Scene(Renderer *renderer) : m_renderer(renderer) {};
+	Scene(Renderer* renderer);
 	void loadOBJModel(string fileName);
 	void draw();
 	void drawDemo();
