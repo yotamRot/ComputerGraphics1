@@ -15,7 +15,7 @@ protected :
 	mat3 _normal_transform;
 
 public:
-	mat4 world_transform;
+	mat4 _world_transform;
 	MeshModel(string fileName);
 	~MeshModel(void);
 	void loadFile(string fileName);
