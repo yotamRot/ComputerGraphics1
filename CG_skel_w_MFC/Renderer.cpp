@@ -48,7 +48,7 @@ void Renderer::transformToScreen(vec2& vec)
 
 void Renderer::DrawPixel(int x, int y)
 {
-	if (x < 1 || x >= m_width || y < 1 || x >= m_height)
+	if (x < 1 || x >= m_width || y < 1 || y >= m_height)
 		{
 			return;
 		}

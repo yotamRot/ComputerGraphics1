@@ -37,10 +37,10 @@ void Scene::drawDemo()
 Scene::Scene(Renderer *renderer) : m_renderer(renderer) 
 {	
 	Camera* initCamera = new Camera();
-	vec4 eye = vec4(0, 0, 0, 1);
-	vec4 at = vec4(0, 0, -1, 1);
-	vec4 up = vec4(0, 1, 0, 1);
-	initCamera->LookAt(eye,at,up);
+	initCamera->eye = vec4(0, 0, 0, 1);
+	initCamera->at = vec4(0, 0, -1, 1);
+	initCamera->up = vec4(0, 1, 0, 1);
+	initCamera->LookAt(initCamera->eye, initCamera->at, initCamera->up);
 	initCamera->Frustum(-3, 3, -3, 3, -1, -5);
 	cameras.push_back(initCamera);
 	activeCamera = 0;
@@ -51,8 +51,11 @@ void Camera::setTransformation(const mat4& transform)
 	cTransform = mat4(transform);
 }
 
-void Camera::LookAt(const vec4& eye, const vec4& at, const vec4& up)
+void Camera::LookAt(const vec4& eye , const vec4& at, const vec4& up)
 {
+	this->eye = eye;
+	this->at = at;
+	this->up = up;
 	vec4 n = normalize(eye - at);
 	vec4 u = normalize(cross(up, n));
 	vec4 v = normalize(cross(n, u));

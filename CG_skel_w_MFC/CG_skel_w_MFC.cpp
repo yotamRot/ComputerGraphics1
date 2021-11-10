@@ -27,6 +27,10 @@
 #define FILE_OPEN 1
 #define MAIN_DEMO 1
 #define MAIN_ABOUT 2
+#define ROTATE_LEFT 97
+#define ROTATE_RIGHT 100
+#define ROTATE_UP 119
+#define ROTATE_DOWN 115
 
 Scene *scene;
 Renderer *renderer;
@@ -50,12 +54,42 @@ void reshape( int width, int height )
 
 void keyboard( unsigned char key, int x, int y )
 {
+	static mat4 rotation;
+	static vec4 new_eye, at, up;
 	switch ( key ) {
 	case 033:			// escape
 		exit( EXIT_SUCCESS );
 		break;
+	case ROTATE_LEFT:
+		rotation = RotateY(10);
+		new_eye = rotation * scene->cameras.at(scene->activeCamera)->eye;
+		at = rotation * scene->cameras.at(scene->activeCamera)->at;
+		up = rotation * scene->cameras.at(scene->activeCamera)->up;
+		scene->cameras.at(scene->activeCamera)->LookAt(new_eye, at, up);
+		break;
+	case ROTATE_RIGHT:
+		rotation = RotateY(350);
+		new_eye = rotation * scene->cameras.at(scene->activeCamera)->eye;
+		at = rotation * scene->cameras.at(scene->activeCamera)->at;
+		up = rotation * scene->cameras.at(scene->activeCamera)->up;
+		scene->cameras.at(scene->activeCamera)->LookAt(new_eye, at, up);
+		break;
+	case ROTATE_DOWN:
+		rotation = RotateX(10);
+		new_eye = rotation * scene->cameras.at(scene->activeCamera)->eye;
+		at = rotation * scene->cameras.at(scene->activeCamera)->at;
+		up = rotation * scene->cameras.at(scene->activeCamera)->up;
+		scene->cameras.at(scene->activeCamera)->LookAt(new_eye, at, up);
+		break;
+	case ROTATE_UP:
+		rotation = RotateX(350);
+		new_eye = rotation * scene->cameras.at(scene->activeCamera)->eye;
+		at = rotation * scene->cameras.at(scene->activeCamera)->at;
+		up = rotation * scene->cameras.at(scene->activeCamera)->up;
+		scene->cameras.at(scene->activeCamera)->LookAt(new_eye, at, up);
+		break;
 	}
-	
+	scene->draw();
 	
 
 }
