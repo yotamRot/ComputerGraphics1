@@ -83,22 +83,6 @@ void keyboard( unsigned char key, int x, int y )
 	case OUT:
 		axis = Z;
 		break;
-	case ROTATE_Z_RIGHT:		// e
-		rotation = RotateZ(10);
-		new_eye = rotation * scene->cameras.at(scene->activeCamera)->eye;
-		at = rotation * scene->cameras.at(scene->activeCamera)->at;
-		up = rotation * scene->cameras.at(scene->activeCamera)->up;
-		scene->cameras.at(scene->activeCamera)->LookAt(new_eye, at, up);
-		break;
-	case ROTATE_Z_LEFT:			// q
-		rotation = RotateZ(350);
-		new_eye = rotation * scene->cameras.at(scene->activeCamera)->eye;
-		at = rotation * scene->cameras.at(scene->activeCamera)->at;
-		up = rotation * scene->cameras.at(scene->activeCamera)->up;
-		scene->cameras.at(scene->activeCamera)->LookAt(new_eye, at, up);
-		break;
-	case RECTANGLE:				// r
-		break;
 	}
 	scene->manipulateActiveModel(curTramsformation, axis);
 	scene->draw();
@@ -108,16 +92,10 @@ void keyboard( unsigned char key, int x, int y )
 
 void mouse(int button, int state, int x, int y)
 {
-	//button = {GLUT_LEFT_BUTTON, GLUT_MIDDLE_BUTTON, GLUT_RIGHT_BUTTON}
-	//state = {GLUT_DOWN,GLUT_UP}
-	vec4 eye = vec4(0, -1, 0, 1);
-	vec4 at = vec4(0, 0, -1, 1);
-	vec4 up = vec4(0, 1, 0, 1);*/
 	//set down flags
 	switch(button) {
 		case GLUT_LEFT_BUTTON:
 			lb_down = (state==GLUT_UP)?0:1;
-			//scene->cameras.at(scene->activeCamera)->LookAt(eye, at, up);
 			break;
 		case GLUT_RIGHT_BUTTON:
 			rb_down = (state==GLUT_UP)?0:1;
