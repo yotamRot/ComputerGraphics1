@@ -31,6 +31,9 @@
 #define ROTATE_RIGHT 100
 #define ROTATE_UP 119
 #define ROTATE_DOWN 115
+#define ROTATE_Z_RIGHT 101
+#define ROTATE_Z_LEFT 113
+#define RECTANGLE 114
 
 Scene *scene;
 Renderer *renderer;
@@ -60,33 +63,49 @@ void keyboard( unsigned char key, int x, int y )
 	case 033:			// escape
 		exit( EXIT_SUCCESS );
 		break;
-	case ROTATE_LEFT:
+	case ROTATE_LEFT:			// a
 		rotation = RotateY(10);
 		new_eye = rotation * scene->cameras.at(scene->activeCamera)->eye;
 		at = rotation * scene->cameras.at(scene->activeCamera)->at;
 		up = rotation * scene->cameras.at(scene->activeCamera)->up;
 		scene->cameras.at(scene->activeCamera)->LookAt(new_eye, at, up);
 		break;
-	case ROTATE_RIGHT:
+	case ROTATE_RIGHT:			// d
 		rotation = RotateY(350);
 		new_eye = rotation * scene->cameras.at(scene->activeCamera)->eye;
 		at = rotation * scene->cameras.at(scene->activeCamera)->at;
 		up = rotation * scene->cameras.at(scene->activeCamera)->up;
 		scene->cameras.at(scene->activeCamera)->LookAt(new_eye, at, up);
 		break;
-	case ROTATE_DOWN:
+	case ROTATE_DOWN:			// s
 		rotation = RotateX(10);
 		new_eye = rotation * scene->cameras.at(scene->activeCamera)->eye;
 		at = rotation * scene->cameras.at(scene->activeCamera)->at;
 		up = rotation * scene->cameras.at(scene->activeCamera)->up;
 		scene->cameras.at(scene->activeCamera)->LookAt(new_eye, at, up);
 		break;
-	case ROTATE_UP:
+	case ROTATE_UP:				// w
 		rotation = RotateX(350);
 		new_eye = rotation * scene->cameras.at(scene->activeCamera)->eye;
 		at = rotation * scene->cameras.at(scene->activeCamera)->at;
 		up = rotation * scene->cameras.at(scene->activeCamera)->up;
 		scene->cameras.at(scene->activeCamera)->LookAt(new_eye, at, up);
+		break;
+	case ROTATE_Z_RIGHT:		// e
+		rotation = RotateZ(10);
+		new_eye = rotation * scene->cameras.at(scene->activeCamera)->eye;
+		at = rotation * scene->cameras.at(scene->activeCamera)->at;
+		up = rotation * scene->cameras.at(scene->activeCamera)->up;
+		scene->cameras.at(scene->activeCamera)->LookAt(new_eye, at, up);
+		break;
+	case ROTATE_Z_LEFT:			// q
+		rotation = RotateZ(350);
+		new_eye = rotation * scene->cameras.at(scene->activeCamera)->eye;
+		at = rotation * scene->cameras.at(scene->activeCamera)->at;
+		up = rotation * scene->cameras.at(scene->activeCamera)->up;
+		scene->cameras.at(scene->activeCamera)->LookAt(new_eye, at, up);
+		break;
+	case RECTANGLE:				// r
 		break;
 	}
 	scene->draw();
@@ -98,7 +117,7 @@ void mouse(int button, int state, int x, int y)
 {
 	//button = {GLUT_LEFT_BUTTON, GLUT_MIDDLE_BUTTON, GLUT_RIGHT_BUTTON}
 	//state = {GLUT_DOWN,GLUT_UP}
-	vec4 eye = vec4(0, -1, 0, 1);
+	vec4 eye = vec4(0, 0, 0, 1);
 	vec4 at = vec4(0, 0, -1, 1);
 	vec4 up = vec4(0, 1, 0, 1);
 	//set down flags

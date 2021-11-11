@@ -42,6 +42,7 @@ public:
 	~Renderer(void);
 	void Init();
 	void DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals=NULL);
+	void DrawRectangles(const vector<vec3>* vertices, const vector<vec3>* normals=NULL);
 	void SetCameraTransform(const mat4& cTransform);
 	void SetProjection(const mat4& projection);
 	void SetObjectMatrices(const mat4& oTransform, const mat3& nTransform);

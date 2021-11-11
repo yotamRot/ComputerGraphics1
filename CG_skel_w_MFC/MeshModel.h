@@ -22,3 +22,14 @@ public:
 	void draw(Renderer* renderer);
 	
 };
+
+class PrimMeshModel : public MeshModel
+{
+	GLfloat posX;
+	GLfloat posY;
+	GLfloat posZ;
+	GLfloat length;
+public:
+	PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat length) :posX(posX), posY(posY), posZ(posZ), length(length) {};
+	void draw(Renderer* renderer);
+};

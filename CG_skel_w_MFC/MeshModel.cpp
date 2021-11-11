@@ -127,3 +127,75 @@ void MeshModel::draw(Renderer* renderer)
 {
 	renderer->DrawTriangles(this->vertex_positions);
 }
+
+
+
+void PrimMeshModel::draw(Renderer* renderer)
+{	
+	vec3 tmp;
+	GLfloat halfLength = length * 0.5f;
+
+	// front face
+	tmp = vec3((posX - halfLength), posY + halfLength, posZ + halfLength); // top left
+	vertex_positions->push_back(tmp);
+	tmp = vec3(posX + halfLength, posY + halfLength, posZ + halfLength); // top right
+	vertex_positions->push_back(tmp);
+	tmp = vec3(posX + halfLength, posY - halfLength, posZ + halfLength); // bottom right
+	vertex_positions->push_back(tmp);
+	tmp = vec3(posX - halfLength, posY - halfLength, posZ + halfLength); // bottom left
+	vertex_positions->push_back(tmp);
+
+	// back face
+	tmp = vec3(posX - halfLength, posY + halfLength, posZ - halfLength); // top left
+	vertex_positions->push_back(tmp);
+	tmp = vec3(posX + halfLength, posY + halfLength, posZ - halfLength); // top right
+	vertex_positions->push_back(tmp);
+	tmp = vec3(posX + halfLength, posY - halfLength, posZ - halfLength); // bottom right
+	vertex_positions->push_back(tmp);
+	tmp = vec3(posX - halfLength, posY - halfLength, posZ - halfLength); // bottom left
+	vertex_positions->push_back(tmp);
+
+	// left face
+	tmp = vec3(posX - halfLength, posY + halfLength, posZ + halfLength); // top left
+	vertex_positions->push_back(tmp);
+	tmp = vec3(posX - halfLength, posY + halfLength, posZ - halfLength); // top right
+	vertex_positions->push_back(tmp);
+	tmp = vec3(posX - halfLength, posY - halfLength, posZ - halfLength); // bottom right
+	vertex_positions->push_back(tmp);
+	tmp = vec3(posX - halfLength, posY - halfLength, posZ + halfLength); // bottom left
+	vertex_positions->push_back(tmp);
+
+	// right face
+	tmp = vec3(posX + halfLength, posY + halfLength, posZ + halfLength); // top left
+	vertex_positions->push_back(tmp);
+	tmp = vec3(posX + halfLength, posY + halfLength, posZ - halfLength); // top right
+	vertex_positions->push_back(tmp);
+	tmp = vec3(posX + halfLength, posY - halfLength, posZ - halfLength); // bottom right
+	vertex_positions->push_back(tmp);
+	tmp = vec3(posX + halfLength, posY - halfLength, posZ + halfLength); // bottom left
+	vertex_positions->push_back(tmp);
+
+	// top face
+	tmp = vec3(posX - halfLength, posY + halfLength, posZ + halfLength); // top left
+	vertex_positions->push_back(tmp);
+	tmp = vec3(posX - halfLength, posY + halfLength, posZ - halfLength); // top right
+	vertex_positions->push_back(tmp);
+	tmp = vec3(posX + halfLength, posY + halfLength, posZ - halfLength); // bottom right
+	vertex_positions->push_back(tmp);
+	tmp = vec3(posX + halfLength, posY + halfLength, posZ + halfLength); // bottom left
+	vertex_positions->push_back(tmp);
+
+	// down face
+	tmp = vec3(posX - halfLength, posY - halfLength, posZ + halfLength); // top left
+	vertex_positions->push_back(tmp);
+	tmp = vec3(posX - halfLength, posY - halfLength, posZ - halfLength); // top right
+	vertex_positions->push_back(tmp);
+	tmp = vec3(posX + halfLength, posY - halfLength, posZ - halfLength); // bottom right
+	vertex_positions->push_back(tmp);
+	tmp = vec3(posX + halfLength, posY - halfLength, posZ + halfLength);  // bottom left
+	vertex_positions->push_back(tmp);
+
+	// draw the faces
+	renderer->DrawRectangles(this->vertex_positions);
+
+}

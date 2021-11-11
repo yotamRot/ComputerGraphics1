@@ -247,6 +247,26 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 		RasterizeLine(triangle[2], triangle[0]);
 	}
 }
+
+void Renderer::DrawRectangles(const vector<vec3>* vertices, const vector<vec3>* normals)
+{
+	vec2 rectangle[4];
+	for (vector<vec3>::const_iterator it = vertices->begin(); it != vertices->end(); ++it)
+	{
+		rectangle[0] = vec3ToVec2(*it);
+		it++;
+		rectangle[1] = vec3ToVec2(*it);
+		it++;
+		rectangle[2] = vec3ToVec2(*it);
+		it++;
+		rectangle[3] = vec3ToVec2(*it);
+
+		RasterizeLine(rectangle[0], rectangle[1]);
+		RasterizeLine(rectangle[1], rectangle[2]);
+		RasterizeLine(rectangle[2], rectangle[3]);
+		RasterizeLine(rectangle[3], rectangle[0]);
+	}
+}
 vec2 Renderer::vec3ToVec2(const vec3& ver)
 {
 	vec4 tempVec = vec4(ver);

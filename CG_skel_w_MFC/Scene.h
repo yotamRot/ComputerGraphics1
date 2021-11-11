@@ -53,6 +53,7 @@ public:
 	Scene(Renderer* renderer);
 	void loadOBJModel(string fileName);
 	void draw();
+	void DrawRec();
 	void drawDemo();
 	
 	int activeModel;
