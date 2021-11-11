@@ -18,7 +18,7 @@ void Scene::lookAtModel(int modelId)
 	activeModel = modelId;
 	static MeshModel* curModel = (MeshModel*)models.at(modelId);
 	static Camera* curCamera = cameras.at(activeCamera);
-	static vec4 modelCenter = curModel->getPosition();
+	static vec4 modelCenter = vec4(curModel->getPosition());
 	curCamera->LookAt(curCamera->cTransform * curCamera->eye, modelCenter, curCamera->cTransform * curCamera->up);
 }
 
@@ -31,10 +31,10 @@ void Scene::rotateAroundActiveModel(Axis direction)
 	switch (direction)
 	{
 		case X:
-			rotationMatrix = RotateX(10);
+			rotationMatrix = RotateX(3);
 			break;
 		case Y:
-			rotationMatrix = RotateY(10);
+			rotationMatrix = RotateY(3);
 			break;
 		case Z:
 		default:
@@ -77,17 +77,66 @@ void Scene::moveActiveModel(Axis direction)
 
 }
 
+void Scene::rotateActiveModel(Axis direction)
+{
+	MeshModel* curModel = (MeshModel*)models.at(activeModel);
+	mat4 rotateMatrix;
+	switch (direction)
+	{
+	case X:
+		rotateMatrix = RotateX(10);
+		break;
+	case Xn:
+		rotateMatrix = RotateX(-10);
+		break;
+	case Y:
+		rotateMatrix = RotateY(10);
+		break;
+	case Yn:
+		rotateMatrix = RotateY(-10);
+		break;
+	case Z:
+		rotateMatrix = RotateZ(10);
+		break;
+	case Zn:
+		rotateMatrix = RotateZ(-10);
+		break;
+	default:
+		break;
+	}
+	curModel->_world_transform = rotateMatrix * curModel->_world_transform; // translate 
+
+}
+
 void Scene::manipulateActiveModel(Tramsformation T, Axis axis)
 {
 	switch (T)
 	{
 		case ROTATE:
+			//rotateAroundActiveModel(axis);
+			rotateActiveModel(axis);
 			break;
 		case MOVE:
 			moveActiveModel(axis);
 			break;
 		case SCALE:
 			break;
+	}
+}
+
+void Scene::setActiveCameraProjection(Projection proj)
+{
+	static Camera* curCamera = cameras.at(activeCamera);
+	vec4 lbn = curCamera->cTransform * vec4(-3, -3, -1, 1); // left, bottom, near
+	vec4 rtf = curCamera->cTransform * vec4(3, 3, -8, 1); // right, top, far
+
+	if (proj == ORTHOGRAPHIC)
+	{
+		curCamera->Ortho(lbn.x, rtf.x, lbn.y, rtf.y, lbn.z, rtf.z);
+	}
+	else
+	{
+		curCamera->Frustum(lbn.x, rtf.x, lbn.y, rtf.y, lbn.z, rtf.z);
 	}
 }
 
@@ -126,9 +175,9 @@ Scene::Scene(Renderer *renderer) : m_renderer(renderer)
 	initCamera->cTransform = mat4();
 	initCamera->cTransform[2][3] = 0;
 	initCamera->LookAt(initCamera->cTransform * initCamera->eye, initCamera->cTransform * initCamera->at, initCamera->cTransform * initCamera->up);
-	initCamera->Frustum(-3, 3, -3, 3, -1, -8);
-	cameras.push_back(initCamera);
 	activeCamera = 0;
+	cameras.push_back(initCamera);
+	setActiveCameraProjection(ORTHOGRAPHIC);
 }
 
 void Camera::setTransformation(const mat4& transform)

@@ -23,6 +23,13 @@ enum Tramsformation
 	ROTATE,
 };
 
+enum Projection
+{
+	ORTHOGRAPHIC,
+	PRESPECTIVE
+};
+
+
 
 class Model { 
 public:
@@ -62,7 +69,7 @@ class Scene {
 	vector<Light*> lights;
 	
 	Renderer *m_renderer;
-
+	Projection proj;
 public:
 	vector<Model*> models;
 	vector<Camera*> cameras;
@@ -72,7 +79,9 @@ public:
 	void lookAtModel(int modelId);
 	void rotateAroundActiveModel(Axis direction);
 	void moveActiveModel(Axis direction);
+	void rotateActiveModel(Axis direction);
 	void manipulateActiveModel(Tramsformation T,Axis axis);
+	void setActiveCameraProjection(Projection proj);
 	void draw();
 	void DrawRec();
 	void drawDemo();

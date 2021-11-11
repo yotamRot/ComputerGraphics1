@@ -32,7 +32,7 @@
 #define LEFT 97
 #define RIGHT 100
 #define UP 119
-#define DOWN 120
+#define DOWN 115
 #define IN 113
 #define OUT 101
 
@@ -43,6 +43,7 @@ int last_x,last_y;
 int mainMenuId;
 int menuObjectsId;
 Tramsformation curTramsformation = MOVE;
+Projection curProjection = PRESPECTIVE;
 bool lb_down,rb_down,mb_down;
 uint32_t mouse_status = 0;
 
@@ -66,28 +67,27 @@ void keyboard( unsigned char key, int x, int y )
 	case 033:			// escape
 		exit( EXIT_SUCCESS );
 		break;
-	case LEFT:
+	case LEFT:  //a
 		axis = Xn;
 		break;
-	case RIGHT:
+	case RIGHT: //d 
 		axis = X;
-	case DOWN:
+		break;
+	case DOWN: //s
 		axis = Yn;
 		break;
-	case UP:
+	case UP:   //w
 		axis = Y;
 		break;
-	case IN:
+	case IN:  //q
 		axis = Zn;
 		break;
-	case OUT:
+	case OUT: //e
 		axis = Z;
 		break;
 	}
 	scene->manipulateActiveModel(curTramsformation, axis);
 	scene->draw();
-	
-
 }
 
 void mouse(int button, int state, int x, int y)
@@ -146,12 +146,19 @@ void fileMenu(int id)
 			}
 			break;
 	}
+	scene->draw();
 }
 
 
-void tramsformationMenu(int id)
+void transformationMenu(int id)
 {
 	curTramsformation = (Tramsformation)id;
+}
+
+void projectionMenu(int id)
+{
+	scene->setActiveCameraProjection((Projection)id);
+	scene->draw();
 }
 
 void mainMenu(int id)
@@ -171,16 +178,20 @@ void initMenu()
 {
 	int menuFile = glutCreateMenu(fileMenu);
 	glutAddMenuEntry("Open..",FILE_OPEN);
-	int menuTramsformation = glutCreateMenu(tramsformationMenu);
+	int menuTramsformation = glutCreateMenu(transformationMenu);
 	glutAddMenuEntry("Move", MOVE);
 	glutAddMenuEntry("Rotate", ROTATE);
 	glutAddMenuEntry("Scale", SCALE);
+	int menuProjections = glutCreateMenu(projectionMenu);
+	glutAddMenuEntry("Orthographic", ORTHOGRAPHIC);
+	glutAddMenuEntry("Prespective", PRESPECTIVE);
 	mainMenuId = glutCreateMenu(mainMenu);
 	glutAddSubMenu("File",menuFile);
 	glutAddMenuEntry("Demo",MAIN_DEMO);
 	glutAddMenuEntry("About",MAIN_ABOUT);
 	glutAddMenuEntry("Add cube", ADD_CUBE);
 	glutAddSubMenu("Transformations", menuTramsformation);
+	glutAddSubMenu("Projection", menuProjections);
 
 	
 
