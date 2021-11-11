@@ -62,8 +62,8 @@ vec2 vec2fFromStream(std::istream & aStream)
 
 MeshModel::MeshModel(string fileName)
 {
-	_world_transform = mat4(0);
-	_world_transform[3][3] = 1;
+	_world_transform = mat4();
+	_world_transform[2][3] = -2; // move center to (0,0,-2)
 	loadFile(fileName);
 }
 
@@ -111,6 +111,7 @@ void MeshModel::loadFile(string fileName)
 	//vertex_positions={v1,v2,v3,v1,v3,v4}
 
 	vertex_positions = new vector<vec3>; /*FIXED*/
+	world_vertex_positions = new vector<vec3>; /*FIXED*/
 	// iterate through all stored faces and create triangles
 	for (vector<FaceIdcs>::iterator it = faces.begin(); it != faces.end(); ++it)
 	{
@@ -125,13 +126,28 @@ void MeshModel::loadFile(string fileName)
 
 void MeshModel::draw(Renderer* renderer)
 {
-	renderer->DrawTriangles(this->vertex_positions);
+	int size = this->vertex_positions->size();
+	this->world_vertex_positions->clear();
+	vec4 tempVec;
+	for (int i = 0; i < size; i++)
+	{
+		tempVec = this->_world_transform * vec4(vertex_positions->at(i));
+		this->world_vertex_positions->push_back(vec3(tempVec.x / tempVec.w, tempVec.y / tempVec.w, tempVec.z / tempVec.w));
+	}
+	renderer->DrawTriangles(this->world_vertex_positions);
+}
+
+vec3 MeshModel::getPosition()
+{
+	return vec3(this->_world_transform[0][3]/ this->_world_transform[3][3],
+		this->_world_transform[1][3]/ this->_world_transform[3][3],
+		this->_world_transform[2][3]/ this->_world_transform[3][3]);
 }
 
 
 
 void PrimMeshModel::draw(Renderer* renderer)
-{	
+{
 	vec3 tmp;
 	GLfloat halfLength = length * 0.5f;
 

@@ -11,7 +11,7 @@
 
 
 // The one and only application object
-
+#include "InputDialog.h"
 #include "GL/glew.h"
 #include "GL/freeglut.h"
 #include "GL/freeglut_ext.h"
@@ -27,18 +27,22 @@
 #define FILE_OPEN 1
 #define MAIN_DEMO 1
 #define MAIN_ABOUT 2
-#define ROTATE_LEFT 97
-#define ROTATE_RIGHT 100
-#define ROTATE_UP 119
-#define ROTATE_DOWN 115
-#define ROTATE_Z_RIGHT 101
-#define ROTATE_Z_LEFT 113
-#define RECTANGLE 114
+#define ADD_CUBE 3
+#define OBJECTS 4
+#define LEFT 97
+#define RIGHT 100
+#define UP 119
+#define DOWN 120
+#define IN 113
+#define OUT 101
 
 Scene *scene;
 Renderer *renderer;
 
 int last_x,last_y;
+int mainMenuId;
+int menuObjectsId;
+Tramsformation curTramsformation = MOVE;
 bool lb_down,rb_down,mb_down;
 uint32_t mouse_status = 0;
 
@@ -57,39 +61,27 @@ void reshape( int width, int height )
 
 void keyboard( unsigned char key, int x, int y )
 {
-	static mat4 rotation;
-	static vec4 new_eye, at, up;
+	Axis axis = X;
 	switch ( key ) {
 	case 033:			// escape
 		exit( EXIT_SUCCESS );
 		break;
-	case ROTATE_LEFT:			// a
-		rotation = RotateY(10);
-		new_eye = rotation * scene->cameras.at(scene->activeCamera)->eye;
-		at = rotation * scene->cameras.at(scene->activeCamera)->at;
-		up = rotation * scene->cameras.at(scene->activeCamera)->up;
-		scene->cameras.at(scene->activeCamera)->LookAt(new_eye, at, up);
+	case LEFT:
+		axis = Xn;
 		break;
-	case ROTATE_RIGHT:			// d
-		rotation = RotateY(350);
-		new_eye = rotation * scene->cameras.at(scene->activeCamera)->eye;
-		at = rotation * scene->cameras.at(scene->activeCamera)->at;
-		up = rotation * scene->cameras.at(scene->activeCamera)->up;
-		scene->cameras.at(scene->activeCamera)->LookAt(new_eye, at, up);
+	case RIGHT:
+		axis = X;
+	case DOWN:
+		axis = Yn;
 		break;
-	case ROTATE_DOWN:			// s
-		rotation = RotateX(10);
-		new_eye = rotation * scene->cameras.at(scene->activeCamera)->eye;
-		at = rotation * scene->cameras.at(scene->activeCamera)->at;
-		up = rotation * scene->cameras.at(scene->activeCamera)->up;
-		scene->cameras.at(scene->activeCamera)->LookAt(new_eye, at, up);
+	case UP:
+		axis = Y;
 		break;
-	case ROTATE_UP:				// w
-		rotation = RotateX(350);
-		new_eye = rotation * scene->cameras.at(scene->activeCamera)->eye;
-		at = rotation * scene->cameras.at(scene->activeCamera)->at;
-		up = rotation * scene->cameras.at(scene->activeCamera)->up;
-		scene->cameras.at(scene->activeCamera)->LookAt(new_eye, at, up);
+	case IN:
+		axis = Zn;
+		break;
+	case OUT:
+		axis = Z;
 		break;
 	case ROTATE_Z_RIGHT:		// e
 		rotation = RotateZ(10);
@@ -108,6 +100,7 @@ void keyboard( unsigned char key, int x, int y )
 	case RECTANGLE:				// r
 		break;
 	}
+	scene->manipulateActiveModel(curTramsformation, axis);
 	scene->draw();
 	
 
@@ -117,14 +110,14 @@ void mouse(int button, int state, int x, int y)
 {
 	//button = {GLUT_LEFT_BUTTON, GLUT_MIDDLE_BUTTON, GLUT_RIGHT_BUTTON}
 	//state = {GLUT_DOWN,GLUT_UP}
-	vec4 eye = vec4(0, 0, 0, 1);
+	vec4 eye = vec4(0, -1, 0, 1);
 	vec4 at = vec4(0, 0, -1, 1);
-	vec4 up = vec4(0, 1, 0, 1);
+	vec4 up = vec4(0, 1, 0, 1);*/
 	//set down flags
 	switch(button) {
 		case GLUT_LEFT_BUTTON:
 			lb_down = (state==GLUT_UP)?0:1;
-			scene->cameras.at(scene->activeCamera)->LookAt(eye, at, up);
+			//scene->cameras.at(scene->activeCamera)->LookAt(eye, at, up);
 			break;
 		case GLUT_RIGHT_BUTTON:
 			rb_down = (state==GLUT_UP)?0:1;
@@ -147,6 +140,12 @@ void motion(int x, int y)
 	last_y=y;
 }
 
+void objectsMenu(int id)
+{
+	scene->lookAtModel(id);
+	scene->draw();
+}
+
 void fileMenu(int id)
 {
 	switch (id)
@@ -157,9 +156,24 @@ void fileMenu(int id)
 			{
 				std::string s((LPCTSTR)dlg.GetPathName());
 				scene->loadOBJModel((LPCTSTR)dlg.GetPathName());
+				if (scene->models.size() == 1)
+				{
+					menuObjectsId = glutCreateMenu(objectsMenu);
+					glutSetMenu(mainMenuId);
+					glutAddSubMenu("objects", menuObjectsId);
+				}
+				glutSetMenu(menuObjectsId);
+				glutAddMenuEntry((LPCTSTR)dlg.GetFileName(), scene->models.size() - 1);
+
 			}
 			break;
 	}
+}
+
+
+void tramsformationMenu(int id)
+{
+	curTramsformation = (Tramsformation)id;
 }
 
 void mainMenu(int id)
@@ -177,13 +191,22 @@ void mainMenu(int id)
 
 void initMenu()
 {
-
 	int menuFile = glutCreateMenu(fileMenu);
 	glutAddMenuEntry("Open..",FILE_OPEN);
-	glutCreateMenu(mainMenu);
+	int menuTramsformation = glutCreateMenu(tramsformationMenu);
+	glutAddMenuEntry("Move", MOVE);
+	glutAddMenuEntry("Rotate", ROTATE);
+	glutAddMenuEntry("Scale", SCALE);
+	mainMenuId = glutCreateMenu(mainMenu);
 	glutAddSubMenu("File",menuFile);
 	glutAddMenuEntry("Demo",MAIN_DEMO);
 	glutAddMenuEntry("About",MAIN_ABOUT);
+	glutAddMenuEntry("Add cube", ADD_CUBE);
+	glutAddSubMenu("Transformations", menuTramsformation);
+
+	
+
+
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
 //----------------------------------------------------------------------------

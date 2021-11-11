@@ -11,6 +11,7 @@ class MeshModel : public Model
 protected :
 	MeshModel() {}
 	vector<vec3>* vertex_positions;
+	vector<vec3>* world_vertex_positions;
 	//add more attributes
 	mat3 _normal_transform;
 
@@ -20,7 +21,7 @@ public:
 	~MeshModel(void);
 	void loadFile(string fileName);
 	void draw(Renderer* renderer);
-	
+	vec3 getPosition();
 };
 
 class PrimMeshModel : public MeshModel

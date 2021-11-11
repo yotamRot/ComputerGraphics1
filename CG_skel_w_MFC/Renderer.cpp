@@ -27,24 +27,7 @@ void Renderer::transformToScreen(vec2& vec)
 	vec.y = ((m_height / 2) * (vec.y + 1) / 2);
 }
 
-//void Renderer::RasterizeLine(vec2 ver1, vec2 ver2)
-//{
-//	int xMin = (ver1.x < ver2.x) ? ver1.x : ver2.x;
-//	int xMax = (ver1.x < ver2.x) ? ver2.x : ver1.x;
-//	int slope = (ver1.y - ver2.y) / (ver1.x - ver2.x);
-//	int g = -slope * ver1.x + ver1.y;
-//	int curY = ver1.y;
-//	for (int curX = xMin; curX < xMax; curX++)
-//	{
-//		if (curX < 1 || curX >= m_width || curY < 1 || curY >= m_height)
-//		{
-//			continue;
-//		}
-//		m_outBuffer[INDEX(m_width, curX, curY, 0)] = 1;	m_outBuffer[INDEX(m_width, curX, curY, 1)] = 0;	m_outBuffer[INDEX(m_width, curX, curY, 2)] = 0;
-//		curY += slope;
-//	}
-//
-//}
+
 
 void Renderer::DrawPixel(int x, int y)
 {
@@ -230,11 +213,6 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 	vec2 triangle [3];
 	for (vector<vec3>::const_iterator it = vertices->begin(); it != vertices->end(); ++it)
 	{
-		/*for (int i = 0; i < 3; i++)
-		{
-			triangle[i] = vec3ToVec2(*it);
-			it++;
-		}*/
 		triangle[0] = vec3ToVec2(*it);
 		it++;
 		triangle[1] = vec3ToVec2(*it);
@@ -269,12 +247,12 @@ void Renderer::DrawRectangles(const vector<vec3>* vertices, const vector<vec3>* 
 }
 vec2 Renderer::vec3ToVec2(const vec3& ver)
 {
+	//vec4 WScale = Scale(1, 1, 1) * tempVec;
+	//mat4 Wtranlate = Translate(0, 2.5, -3);
+	////vec4 WScale = Scale(1, 1, 1) * (vec4(ver));
+	//vec4 tempWorldTrans = Wtranlate * tempVec;
 	vec4 tempVec = vec4(ver);
-	vec4 WScale = Scale(1, 1, 1) * tempVec;
-	mat4 Wtranlate = Translate(0, 2.5, -3);
-	//vec4 WScale = Scale(1, 1, 1) * (vec4(ver));
-	vec4 tempWorldTrans = Wtranlate * tempVec;
-	tempVec = this->projection * this->cTransform * tempWorldTrans;
+	tempVec = this->projection * this->cTransform * tempVec;
 
 	vec2 point = vec2(tempVec.x / tempVec.w, tempVec.y / tempVec.w);
 	transformToScreen(point);

@@ -9,8 +9,88 @@ using namespace std;
 void Scene::loadOBJModel(string fileName)
 {
 	MeshModel *model = new MeshModel(fileName);
+	activeModel = models.size();
 	models.push_back(model);
 }
+
+void Scene::lookAtModel(int modelId)
+{
+	activeModel = modelId;
+	static MeshModel* curModel = (MeshModel*)models.at(modelId);
+	static Camera* curCamera = cameras.at(activeCamera);
+	static vec4 modelCenter = curModel->getPosition();
+	curCamera->LookAt(curCamera->cTransform * curCamera->eye, modelCenter, curCamera->cTransform * curCamera->up);
+}
+
+void Scene::rotateAroundActiveModel(Axis direction)
+{	
+	static MeshModel* curModel = (MeshModel*)models.at(activeModel);
+	static Camera* curCamera = cameras.at(activeCamera);
+	mat4 rotationMatrix;
+	curCamera->cTransform = Translate(curModel->getPosition()) * curCamera->cTransform;  // move to object center
+	switch (direction)
+	{
+		case X:
+			rotationMatrix = RotateX(10);
+			break;
+		case Y:
+			rotationMatrix = RotateY(10);
+			break;
+		case Z:
+		default:
+			break;
+	}
+	curCamera->cTransform = rotationMatrix * curCamera->cTransform; // rotate 
+	curCamera->cTransform = Translate((-1) * curModel->getPosition()) * curCamera->cTransform;  // return to orig
+	// look at model for new location
+	lookAtModel(activeModel);
+}
+
+void Scene::moveActiveModel(Axis direction)
+{
+	MeshModel* curModel = (MeshModel*)models.at(activeModel);
+	mat4 tranlateMatrix;
+	switch (direction)
+	{
+		case X:
+			tranlateMatrix = Translate(1, 0, 0);
+			break;
+		case Xn:
+			tranlateMatrix = Translate(-1, 0, 0);
+			break;
+		case Y:
+			tranlateMatrix = Translate(0, 1, 0);
+			break;
+		case Yn:
+			tranlateMatrix = Translate(0, -1, 0);
+			break;
+		case Z:
+			tranlateMatrix = Translate(0, 0, 1);
+			break;
+		case Zn:
+			tranlateMatrix = Translate(0, 0, -1);
+			break;
+		default:
+			break;
+	}
+	curModel->_world_transform = tranlateMatrix * curModel->_world_transform; // translate 
+
+}
+
+void Scene::manipulateActiveModel(Tramsformation T, Axis axis)
+{
+	switch (T)
+	{
+		case ROTATE:
+			break;
+		case MOVE:
+			moveActiveModel(axis);
+			break;
+		case SCALE:
+			break;
+	}
+}
+
 
 void Scene::draw()
 {
@@ -37,11 +117,16 @@ void Scene::drawDemo()
 Scene::Scene(Renderer *renderer) : m_renderer(renderer) 
 {	
 	Camera* initCamera = new Camera();
+
+	// dont change in camera world of view!
 	initCamera->eye = vec4(0, 0, 0, 1);
 	initCamera->at = vec4(0, 0, -1, 1);
 	initCamera->up = vec4(0, 1, 0, 1);
-	initCamera->LookAt(initCamera->eye, initCamera->at, initCamera->up);
-	initCamera->Frustum(-3, 3, -3, 3, -1, -5);
+	//set camera world view aligned with world asix with offset in z
+	initCamera->cTransform = mat4();
+	initCamera->cTransform[2][3] = 0;
+	initCamera->LookAt(initCamera->cTransform * initCamera->eye, initCamera->cTransform * initCamera->at, initCamera->cTransform * initCamera->up);
+	initCamera->Frustum(-3, 3, -3, 3, -1, -8);
 	cameras.push_back(initCamera);
 	activeCamera = 0;
 }
@@ -53,9 +138,6 @@ void Camera::setTransformation(const mat4& transform)
 
 void Camera::LookAt(const vec4& eye , const vec4& at, const vec4& up)
 {
-	this->eye = eye;
-	this->at = at;
-	this->up = up;
 	vec4 n = normalize(eye - at);
 	vec4 u = normalize(cross(up, n));
 	vec4 v = normalize(cross(n, u));

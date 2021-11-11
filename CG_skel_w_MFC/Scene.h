@@ -6,6 +6,24 @@
 #include "Renderer.h"
 using namespace std;
 
+enum Axis
+{
+	X,
+	Xn,
+	Y,
+	Yn,
+	Z,
+	Zn
+};
+
+enum Tramsformation
+{
+	SCALE,
+	MOVE,
+	ROTATE,
+};
+
+
 class Model { 
 public:
 	void virtual draw(Renderer* renderer) = 0;
@@ -15,7 +33,6 @@ protected:
 
 
 class Light {
-
 };
 
 class Camera {
@@ -52,6 +69,10 @@ public:
 	Scene() {};
 	Scene(Renderer* renderer);
 	void loadOBJModel(string fileName);
+	void lookAtModel(int modelId);
+	void rotateAroundActiveModel(Axis direction);
+	void moveActiveModel(Axis direction);
+	void manipulateActiveModel(Tramsformation T,Axis axis);
 	void draw();
 	void DrawRec();
 	void drawDemo();
