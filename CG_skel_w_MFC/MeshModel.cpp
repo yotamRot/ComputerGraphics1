@@ -143,10 +143,7 @@ vec3 MeshModel::getPosition()
 		this->_world_transform[1][3]/ this->_world_transform[3][3],
 		this->_world_transform[2][3]/ this->_world_transform[3][3]);
 }
-//vec3 PrimMeshModel::getPosition()
-//{
-//	return vec3(posX, posY, posZ);
-//}
+
 
 PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat length) :posX(posX), posY(posY), posZ(posZ), length(length) 
 {

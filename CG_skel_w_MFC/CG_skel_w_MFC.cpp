@@ -62,7 +62,7 @@ void reshape( int width, int height )
 
 void keyboard( unsigned char key, int x, int y )
 {
-	Axis axis = X;
+	Axis axis;
 	switch ( key ) {
 	case 033:			// escape
 		exit( EXIT_SUCCESS );
@@ -85,6 +85,8 @@ void keyboard( unsigned char key, int x, int y )
 	case OUT: //e
 		axis = Z;
 		break;
+	default:
+		return;
 	}
 	scene->manipulateActiveModel(curTramsformation, axis);
 	scene->draw();

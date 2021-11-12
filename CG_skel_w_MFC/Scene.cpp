@@ -23,17 +23,17 @@ void Scene::loadCubeModel()
 void Scene::lookAtModel(int modelId)
 {
 	activeModel = modelId;
-	static MeshModel* curModel = (MeshModel*)models.at(modelId);
-	static Camera* curCamera = cameras.at(activeCamera);
-	static vec4 modelCenter = vec4(curModel->getPosition());
-	curCamera->cTransform = Translate(0, 0, -2) * curModel->_world_transform; //gets model location
+	MeshModel* curModel = (MeshModel*)models.at(modelId);
+	Camera* curCamera = cameras.at(activeCamera);
+	vec4 modelCenter = vec4(curModel->getPosition());
+	curCamera->cTransform = Translate(0, 0, 2) * curModel->_world_transform; //gets model location
 	curCamera->LookAt(curCamera->cTransform * curCamera->eye, modelCenter, curCamera->up);
 }
 
 void Scene::rotateAroundActiveModel(Axis direction)
 {	
-	static MeshModel* curModel = (MeshModel*)models.at(activeModel);
-	static Camera* curCamera = cameras.at(activeCamera);
+	MeshModel* curModel = (MeshModel*)models.at(activeModel);
+	Camera* curCamera = cameras.at(activeCamera);
 	mat4 rotationMatrix;
 	curCamera->cTransform = Translate(curModel->getPosition()) * curCamera->cTransform;  // move to object center
 	switch (direction)
@@ -134,7 +134,7 @@ void Scene::manipulateActiveModel(Transformation T, Axis axis)
 
 void Scene::setActiveCameraProjection(Projection proj)
 {
-	static Camera* curCamera = cameras.at(activeCamera);
+	Camera* curCamera = cameras.at(activeCamera);
 	vec4 lbn = curCamera->cTransform * vec4(-3, -3, 3, 1); // left, bottom, near
 	vec4 rtf = curCamera->cTransform * vec4(3, 3, 8, 1); // right, top, far
 
