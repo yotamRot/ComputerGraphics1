@@ -38,17 +38,29 @@ void Renderer::DrawPixel(int x, int y)
 	m_outBuffer[INDEX(m_width, x, y, 0)] = 1;	m_outBuffer[INDEX(m_width, x, y, 1)] = 0;	m_outBuffer[INDEX(m_width, x, y, 2)] = 0;
 }
 
-void RasterizeArrangeVeritcs(vec2& ver1, vec2& ver2)
+void RasterizeArrangeVeritcs(vec2& ver1, vec2& ver2, bool byX = true)
 {
-	vec2 minVer = (ver1.x < ver2.x) ? ver1 : ver2;
-	vec2 maxVer = (ver1.x < ver2.x) ? ver2 : ver1;
-	ver1 = minVer;
-	ver2 = maxVer;
+	vec2 minVer, maxVer;
+	if (byX) 
+	{
+		minVer = (ver1.x < ver2.x) ? ver1 : ver2;
+		maxVer = (ver1.x < ver2.x) ? ver2 : ver1;
+		ver1 = minVer;
+		ver2 = maxVer;
+	}
+	else
+	{
+		minVer = (ver1.y < ver2.y) ? ver1 : ver2;
+		maxVer = (ver1.y < ver2.y) ? ver2 : ver1;
+		ver1 = minVer;
+		ver2 = maxVer;
+	}
+
 }
 
 void Renderer::RasterizeLine(vec2 ver1, vec2 ver2)
 {
-	RasterizeArrangeVeritcs(ver1, ver2);
+	
 	float dX = ver2.x - ver1.x;
 	float dY = ver2.y - ver1.y;
 	if (abs(dY) < abs(dX) )
@@ -79,7 +91,7 @@ void Renderer::RasterizeLine(vec2 ver1, vec2 ver2)
 
 void Renderer::RasterizeRegular(vec2& ver1, vec2& ver2)
 {
-
+	RasterizeArrangeVeritcs(ver1, ver2);
 	int x = ver1.x;
 	int y = ver1.y;
 	int dX = ver2.x - ver1.x;
@@ -105,7 +117,7 @@ void Renderer::RasterizeRegular(vec2& ver1, vec2& ver2)
 
 void Renderer::RasterizeBig(vec2& ver1, vec2& ver2)
 {
-
+	RasterizeArrangeVeritcs(ver1, ver2,false);
 	int x = ver1.y;
 	int y = ver1.x;
 	int dX = ver2.y - ver1.y;
@@ -132,7 +144,7 @@ void Renderer::RasterizeBig(vec2& ver1, vec2& ver2)
 
 void Renderer::RasterizeRegularNegetive(vec2& ver1, vec2& ver2)
 {
-
+	RasterizeArrangeVeritcs(ver1, ver2);
 	int x = ver1.x;
 	int y = -ver1.y;
 	int dX = ver2.x - ver1.x;
@@ -159,6 +171,7 @@ void Renderer::RasterizeRegularNegetive(vec2& ver1, vec2& ver2)
 
 void Renderer::RasterizeBigNegetive(vec2& ver1, vec2& ver2)
 {
+	RasterizeArrangeVeritcs(ver1, ver2,false);
 	int x = ver1.y;
 	int y = -ver1.x;
 	int dX = ver2.y - ver1.y;
