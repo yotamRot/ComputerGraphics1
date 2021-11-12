@@ -15,7 +15,7 @@ void Scene::loadOBJModel(string fileName)
 
 void Scene::loadCubeModel()
 {
-	PrimMeshModel* cube = new PrimMeshModel(1, 1, 1, 1);
+	PrimMeshModel* cube = new PrimMeshModel(0, 0, 0, 1);
 	activeModel = models.size();
 	models.push_back(cube);
 }
@@ -116,6 +116,37 @@ void Scene::rotateActiveModel(Axis direction)
 
 }
 
+void Scene::scaleActiveModel(Axis direction)
+{
+	MeshModel* curModel = (MeshModel*)models.at(activeModel);
+	mat4 scaleMatrix;
+	switch (direction)
+	{
+	case X:
+		scaleMatrix = Scale(2, 1, 1);
+		break;
+	case Xn:
+		scaleMatrix = Scale(0.5, 1, 1);
+		break;
+	case Y:
+		scaleMatrix = Scale(1, 2, 1);
+		break;
+	case Yn:
+		scaleMatrix = Scale(1, 0.5, 1);
+		break;
+	case Z:
+		scaleMatrix = Scale(1, 1, 2);
+		break;
+	case Zn:
+		scaleMatrix = Scale(1, 1, 0.5);
+		break;
+	default:
+		break;
+	}
+	curModel->_world_transform = scaleMatrix * curModel->_world_transform; // translate 
+
+}
+
 void Scene::manipulateActiveModel(Transformation T, Axis axis)
 {
 	switch (T)
@@ -128,6 +159,7 @@ void Scene::manipulateActiveModel(Transformation T, Axis axis)
 			moveActiveModel(axis);
 			break;
 		case SCALE:
+			scaleActiveModel(axis);
 			break;
 	}
 }

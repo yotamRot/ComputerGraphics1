@@ -82,6 +82,7 @@ public:
 	void rotateAroundActiveModel(Axis direction);
 	void moveActiveModel(Axis direction);
 	void rotateActiveModel(Axis direction);
+	void scaleActiveModel(Axis direction);
 	void manipulateActiveModel(Transformation T,Axis axis);
 	void setActiveCameraProjection(Projection proj);
 	void draw();
