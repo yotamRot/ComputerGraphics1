@@ -58,6 +58,8 @@ void display( void )
 void reshape( int width, int height )
 {
 //update the renderer's buffers
+	renderer->ResizeBuffers(width, height);
+	glViewport(0, 0, width, height);
 }
 
 void keyboard( unsigned char key, int x, int y )

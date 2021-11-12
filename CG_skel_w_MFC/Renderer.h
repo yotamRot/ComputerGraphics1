@@ -50,4 +50,5 @@ public:
 	void ClearColorBuffer();
 	void ClearDepthBuffer();
 	void SetDemoBuffer();
+	void ResizeBuffers(int width, int height);
 };

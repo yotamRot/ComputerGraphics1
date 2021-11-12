@@ -369,3 +369,16 @@ void Renderer::ClearDepthBuffer()
 {
 	memset(m_zbuffer, 0, (sizeof(float) * m_width * m_height));
 }
+
+
+void Renderer::ResizeBuffers(int width, int height)
+{
+	delete m_outBuffer;
+	delete m_zbuffer;
+	m_width = width;
+	m_height = height;
+	CreateOpenGLBuffer(); //Do not remove this line.
+	m_outBuffer = new float[3 * m_width * m_height];
+	m_zbuffer = new float[m_width * m_height];
+
+}
