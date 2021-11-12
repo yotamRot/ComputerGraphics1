@@ -13,10 +13,17 @@ void Scene::loadOBJModel(string fileName)
 	models.push_back(model);
 }
 
+void Scene::loadCubeModel()
+{
+	PrimMeshModel* cube = new PrimMeshModel(1, 1, 1, 1);
+	activeModel = models.size();
+	models.push_back(cube);
+}
+
 void Scene::lookAtModel(int modelId)
 {
 	activeModel = modelId;
-	static MeshModel* curModel = (MeshModel*)models.at(modelId);
+	static Model* curModel = (MeshModel*)models.at(modelId);
 	static Camera* curCamera = cameras.at(activeCamera);
 	static vec4 modelCenter = vec4(curModel->getPosition());
 	curCamera->LookAt(curCamera->cTransform * curCamera->eye, modelCenter, curCamera->cTransform * curCamera->up);
@@ -108,7 +115,7 @@ void Scene::rotateActiveModel(Axis direction)
 
 }
 
-void Scene::manipulateActiveModel(Tramsformation T, Axis axis)
+void Scene::manipulateActiveModel(Transformation T, Axis axis)
 {
 	switch (T)
 	{
@@ -179,6 +186,13 @@ Scene::Scene(Renderer *renderer) : m_renderer(renderer)
 	cameras.push_back(initCamera);
 	setActiveCameraProjection(ORTHOGRAPHIC);
 }
+void Scene::DrawRec() {
+	PrimMeshModel* cube = new PrimMeshModel(0,0,0,1);
+	activeModel = models.size();
+	models.push_back(cube);
+
+	cube->draw(this->m_renderer);
+}
 
 void Camera::setTransformation(const mat4& transform)
 {
@@ -233,3 +247,5 @@ void Camera::Ortho(const float left, const float right,
 		(-1) * ((top + bottom) / (top - bottom)),
 		(-1) * (zFar + zNear) / (zFar - zNear), 1);
 }
+
+

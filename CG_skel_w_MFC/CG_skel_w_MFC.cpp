@@ -42,7 +42,7 @@ Renderer *renderer;
 int last_x,last_y;
 int mainMenuId;
 int menuObjectsId;
-Tramsformation curTramsformation = MOVE;
+Transformation curTramsformation = MOVE;
 Projection curProjection = PRESPECTIVE;
 bool lb_down,rb_down,mb_down;
 uint32_t mouse_status = 0;
@@ -152,7 +152,7 @@ void fileMenu(int id)
 
 void transformationMenu(int id)
 {
-	curTramsformation = (Tramsformation)id;
+	curTramsformation = (Transformation)id;
 }
 
 void projectionMenu(int id)
@@ -170,6 +170,18 @@ void mainMenu(int id)
 		break;
 	case MAIN_ABOUT:
 		AfxMessageBox(_T("Computer Graphics"));
+		break;
+	case ADD_CUBE:
+		scene->loadCubeModel();
+		if (scene->models.size() == 1)
+		{
+			menuObjectsId = glutCreateMenu(objectsMenu);
+			glutSetMenu(mainMenuId);
+			glutAddSubMenu("objects", menuObjectsId);
+		}
+		glutSetMenu(menuObjectsId);
+		glutAddMenuEntry("Cube", scene->models.size() - 1);
+		scene->draw();
 		break;
 	}
 }

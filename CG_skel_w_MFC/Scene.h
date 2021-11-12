@@ -16,7 +16,7 @@ enum Axis
 	Zn
 };
 
-enum Tramsformation
+enum Transformation
 {
 	SCALE,
 	MOVE,
@@ -34,6 +34,7 @@ enum Projection
 class Model { 
 public:
 	void virtual draw(Renderer* renderer) = 0;
+	vec3 virtual getPosition() = 0;
 protected:
 	virtual ~Model() {}
 };
@@ -76,11 +77,12 @@ public:
 	Scene() {};
 	Scene(Renderer* renderer);
 	void loadOBJModel(string fileName);
+	void loadCubeModel();
 	void lookAtModel(int modelId);
 	void rotateAroundActiveModel(Axis direction);
 	void moveActiveModel(Axis direction);
 	void rotateActiveModel(Axis direction);
-	void manipulateActiveModel(Tramsformation T,Axis axis);
+	void manipulateActiveModel(Transformation T,Axis axis);
 	void setActiveCameraProjection(Projection proj);
 	void draw();
 	void DrawRec();

@@ -10,12 +10,13 @@ class MeshModel : public Model
 {
 protected :
 	MeshModel() {}
-	vector<vec3>* vertex_positions;
-	vector<vec3>* world_vertex_positions;
+
 	//add more attributes
 	mat3 _normal_transform;
 
 public:
+	vector<vec3>* vertex_positions;
+	vector<vec3>* world_vertex_positions;
 	mat4 _world_transform;
 	MeshModel(string fileName);
 	~MeshModel(void);
@@ -31,6 +32,7 @@ class PrimMeshModel : public MeshModel
 	GLfloat posZ;
 	GLfloat length;
 public:
-	PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat length) :posX(posX), posY(posY), posZ(posZ), length(length) {};
+	PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat length);
 	void draw(Renderer* renderer);
+	//vec3 getPosition();
 };
