@@ -49,9 +49,9 @@ void RasterizeArrangeVeritcs(vec2& ver1, vec2& ver2)
 void Renderer::RasterizeLine(vec2 ver1, vec2 ver2)
 {
 	RasterizeArrangeVeritcs(ver1, ver2);
-	int dX = ver2.x - ver1.x;
-	int dY = ver2.y - ver1.y;
-	if (dY < dX )
+	float dX = ver2.x - ver1.x;
+	float dY = ver2.y - ver1.y;
+	if (abs(dY) < abs(dX) )
 	{
 		if (dX * dY > 0)
 		{
@@ -64,13 +64,13 @@ void Renderer::RasterizeLine(vec2 ver1, vec2 ver2)
 	}
 	else
 	{
-		if (dX * dY > 0)
+		if (dX * dY >= 0)
 		{
 			RasterizeBig(ver1, ver2);
 		}
 		else
 		{
-			RasterizeBigNegetive(ver1, ver2);
+			RasterizeBigNegetive( ver2,ver1);
 		}
 	}
 
@@ -159,15 +159,14 @@ void Renderer::RasterizeRegularNegetive(vec2& ver1, vec2& ver2)
 
 void Renderer::RasterizeBigNegetive(vec2& ver1, vec2& ver2)
 {
-
 	int x = ver1.y;
 	int y = -ver1.x;
 	int dX = ver2.y - ver1.y;
-	int dY = -ver2.x - (-1) * ver1.x;
+	int dY = -ver2.x - (-ver1.x);
 	int d = 2 * dY - dX;
 	int dE = 2 * dY;
 	int dNE = 2 * dY - 2 * dX;
-	DrawPixel(y, -x);
+	DrawPixel(-y, x);
 	for (int i = x; i < (int)ver2.y; i++)
 	{
 		if (d < 0)
@@ -179,7 +178,7 @@ void Renderer::RasterizeBigNegetive(vec2& ver1, vec2& ver2)
 			y++;
 			d += dNE;
 		}
-		DrawPixel(y, -i);
+		DrawPixel(-y, i);
 	}
 }
 
