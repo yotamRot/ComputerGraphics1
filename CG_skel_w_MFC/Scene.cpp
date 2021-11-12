@@ -23,10 +23,11 @@ void Scene::loadCubeModel()
 void Scene::lookAtModel(int modelId)
 {
 	activeModel = modelId;
-	static Model* curModel = (MeshModel*)models.at(modelId);
+	static MeshModel* curModel = (MeshModel*)models.at(modelId);
 	static Camera* curCamera = cameras.at(activeCamera);
 	static vec4 modelCenter = vec4(curModel->getPosition());
-	curCamera->LookAt(curCamera->cTransform * curCamera->eye, modelCenter, curCamera->cTransform * curCamera->up);
+	curCamera->cTransform = Translate(0, 0, -2) * curModel->_world_transform; //gets model location
+	curCamera->LookAt(curCamera->cTransform * curCamera->eye, modelCenter, curCamera->up);
 }
 
 void Scene::rotateAroundActiveModel(Axis direction)
@@ -111,7 +112,7 @@ void Scene::rotateActiveModel(Axis direction)
 	default:
 		break;
 	}
-	curModel->_world_transform = rotateMatrix * curModel->_world_transform; // translate 
+	curModel->_world_transform = curModel->_world_transform * rotateMatrix; // rotate around center so first rotate then move!
 
 }
 
@@ -134,8 +135,8 @@ void Scene::manipulateActiveModel(Transformation T, Axis axis)
 void Scene::setActiveCameraProjection(Projection proj)
 {
 	static Camera* curCamera = cameras.at(activeCamera);
-	vec4 lbn = curCamera->cTransform * vec4(-3, -3, -1, 1); // left, bottom, near
-	vec4 rtf = curCamera->cTransform * vec4(3, 3, -8, 1); // right, top, far
+	vec4 lbn = curCamera->cTransform * vec4(-3, -3, 3, 1); // left, bottom, near
+	vec4 rtf = curCamera->cTransform * vec4(3, 3, 8, 1); // right, top, far
 
 	if (proj == ORTHOGRAPHIC)
 	{
@@ -181,7 +182,7 @@ Scene::Scene(Renderer *renderer) : m_renderer(renderer)
 	//set camera world view aligned with world asix with offset in z
 	initCamera->cTransform = mat4();
 	initCamera->cTransform[2][3] = 0;
-	initCamera->LookAt(initCamera->cTransform * initCamera->eye, initCamera->cTransform * initCamera->at, initCamera->cTransform * initCamera->up);
+	//initCamera->LookAt(initCamera->cTransform * initCamera->eye, initCamera->cTransform * initCamera->at, initCamera->up);
 	activeCamera = 0;
 	cameras.push_back(initCamera);
 	setActiveCameraProjection(ORTHOGRAPHIC);
