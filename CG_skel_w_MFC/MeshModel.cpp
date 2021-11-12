@@ -76,6 +76,7 @@ void MeshModel::loadFile(string fileName)
 	ifstream ifile(fileName.c_str());
 	vector<FaceIdcs> faces;
 	vector<vec3> vertices;
+	vector<vec3> verticesNormals;
 	// while not end of file
 	while (!ifile.eof())
 	{
@@ -92,6 +93,8 @@ void MeshModel::loadFile(string fileName)
 		// based on the type parse data
 		if (lineType == "v") /*FIXED*/
 			vertices.push_back(vec3fFromStream(issLine));
+		if (lineType == "vn") /*FIXED*/
+			verticesNormals.push_back(vec3fFromStream(issLine));
 		else if (lineType == "f") /*FIXED*/
 			faces.push_back(issLine);
 		else if (lineType == "#" || lineType == "")
@@ -110,50 +113,56 @@ void MeshModel::loadFile(string fileName)
 	//Then vertex_positions should contain:
 	//vertex_positions={v1,v2,v3,v1,v3,v4}
 
-	vertex_positions = new vector<vec3>; /*FIXED*/
-	world_vertex_positions = new vector<vec3>; /*FIXED*/
+	vertex_positions = new vector<vec3>;
+
+	normal_positions = new vector<vec3>;
 	// iterate through all stored faces and create triangles
 	for (vector<FaceIdcs>::iterator it = faces.begin(); it != faces.end(); ++it)
 	{
 		for (int i = 0; i < 3; i++)
 		{
-			vertex_positions->push_back(vec3(vertices[it->v[i] - 1])); /*FIXED*/
+			vertex_positions->push_back(vertices.at(it->v[i] - 1)); /*FIXED*/
+			if (verticesNormals.size() != 0)
+			{
+				//adds a tuple of vertices and it normal to a set to avoid duplicates
+				normal_positions->push_back(verticesNormals.at(it->vn[i] - 1) - vertices.at(it->v[i] - 1));
+			}
 		}
 	}
 }
 
 void MeshModel::CalcBounds()
 {
-	int size = world_vertex_positions->size();
+	int size = vertex_positions->size();
 	vec3 min_bound, max_bound;
-	max_bound = min_bound = world_vertex_positions->at(0);
+	max_bound = min_bound = vertex_positions->at(0);
 	for (int i = 1; i < size; i++)
 	{
 		// find max
-		if (world_vertex_positions->at(i).x > max_bound.x)
+		if (vertex_positions->at(i).x > max_bound.x)
 		{
-			max_bound.x = world_vertex_positions->at(i).x;
+			max_bound.x = vertex_positions->at(i).x;
 		}
-		if (world_vertex_positions->at(i).y > max_bound.y)
+		if (vertex_positions->at(i).y > max_bound.y)
 		{
-			max_bound.y = world_vertex_positions->at(i).y;
+			max_bound.y = vertex_positions->at(i).y;
 		}
-		if (world_vertex_positions->at(i).z > max_bound.z)
+		if (vertex_positions->at(i).z > max_bound.z)
 		{
-			max_bound.z = world_vertex_positions->at(i).z;
+			max_bound.z = vertex_positions->at(i).z;
 		}
 		// find min
-		if (world_vertex_positions->at(i).x < min_bound.x)
+		if (vertex_positions->at(i).x < min_bound.x)
 		{
-			min_bound.x = world_vertex_positions->at(i).x;
+			min_bound.x = vertex_positions->at(i).x;
 		}
-		if (world_vertex_positions->at(i).y < min_bound.y)
+		if (vertex_positions->at(i).y < min_bound.y)
 		{
-			min_bound.y = world_vertex_positions->at(i).y;
+			min_bound.y = vertex_positions->at(i).y;
 		}
-		if (world_vertex_positions->at(i).z < min_bound.z)
+		if (vertex_positions->at(i).z < min_bound.z)
 		{
-			min_bound.z = world_vertex_positions->at(i).z;
+			min_bound.z = vertex_positions->at(i).z;
 		}
 	}
 	x_bound_lenght = abs(max_bound.x - min_bound.x);
@@ -162,23 +171,23 @@ void MeshModel::CalcBounds()
 	center = (max_bound + min_bound) / 2;
 }
 
-void MeshModel::draw(Renderer* renderer, bool draw_bound_box)
+
+void MeshModel::draw(Renderer* renderer, bool isShowVerticsNormals, bool draw_bound_box)
 {
-	int size = vertex_positions->size();
-	world_vertex_positions->clear();
-	vec4 tempVec;
-	for (int i = 0; i < size; i++)
+	if (isShowVerticsNormals)
 	{
-		tempVec = _world_transform * vec4(vertex_positions->at(i));
-		world_vertex_positions->push_back(vec3(tempVec.x / tempVec.w, tempVec.y / tempVec.w, tempVec.z / tempVec.w));
+		renderer->DrawTriangles(this->vertex_positions, normal_positions);
 	}
-	renderer->DrawTriangles(world_vertex_positions);
-	
+	else
+	{
+		renderer->DrawTriangles(this->vertex_positions);
+	}
+
 	if (draw_bound_box)
 	{
 		CalcBounds();
 		PrimMeshModel* bound_box = new PrimMeshModel(center.x, center.y, center.z, x_bound_lenght, y_bound_lenght, z_bound_lenght);
-		bound_box->draw(renderer,true);
+		bound_box->draw(renderer, isShowVerticsNormals, draw_bound_box);
 	}
 }
 
@@ -193,7 +202,6 @@ vec3 MeshModel::getPosition()
 PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat lenX, GLfloat lenY, GLfloat lenZ) :posX(posX), posY(posY), posZ(posZ), lenX(lenX), lenY(lenY), lenZ(lenZ)
 {
 	vertex_positions = new vector<vec3>;
-	world_vertex_positions = new vector<vec3>; /*FIXED*/
 	//_world_transform = mat4();
 	//_world_transform[2][3] = -2; // move center to (0,0,-2)
 	GLfloat halfX = lenX * 0.5f;
@@ -237,19 +245,129 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	vertex_positions->push_back(vec3(posX + halfX, posY - halfY, posZ + halfZ)); // bottom left
 }
 
-void PrimMeshModel::draw(Renderer* renderer, bool draw_bound_box)
+void PrimMeshModel::draw(Renderer* renderer, bool isShowVerticsNormals, bool draw_bound_box)
 {
-	int size = this->vertex_positions->size();
-	this->world_vertex_positions->clear();
-	vec4 tempVec;
-	for (int i = 0; i < size; i++)
+	renderer->DrawRectangles(this->vertex_positions);
+}
+
+
+void MeshModel::moveModel(Axis direction)
+{
+	mat4 tranlateMatrix;
+	switch (direction)
 	{
-		tempVec = this->_world_transform * vec4(vertex_positions->at(i));
-		this->world_vertex_positions->push_back(vec3(tempVec.x / tempVec.w, tempVec.y / tempVec.w, tempVec.z / tempVec.w));
+	case X:
+		tranlateMatrix = Translate(1, 0, 0);
+		break;
+	case Xn:
+		tranlateMatrix = Translate(-1, 0, 0);
+		break;
+	case Y:
+		tranlateMatrix = Translate(0, 1, 0);
+		break;
+	case Yn:
+		tranlateMatrix = Translate(0, -1, 0);
+		break;
+	case Z:
+		tranlateMatrix = Translate(0, 0, 1);
+		break;
+	case Zn:
+		tranlateMatrix = Translate(0, 0, -1);
+		break;
+	default:
+		break;
 	}
+	preformTransform(tranlateMatrix);
+	_world_transform = tranlateMatrix * _world_transform; // translate 
 
-	// draw the faces
-	renderer->DrawRectangles(this->world_vertex_positions);
+}
 
+void MeshModel::rotateModel(Axis direction)
+{
+	mat4 rotateMatrix;
+	switch (direction)
+	{
+	case X:
+		rotateMatrix = RotateX(10);
+		break;
+	case Xn:
+		rotateMatrix = RotateX(-10);
+		break;
+	case Y:
+		rotateMatrix = RotateY(10);
+		break;
+	case Yn:
+		rotateMatrix = RotateY(-10);
+		break;
+	case Z:
+		rotateMatrix = RotateZ(10);
+		break;
+	case Zn:
+		rotateMatrix = RotateZ(-10);
+		break;
+	default:
+		break;
+	}
+	preformTransform(rotateMatrix);
+	_world_transform = _world_transform * rotateMatrix; // rotate around center so first rotate then move!
+
+}
+
+void MeshModel::scaleModel(Axis direction)
+{
+	mat4 scaleMatrix;
+	switch (direction)
+	{
+	case X:
+		scaleMatrix = Scale(2, 1, 1);
+		break;
+	case Xn:
+		scaleMatrix = Scale(0.5, 1, 1);
+		break;
+	case Y:
+		scaleMatrix = Scale(1, 2, 1);
+		break;
+	case Yn:
+		scaleMatrix = Scale(1, 0.5, 1);
+		break;
+	case Z:
+		scaleMatrix = Scale(1, 1, 2);
+		break;
+	case Zn:
+		scaleMatrix = Scale(1, 1, 0.5);
+		break;
+	default:
+		break;
+	}
+	preformTransform(scaleMatrix);
+	_world_transform = scaleMatrix * _world_transform; // translate 
+
+}
+
+void MeshModel::preformTransform(mat4 matrix)
+{
+	vec4 tempVec;
+	for (auto it = vertex_positions->begin(); it != vertex_positions->end(); ++it)
+	{
+		tempVec = this->_world_transform * vec4(*it);
+		*it = vec3(tempVec.x / tempVec.w, tempVec.y / tempVec.w, tempVec.z / tempVec.w);
+	}
+}
+
+void MeshModel::manipulateModel(Transformation T, Axis axis)
+{
+	switch (T)
+	{
+	case ROTATE:
+		//rotateAroundActiveModel(axis);
+		rotateModel(axis);
+		break;
+	case MOVE:
+		moveModel(axis);
+		break;
+	case SCALE:
+		scaleModel(axis);
+		break;
+	}
 }
 

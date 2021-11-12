@@ -6,6 +6,12 @@
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 
+struct color{
+	int red, green, blue;
+} white{ 1,1,1 }, red{ 1,0,0 }, green{ 0, 1, 0 }, blue{ 0,0,1 };
+
+color curColor = red;
+
 Renderer::Renderer() :m_width(512), m_height(512)
 {
 	InitOpenGLRendering();
@@ -35,7 +41,7 @@ void Renderer::DrawPixel(int x, int y)
 		{
 			return;
 		}
-	m_outBuffer[INDEX(m_width, x, y, 0)] = 1;	m_outBuffer[INDEX(m_width, x, y, 1)] = 0;	m_outBuffer[INDEX(m_width, x, y, 2)] = 0;
+	m_outBuffer[INDEX(m_width, x, y, 0)] = curColor.red;	m_outBuffer[INDEX(m_width, x, y, 1)] = curColor.green;	m_outBuffer[INDEX(m_width, x, y, 2)] = curColor.blue;
 }
 
 void RasterizeArrangeVeritcs(vec2& ver1, vec2& ver2, bool byX = true)
@@ -223,25 +229,39 @@ void Renderer::SetDemoBuffer()
 void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals)
 {
 	vec2 triangle [3];
-	for (vector<vec3>::const_iterator it = vertices->begin(); it != vertices->end(); ++it)
+	vec2 normal [2];
+	int normalIndex;
+	for (int i = 0; i < vertices->size(); i++)
 	{
-		triangle[0] = vec3ToVec2(*it);
-		it++;
-		triangle[1] = vec3ToVec2(*it);
-		it++;
-		triangle[2] = vec3ToVec2(*it);
+		curColor = white;
+		normalIndex = i;
+		triangle[0] = vec3ToVec2(vertices->at(i));
+		i++;
+		triangle[1] = vec3ToVec2(vertices->at(i));
+		i++;
+		triangle[2] = vec3ToVec2(vertices->at(i));
 
 
 		RasterizeLine(triangle[0], triangle[1]);
 		RasterizeLine(triangle[1], triangle[2]);
 		RasterizeLine(triangle[2], triangle[0]);
+		if (normals != NULL)
+		{
+			curColor = red;
+			RasterizeLine(triangle[0], vec3ToVec2(normals->at(normalIndex)));
+			normalIndex++;
+			RasterizeLine(triangle[1], vec3ToVec2(normals->at(normalIndex)));
+			normalIndex++;
+			RasterizeLine(triangle[2], vec3ToVec2(normals->at(normalIndex)));
+		}
 	}
 }
 
 void Renderer::DrawRectangles(const vector<vec3>* vertices, const vector<vec3>* normals)
 {
 	vec2 rectangle[4];
-	for (vector<vec3>::const_iterator it = vertices->begin(); it != vertices->end(); ++it)
+	vec2 normal[2];
+	for (auto it = vertices->begin(); it != vertices->end(); ++it)
 	{
 		rectangle[0] = vec3ToVec2(*it);
 		it++;
@@ -255,14 +275,13 @@ void Renderer::DrawRectangles(const vector<vec3>* vertices, const vector<vec3>* 
 		RasterizeLine(rectangle[1], rectangle[2]);
 		RasterizeLine(rectangle[2], rectangle[3]);
 		RasterizeLine(rectangle[3], rectangle[0]);
+
 	}
+
+
 }
 vec2 Renderer::vec3ToVec2(const vec3& ver)
 {
-	//vec4 WScale = Scale(1, 1, 1) * tempVec;
-	//mat4 Wtranlate = Translate(0, 2.5, -3);
-	////vec4 WScale = Scale(1, 1, 1) * (vec4(ver));
-	//vec4 tempWorldTrans = Wtranlate * tempVec;
 	vec4 tempVec = vec4(ver);
 	tempVec = this->projection * this->cTransform * tempVec;
 

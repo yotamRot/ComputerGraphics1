@@ -33,7 +33,8 @@ enum Projection
 
 class Model { 
 public:
-	void virtual draw(Renderer* renderer, bool draw_bound_box) = 0;
+	void virtual draw(Renderer* renderer, bool isShowVerticsNormals, bool draw_bound_box) = 0;
+	vec3 virtual getPosition() = 0;
 protected:
 	virtual ~Model() {}
 };
@@ -67,11 +68,12 @@ class Scene {
 
 	
 	vector<Light*> lights;
-	
-	Renderer *m_renderer;
 	Projection proj;
+	bool isShowVerticsNormals;
 	bool draw_bound_box = false;
+	Renderer* m_renderer;
 public:
+	
 	vector<Model*> models;
 	vector<Camera*> cameras;
 	Scene() {};
@@ -85,6 +87,7 @@ public:
 	void scaleActiveModel(Axis direction);
 	void manipulateActiveModel(Transformation T,Axis axis);
 	void setActiveCameraProjection(Projection proj);
+	bool toggleShowVerticesNormals();
 	void draw();
 	void drawDemo();
 	bool updateDrawBoundBox();

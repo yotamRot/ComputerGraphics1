@@ -68,116 +68,6 @@ void Scene::rotateAroundActiveModel(Axis direction)
 	lookAtModel(activeModel);
 }
 
-void Scene::moveActiveModel(Axis direction)
-{
-	MeshModel* curModel = (MeshModel*)models.at(activeModel);
-	mat4 tranlateMatrix;
-	switch (direction)
-	{
-		case X:
-			tranlateMatrix = Translate(1, 0, 0);
-			break;
-		case Xn:
-			tranlateMatrix = Translate(-1, 0, 0);
-			break;
-		case Y:
-			tranlateMatrix = Translate(0, 1, 0);
-			break;
-		case Yn:
-			tranlateMatrix = Translate(0, -1, 0);
-			break;
-		case Z:
-			tranlateMatrix = Translate(0, 0, 1);
-			break;
-		case Zn:
-			tranlateMatrix = Translate(0, 0, -1);
-			break;
-		default:
-			break;
-	}
-	curModel->_world_transform = tranlateMatrix * curModel->_world_transform; // translate 
-
-}
-
-void Scene::rotateActiveModel(Axis direction)
-{
-	MeshModel* curModel = (MeshModel*)models.at(activeModel);
-	mat4 rotateMatrix;
-	switch (direction)
-	{
-	case X:
-		rotateMatrix = RotateX(10);
-		break;
-	case Xn:
-		rotateMatrix = RotateX(-10);
-		break;
-	case Y:
-		rotateMatrix = RotateY(10);
-		break;
-	case Yn:
-		rotateMatrix = RotateY(-10);
-		break;
-	case Z:
-		rotateMatrix = RotateZ(10);
-		break;
-	case Zn:
-		rotateMatrix = RotateZ(-10);
-		break;
-	default:
-		break;
-	}
-	curModel->_world_transform = curModel->_world_transform * rotateMatrix; // rotate around center so first rotate then move!
-
-}
-
-void Scene::scaleActiveModel(Axis direction)
-{
-	MeshModel* curModel = (MeshModel*)models.at(activeModel);
-	mat4 scaleMatrix;
-	switch (direction)
-	{
-	case X:
-		scaleMatrix = Scale(2, 1, 1);
-		break;
-	case Xn:
-		scaleMatrix = Scale(0.5, 1, 1);
-		break;
-	case Y:
-		scaleMatrix = Scale(1, 2, 1);
-		break;
-	case Yn:
-		scaleMatrix = Scale(1, 0.5, 1);
-		break;
-	case Z:
-		scaleMatrix = Scale(1, 1, 2);
-		break;
-	case Zn:
-		scaleMatrix = Scale(1, 1, 0.5);
-		break;
-	default:
-		break;
-	}
-	curModel->_world_transform = scaleMatrix * curModel->_world_transform; // translate 
-
-}
-
-void Scene::manipulateActiveModel(Transformation T, Axis axis)
-{
-	switch (T)
-	{
-		case ROTATE:
-			//rotateAroundActiveModel(axis);
-			rotateActiveModel(axis);
-			break;
-		case MOVE:
-			moveActiveModel(axis);
-			break;
-		case SCALE:
-			scaleActiveModel(axis);
-			break;
-	}
-}
-
 void Scene::setActiveCameraProjection(Projection proj)
 {
 	Camera* curCamera = cameras.at(activeCamera);
@@ -194,6 +84,11 @@ void Scene::setActiveCameraProjection(Projection proj)
 	}
 }
 
+bool Scene::toggleShowVerticesNormals()
+{
+	isShowVerticsNormals = !isShowVerticsNormals;
+	return isShowVerticsNormals;
+}
 
 void Scene::draw()
 {
@@ -205,7 +100,7 @@ void Scene::draw()
 
 	for (vector<Model*>::iterator it = models.begin(); it != models.end(); ++it)
 	{
-		(*it)->draw(this->m_renderer,draw_bound_box);
+		(*it)->draw(this->m_renderer, this->isShowVerticsNormals, draw_bound_box);
 
 	}
 	m_renderer->SwapBuffers();
@@ -234,6 +129,11 @@ Scene::Scene(Renderer *renderer) : m_renderer(renderer)
 	setActiveCameraProjection(ORTHOGRAPHIC);
 }
 
+void Scene::manipulateActiveModel(Transformation T, Axis axis)
+{
+	MeshModel* curModel = (MeshModel*)models.at(activeModel);
+	curModel->manipulateModel(T, axis);
+}
 
 void Camera::setTransformation(const mat4& transform)
 {

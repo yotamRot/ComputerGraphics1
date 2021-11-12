@@ -29,7 +29,12 @@
 #define MAIN_ABOUT 2
 #define ADD_CUBE 3
 #define OBJECTS 4
-#define BOUND_BOX 5
+
+#define FEATURES 5
+#define SHOW_VERTICES_NORMAL 1
+#define SHOW_BOUNDING_BOX 2
+
+
 #define LEFT 97
 #define RIGHT 100
 #define UP 119
@@ -160,6 +165,20 @@ void transformationMenu(int id)
 	curTramsformation = (Transformation)id;
 }
 
+void featuresMenu(int id)
+{
+	switch (id)
+	{
+		case SHOW_VERTICES_NORMAL:
+			scene->toggleShowVerticesNormals();
+			break;
+		case SHOW_BOUNDING_BOX:
+			scene->updateDrawBoundBox();
+			break;
+	}
+	scene->draw();
+}
+
 void projectionMenu(int id)
 {
 	scene->setActiveCameraProjection((Projection)id);
@@ -188,10 +207,6 @@ void mainMenu(int id)
 		glutAddMenuEntry("Cube", scene->models.size() - 1);
 		scene->draw();
 		break;
-	case BOUND_BOX:
-		scene->updateDrawBoundBox();
-		scene->draw();
-		break;
 	}
 }
 
@@ -203,6 +218,9 @@ void initMenu()
 	glutAddMenuEntry("Move", MOVE);
 	glutAddMenuEntry("Rotate", ROTATE);
 	glutAddMenuEntry("Scale", SCALE);
+	int menuFeatures = glutCreateMenu(featuresMenu);
+	glutAddMenuEntry("Show Vertices Normal", SHOW_VERTICES_NORMAL);
+	glutAddMenuEntry("Draw Bound Box", SHOW_BOUNDING_BOX);
 	int menuProjections = glutCreateMenu(projectionMenu);
 	glutAddMenuEntry("Orthographic", ORTHOGRAPHIC);
 	glutAddMenuEntry("Prespective", PRESPECTIVE);
@@ -213,7 +231,7 @@ void initMenu()
 	glutAddMenuEntry("Add Cube", ADD_CUBE);
 	glutAddSubMenu("Transformations", menuTramsformation);
 	glutAddSubMenu("Projection", menuProjections);
-	glutAddMenuEntry("Draw Bound Box", BOUND_BOX);
+	glutAddSubMenu("Features", menuFeatures);
 
 	
 

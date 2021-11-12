@@ -1,5 +1,7 @@
 #pragma once
 #include <vector>
+#include <set>
+#include <tuple>
 #include "CG_skel_w_MFC.h"
 #include "vec.h"
 #include "mat.h"
@@ -21,7 +23,6 @@ class Renderer
 	void RasterizeRegularNegetive(vec2& ver1, vec2& ver2);
 	void RasterizeBig(vec2& ver1, vec2& ver2);
 	void RasterizeRegular(vec2& ver1, vec2& ver2);
-
 	void DrawPixel(int x, int y);
 	void transformToScreen(vec2& vec);
 	vec2 vec3ToVec2(const vec3& ver);
@@ -42,7 +43,7 @@ public:
 	~Renderer(void);
 	void Init();
 	void DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals=NULL);
-	void DrawRectangles(const vector<vec3>* vertices, const vector<vec3>* normals=NULL);
+	void DrawRectangles(const vector<vec3>* vertices, const vector<vec3>* normals =NULL);
 	void SetCameraTransform(const mat4& cTransform);
 	void SetProjection(const mat4& projection);
 	void SetObjectMatrices(const mat4& oTransform, const mat3& nTransform);
