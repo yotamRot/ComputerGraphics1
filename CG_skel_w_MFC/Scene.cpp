@@ -15,7 +15,7 @@ void Scene::loadOBJModel(string fileName)
 
 void Scene::loadCubeModel()
 {
-	PrimMeshModel* cube = new PrimMeshModel(0, 0, 0, 1);
+	PrimMeshModel* cube = new PrimMeshModel(0, 0, 0, 1,1,1);
 	activeModel = models.size();
 	models.push_back(cube);
 }
@@ -28,6 +28,20 @@ void Scene::lookAtModel(int modelId)
 	vec4 modelCenter = vec4(curModel->getPosition());
 	curCamera->cTransform = Translate(0, 0, 2) * curModel->_world_transform; //gets model location
 	curCamera->LookAt(curCamera->cTransform * curCamera->eye, modelCenter, curCamera->up);
+}
+
+
+bool Scene::updateDrawBoundBox()
+{
+	if (draw_bound_box)		// hide boxes
+	{
+		draw_bound_box = false;
+	}
+	else					// show boxes
+	{
+		draw_bound_box = true;
+	}
+	return draw_bound_box;
 }
 
 void Scene::rotateAroundActiveModel(Axis direction)
@@ -191,7 +205,7 @@ void Scene::draw()
 
 	for (vector<Model*>::iterator it = models.begin(); it != models.end(); ++it)
 	{
-		(*it)->draw(this->m_renderer);
+		(*it)->draw(this->m_renderer,draw_bound_box);
 
 	}
 	m_renderer->SwapBuffers();
@@ -219,13 +233,7 @@ Scene::Scene(Renderer *renderer) : m_renderer(renderer)
 	cameras.push_back(initCamera);
 	setActiveCameraProjection(ORTHOGRAPHIC);
 }
-void Scene::DrawRec() {
-	PrimMeshModel* cube = new PrimMeshModel(0,0,0,1);
-	activeModel = models.size();
-	models.push_back(cube);
 
-	cube->draw(this->m_renderer);
-}
 
 void Camera::setTransformation(const mat4& transform)
 {

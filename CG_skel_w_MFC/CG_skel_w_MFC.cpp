@@ -29,6 +29,7 @@
 #define MAIN_ABOUT 2
 #define ADD_CUBE 3
 #define OBJECTS 4
+#define BOUND_BOX 5
 #define LEFT 97
 #define RIGHT 100
 #define UP 119
@@ -187,6 +188,10 @@ void mainMenu(int id)
 		glutAddMenuEntry("Cube", scene->models.size() - 1);
 		scene->draw();
 		break;
+	case BOUND_BOX:
+		scene->updateDrawBoundBox();
+		scene->draw();
+		break;
 	}
 }
 
@@ -205,9 +210,10 @@ void initMenu()
 	glutAddSubMenu("File",menuFile);
 	glutAddMenuEntry("Demo",MAIN_DEMO);
 	glutAddMenuEntry("About",MAIN_ABOUT);
-	glutAddMenuEntry("Add cube", ADD_CUBE);
+	glutAddMenuEntry("Add Cube", ADD_CUBE);
 	glutAddSubMenu("Transformations", menuTramsformation);
 	glutAddSubMenu("Projection", menuProjections);
+	glutAddMenuEntry("Draw Bound Box", BOUND_BOX);
 
 	
 
