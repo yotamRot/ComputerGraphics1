@@ -127,6 +127,7 @@ Scene::Scene(Renderer *renderer) : m_renderer(renderer)
 	activeCamera = 0;
 	cameras.push_back(initCamera);
 	setActiveCameraProjection(ORTHOGRAPHIC);
+	this->isShowVerticsNormals = false;
 }
 
 void Scene::manipulateActiveModel(Transformation T, Axis axis)

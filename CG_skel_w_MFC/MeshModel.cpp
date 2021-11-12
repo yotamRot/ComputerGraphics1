@@ -339,9 +339,8 @@ void MeshModel::scaleModel(Axis direction)
 	default:
 		break;
 	}
-	preformTransform(scaleMatrix);
 	_world_transform = scaleMatrix * _world_transform; // translate 
-
+	preformTransform(scaleMatrix);
 }
 
 void MeshModel::preformTransform(mat4 matrix)
@@ -349,7 +348,7 @@ void MeshModel::preformTransform(mat4 matrix)
 	vec4 tempVec;
 	for (auto it = vertex_positions->begin(); it != vertex_positions->end(); ++it)
 	{
-		tempVec = this->_world_transform * vec4(*it);
+		tempVec = matrix * vec4(*it);
 		*it = vec3(tempVec.x / tempVec.w, tempVec.y / tempVec.w, tempVec.z / tempVec.w);
 	}
 }
