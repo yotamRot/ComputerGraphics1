@@ -186,7 +186,18 @@ GLfloat MeshModel::GetZBoundLength()
 {
 	return z_bound_lenght;
 }
-
+GLfloat MeshModel::GetXBoundLength()
+{
+	return x_bound_lenght;
+}
+GLfloat MeshModel::GetYBoundLength()
+{
+	return y_bound_lenght;
+}
+vec3 MeshModel::GetBoundsLength()
+{
+	return vec3(x_bound_lenght, y_bound_lenght, z_bound_lenght) ;
+}
 void MeshModel::draw(Renderer* renderer, bool isShowVerticsNormals, bool draw_bound_box)
 {
 	if (isShowVerticsNormals)

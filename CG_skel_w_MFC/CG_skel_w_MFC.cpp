@@ -45,7 +45,6 @@
 #define IN 113
 #define OUT 101
 
-#define ZOOM 2
 
 Scene *scene;
 Renderer *renderer;
@@ -108,9 +107,7 @@ void keyboard( unsigned char key, int x, int y )
 void mouse(int button, int state, int x, int y)
 {
 	//set down flags
-	vec3 lbn;
-	vec3 rtf;
-	GLfloat fovy;
+
 	switch(button) {
 		case GLUT_LEFT_BUTTON:
 			lb_down = (state==GLUT_UP)?0:1;
@@ -122,38 +119,10 @@ void mouse(int button, int state, int x, int y)
 			mb_down = (state==GLUT_UP)?0:1;	
 			break;
 		case WHEEL_SCROLL_UP:
-			lbn = scene->GetActiveCamera()->Getlbn();
-			rtf = scene->GetActiveCamera()->Getrtf();
-			if (scene->GetProjection() == ORTHOGRAPHIC)
-			{
-				scene->GetActiveCamera()->Ortho(lbn.x-ZOOM, rtf.x-ZOOM, lbn.y-ZOOM, rtf.y-ZOOM, lbn.z, rtf.z);
-			}
-			if (scene->GetProjection() == PRESPECTIVE)
-			{
-				fovy = ((360 * atan(rtf.y / lbn.z)) / M_PI);
-				if (fovy - ZOOM < 1)
-				{
-					break;
-				}
-				scene->GetActiveCamera()->Perspective(fovy - ZOOM, rtf.x / rtf.y, lbn.z, rtf.z);
-			}
+			scene->Zoom(ZOOM_IN);
 			break;
 		case WHEEL_SCROLL_DOWN:
-			lbn = scene->GetActiveCamera()->Getlbn();
-			rtf = scene->GetActiveCamera()->Getrtf();
-			if (scene->GetProjection() == ORTHOGRAPHIC)
-			{
-				scene->GetActiveCamera()->Ortho(lbn.x + ZOOM, rtf.x + ZOOM, lbn.y + ZOOM, rtf.y + ZOOM, lbn.z, rtf.z);
-			}
-			if (scene->GetProjection() == PRESPECTIVE)
-			{
-				fovy = ((360 * atan(rtf.y / lbn.z)) / M_PI);
-				if (fovy + ZOOM > 179)
-				{
-					break;
-				}
-				scene->GetActiveCamera()->Perspective(fovy + ZOOM, rtf.x / rtf.y, lbn.z, rtf.z);
-			}
+			scene->Zoom(ZOOM_OUT);
 			break;
 
 	}

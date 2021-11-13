@@ -35,7 +35,10 @@ public:
 	vec3 getPosition();
 	void CalcBounds();
 	vec3 GetCenter();
+	GLfloat GetXBoundLength();
+	GLfloat GetYBoundLength();
 	GLfloat GetZBoundLength();
+	vec3 GetBoundsLength();
 	void manipulateModel(Transformation T, Axis axis);
 };
 

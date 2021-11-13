@@ -24,13 +24,64 @@ Camera* Scene::GetActiveCamera()
 	return cameras.at(activeCamera);
 }
 
+void Scene::Zoom(Direction direction)
+{
+	vec3 lbn;
+	vec3 rtf;
+	GLfloat fovy;
+	vec3 bounds;
+	lbn = GetActiveCamera()->Getlbn();
+	rtf = GetActiveCamera()->Getrtf();
+	MeshModel* curModel = (MeshModel*)models.at(activeModel);
+	bounds = curModel->GetBoundsLength();
+	if (GetProjection() == ORTHOGRAPHIC)
+	{
+		if(direction == ZOOM_IN)
+		{
+			if ((lbn.x + bounds.x >= rtf.x - bounds.x) || (lbn.y + bounds.x >= rtf.y - bounds.x))
+			{
+				return;
+			}
+			GetActiveCamera()->Ortho(lbn.x + bounds.x, rtf.x - bounds.x, lbn.y + bounds.x, rtf.y - bounds.x, lbn.z, rtf.z);
+		}
+		else // WHEEL_SCROLL_DOWN
+		{
+			GetActiveCamera()->Ortho(lbn.x - bounds.x, rtf.x + bounds.x, lbn.y - bounds.x, rtf.y + bounds.x, lbn.z, rtf.z);
+		}
+
+	}
+	if (GetProjection() == PRESPECTIVE)
+	{
+
+		if (direction == ZOOM_IN)
+		{
+			fovy = ((360 * atan(rtf.y / lbn.z)) / M_PI);
+			if (fovy - ZOOM < 1)
+			{
+				return;
+			}
+			GetActiveCamera()->Perspective(fovy - ZOOM, rtf.x / rtf.y, lbn.z, rtf.z);
+		}
+		else // WHEEL_SCROLL_DOWN
+		{
+			fovy = ((360 * atan(rtf.y / lbn.z)) / M_PI);
+			if (fovy + ZOOM > 179)
+			{
+				return;
+			}
+			GetActiveCamera()->Perspective(fovy + ZOOM, rtf.x / rtf.y, lbn.z, rtf.z);
+		}
+
+	}
+}
+
 void Scene::lookAtModel(int modelId)
 {
 	activeModel = modelId;
 	MeshModel* curModel = (MeshModel*)models.at(modelId);
 	Camera* curCamera = cameras.at(activeCamera);
 	vec4 modelCenter = vec4(curModel->GetCenter());
-	curCamera->cTransform = Translate(0, 0, curModel->GetZBoundLength()) * Translate(modelCenter); //gets model location
+	curCamera->cTransform = Translate(0, 0, 2*curModel->GetZBoundLength()) * Translate(modelCenter); //gets model location
 	curCamera->LookAt(curCamera->cTransform * curCamera->eye, modelCenter, curCamera->up);
 }
 
@@ -81,8 +132,8 @@ void Scene::rotateAroundActiveModel(Axis direction)
 void Scene::setActiveCameraProjection(Projection proj)
 {
 	Camera* curCamera = cameras.at(activeCamera);
-	vec3 lbn = curCamera->Getlbn();
-	vec3 rtf = curCamera->Getrtf();
+	const vec3 lbn = curCamera->Getlbn();
+	const vec3 rtf = curCamera->Getrtf();
 	this->proj = proj;
 
 	if (proj == ORTHOGRAPHIC)
@@ -212,11 +263,11 @@ void Camera::Ortho(const float left, const float right,
 		(-1) * (zFar + zNear) / (zFar - zNear), 1);
 }
 
-vec3 Camera::Getlbn()
+vec3 Camera::Getlbn() 
 {
 	return vec3(lbn);
 }
-vec3 Camera::Getrtf() 
+vec3 Camera::Getrtf()
 {
 	return vec3(rtf);
 }

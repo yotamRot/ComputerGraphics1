@@ -6,6 +6,13 @@
 #include "Renderer.h"
 using namespace std;
 
+
+
+
+#define ZOOM 2
+
+
+
 enum Axis
 {
 	X,
@@ -27,6 +34,12 @@ enum Projection
 {
 	ORTHOGRAPHIC,
 	PRESPECTIVE
+};
+
+enum Direction
+{
+	ZOOM_IN,
+	ZOOM_OUT
 };
 
 
@@ -96,6 +109,7 @@ public:
 	void drawDemo();
 	bool updateDrawBoundBox();
 	Camera* GetActiveCamera();
+	void Zoom(Direction direction);
 	int activeModel;
 	int activeLight;
 	int activeCamera;
