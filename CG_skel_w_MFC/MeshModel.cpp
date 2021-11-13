@@ -64,7 +64,7 @@ MeshModel::MeshModel(string fileName)
 {
 	_world_transform = Translate(0,0,-5);
 	loadFile(fileName);
-	this->preformTransform(_world_transform);
+	this->preformTransform(_world_transform, MOVE);
 }
 
 MeshModel::~MeshModel(void)
@@ -77,6 +77,9 @@ void MeshModel::loadFile(string fileName)
 	vector<FaceIdcs> faces;
 	vector<vec3> vertices;
 	vector<vec3> verticesNormals;
+	vec3 curVertex;
+	vec3 curNormal;
+
 	// while not end of file
 	while (!ifile.eof())
 	{
@@ -114,18 +117,20 @@ void MeshModel::loadFile(string fileName)
 	//vertex_positions={v1,v2,v3,v1,v3,v4}
 
 	vertex_positions = new vector<vec3>;
-
-	normal_positions = new vector<vec3>;
+	vertices_end_normal_positions = new vector<vec3>;
+	normals = new vector<vec3>;
 	// iterate through all stored faces and create triangles
 	for (vector<FaceIdcs>::iterator it = faces.begin(); it != faces.end(); ++it)
 	{
 		for (int i = 0; i < 3; i++)
 		{
-			vertex_positions->push_back(vertices.at(it->v[i] - 1)); /*FIXED*/
+			curVertex = vertices.at(it->v[i] - 1);
+			vertex_positions->push_back(curVertex); /*FIXED*/
 			if (verticesNormals.size() != 0)
 			{
-				//adds a tuple of vertices and it normal to a set to avoid duplicates
-				normal_positions->push_back(verticesNormals.at(it->vn[i] - 1) - vertices.at(it->v[i] - 1));
+				curNormal = normalize(verticesNormals.at(it->vn[i] - 1) - vertices.at(it->v[i] - 1));
+				normals->push_back(curNormal);
+				this->vertices_end_normal_positions->push_back(curVertex + 0.1 * curNormal);
 			}
 		}
 	}
@@ -176,7 +181,7 @@ void MeshModel::draw(Renderer* renderer, bool isShowVerticsNormals, bool draw_bo
 {
 	if (isShowVerticsNormals)
 	{
-		renderer->DrawTriangles(this->vertex_positions, normal_positions);
+		renderer->DrawTriangles(this->vertex_positions, vertices_end_normal_positions);
 	}
 	else
 	{
@@ -277,7 +282,7 @@ void MeshModel::moveModel(Axis direction)
 	default:
 		break;
 	}
-	preformTransform(tranlateMatrix);
+	preformTransform(tranlateMatrix, MOVE);
 	_world_transform = tranlateMatrix * _world_transform; // translate 
 
 }
@@ -285,6 +290,8 @@ void MeshModel::moveModel(Axis direction)
 void MeshModel::rotateModel(Axis direction)
 {
 	mat4 rotateMatrix;
+	vec3 modelPosition = getPosition();
+	preformTransform(Translate((-1) * modelPosition), MOVE); // move to center
 	switch (direction)
 	{
 	case X:
@@ -308,7 +315,8 @@ void MeshModel::rotateModel(Axis direction)
 	default:
 		break;
 	}
-	preformTransform(rotateMatrix);
+	preformTransform(rotateMatrix, ROTATE);
+	preformTransform(Translate(modelPosition), MOVE); //move back to orig loctaion
 	_world_transform = _world_transform * rotateMatrix; // rotate around center so first rotate then move!
 
 }
@@ -340,16 +348,34 @@ void MeshModel::scaleModel(Axis direction)
 		break;
 	}
 	_world_transform = scaleMatrix * _world_transform; // translate 
-	preformTransform(scaleMatrix);
+	preformTransform(scaleMatrix, SCALE);
 }
 
-void MeshModel::preformTransform(mat4 matrix)
+void MeshModel::preformTransform(mat4& matrix, Transformation T)
 {
 	vec4 tempVec;
+	mat4 noramlMatrix;
 	for (auto it = vertex_positions->begin(); it != vertex_positions->end(); ++it)
 	{
 		tempVec = matrix * vec4(*it);
 		*it = vec3(tempVec.x / tempVec.w, tempVec.y / tempVec.w, tempVec.z / tempVec.w);
+	}
+
+	noramlMatrix = matrix;
+	if (T == SCALE) // need to inverse and transpose
+	{
+		noramlMatrix[0][0] = 1 / matrix[0][0];
+		noramlMatrix[1][1] = 1 / matrix[1][1];
+		noramlMatrix[2][2] = 1 / matrix[2][2];
+	}
+
+	for (int i = 0; i < vertex_positions->size(); i++)
+	{
+		tempVec = vec4(normals->at(i));
+		tempVec.w = 0; // we dont want to translate matrix!
+		tempVec = noramlMatrix * tempVec;
+		normals->at(i) = vec3(tempVec.x, tempVec.y, tempVec.z);
+		this->vertices_end_normal_positions->at(i)= vertex_positions->at(i) + normals->at(i);
 	}
 }
 
@@ -357,16 +383,15 @@ void MeshModel::manipulateModel(Transformation T, Axis axis)
 {
 	switch (T)
 	{
-	case ROTATE:
-		//rotateAroundActiveModel(axis);
-		rotateModel(axis);
-		break;
-	case MOVE:
-		moveModel(axis);
-		break;
-	case SCALE:
-		scaleModel(axis);
-		break;
+		case ROTATE:
+			rotateModel(axis);
+			break;
+		case MOVE:
+			moveModel(axis);
+			break;
+		case SCALE:
+			scaleModel(axis);
+			break;
 	}
 }
 

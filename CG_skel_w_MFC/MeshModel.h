@@ -15,7 +15,7 @@ protected :
 	void moveModel(Axis direction);
 	void rotateModel(Axis direction);
 	void scaleModel(Axis direction);
-	void preformTransform(mat4 matrix);
+	void preformTransform(mat4& matrix, Transformation T);
 	//add more attributes
 	mat3 _normal_transform;
 	float x_bound_lenght;
@@ -25,8 +25,8 @@ protected :
 
 public:	
 	vector<vec3>* vertex_positions;
-	vector<vec3>* normal_positions;
-
+	vector<vec3>* vertices_end_normal_positions;
+	vector<vec3>* normals;
 	mat4 _world_transform;
 	MeshModel(string fileName);
 	~MeshModel(void);
