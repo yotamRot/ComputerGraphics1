@@ -296,8 +296,8 @@ void MeshModel::moveModel(Axis direction)
 void MeshModel::rotateModel(Axis direction)
 {
 	mat4 rotateMatrix;
-	vec3 modelPosition = getPosition();
-	preformTransform(Translate((-1) * modelPosition), MOVE); // move to center
+	vec3 modelCenter = GetCenter();
+	preformTransform(Translate((-1) * modelCenter), MOVE); // move to center
 	switch (direction)
 	{
 	case X:
@@ -322,7 +322,7 @@ void MeshModel::rotateModel(Axis direction)
 		break;
 	}
 	preformTransform(rotateMatrix, ROTATE);
-	preformTransform(Translate(modelPosition), MOVE); //move back to orig loctaion
+	preformTransform(Translate(modelCenter), MOVE); //move back to orig loctaion
 	_world_transform = _world_transform * rotateMatrix; // rotate around center so first rotate then move!
 
 }
@@ -330,6 +330,8 @@ void MeshModel::rotateModel(Axis direction)
 void MeshModel::scaleModel(Axis direction)
 {
 	mat4 scaleMatrix;
+	vec3 modelCenter = GetCenter();
+	preformTransform(Translate((-1) * modelCenter), MOVE); // move to center
 	switch (direction)
 	{
 	case X:
@@ -354,6 +356,7 @@ void MeshModel::scaleModel(Axis direction)
 		break;
 	}
 	_world_transform = scaleMatrix * _world_transform; // translate 
+	preformTransform(Translate(modelCenter), MOVE); //move back to orig loctaion
 	preformTransform(scaleMatrix, SCALE);
 }
 
