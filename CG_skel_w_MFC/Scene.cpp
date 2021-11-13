@@ -71,8 +71,8 @@ void Scene::rotateAroundActiveModel(Axis direction)
 void Scene::setActiveCameraProjection(Projection proj)
 {
 	Camera* curCamera = cameras.at(activeCamera);
-	vec4 lbn = curCamera->cTransform * vec4(-3, -3, 3, 1); // left, bottom, near
-	vec4 rtf = curCamera->cTransform * vec4(3, 3, 8, 1); // right, top, far
+	vec4 lbn =  vec4(-3, -3, 3, 1); // left, bottom, near
+	vec4 rtf =  vec4(3, 3, 8, 1); // right, top, far
 
 	if (proj == ORTHOGRAPHIC)
 	{
@@ -122,11 +122,11 @@ Scene::Scene(Renderer *renderer) : m_renderer(renderer)
 	initCamera->up = vec4(0, 1, 0, 1);
 	//set camera world view aligned with world asix with offset in z
 	initCamera->cTransform = mat4();
-	initCamera->cTransform[2][3] = 0;
+	initCamera->cTransform[2][3] = 2;
 	//initCamera->LookAt(initCamera->cTransform * initCamera->eye, initCamera->cTransform * initCamera->at, initCamera->up);
 	activeCamera = 0;
 	cameras.push_back(initCamera);
-	setActiveCameraProjection(ORTHOGRAPHIC);
+	setActiveCameraProjection(PRESPECTIVE);
 	this->isShowVerticsNormals = false;
 }
 

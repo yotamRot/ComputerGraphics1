@@ -62,9 +62,9 @@ vec2 vec2fFromStream(std::istream & aStream)
 
 MeshModel::MeshModel(string fileName)
 {
-	_world_transform = mat4();
-	_world_transform[2][3] = -2; // move center to (0,0,-2)
+	_world_transform = Translate(0,0,-5);
 	loadFile(fileName);
+	this->preformTransform(_world_transform);
 }
 
 MeshModel::~MeshModel(void)
