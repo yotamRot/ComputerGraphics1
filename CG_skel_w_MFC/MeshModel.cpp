@@ -176,6 +176,12 @@ void MeshModel::CalcBounds()
 	center = (max_bound + min_bound) / 2;
 }
 
+vec3 MeshModel::GetCenter()
+{
+	CalcBounds();
+	return vec3(center);
+}
+
 
 void MeshModel::draw(Renderer* renderer, bool isShowVerticsNormals, bool draw_bound_box)
 {

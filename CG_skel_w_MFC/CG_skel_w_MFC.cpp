@@ -199,6 +199,7 @@ void fileMenu(int id)
 			}
 			break;
 	}
+	scene->lookAtModel(scene->activeModel);
 	scene->draw();
 }
 

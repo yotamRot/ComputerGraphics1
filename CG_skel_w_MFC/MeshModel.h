@@ -34,6 +34,7 @@ public:
 	void draw(Renderer* renderer, bool isShowVerticsNormals, bool draw_bound_box);
 	vec3 getPosition();
 	void CalcBounds();
+	vec3 GetCenter();
 	void manipulateModel(Transformation T, Axis axis);
 };
 

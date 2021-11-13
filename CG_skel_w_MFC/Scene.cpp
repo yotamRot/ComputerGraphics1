@@ -29,8 +29,8 @@ void Scene::lookAtModel(int modelId)
 	activeModel = modelId;
 	MeshModel* curModel = (MeshModel*)models.at(modelId);
 	Camera* curCamera = cameras.at(activeCamera);
-	vec4 modelCenter = vec4(curModel->getPosition());
-	curCamera->cTransform = Translate(0, 0, 2) * curModel->_world_transform; //gets model location
+	vec4 modelCenter = vec4(curModel->GetCenter());
+	curCamera->cTransform = Translate(0, 0, 4) * Translate(modelCenter); //gets model location
 	curCamera->LookAt(curCamera->cTransform * curCamera->eye, modelCenter, curCamera->up);
 }
 
@@ -155,8 +155,11 @@ void Camera::setTransformation(const mat4& transform)
 void Camera::LookAt(const vec4& eye , const vec4& at, const vec4& up)
 {
 	vec4 n = normalize(eye - at);
+	n.w = 0;
 	vec4 u = normalize(cross(up, n));
+	u.w = 0;
 	vec4 v = normalize(cross(n, u));
+	v.w = 0;
 	vec4 t = vec4(0.0, 0.0, 0.0, 1.0);
 	mat4 c = mat4(u, v, n, t);
 	setTransformation(c * Translate(-eye));
