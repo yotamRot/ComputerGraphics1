@@ -44,8 +44,10 @@ class Light {
 };
 
 class Camera {
-
+	vec3 lbn;  // left, bottom, near
+	vec3 rtf;  // right, top, far
 public:
+	Camera(vec3 lbn, vec3 rtf) :lbn(lbn), rtf(rtf) {};
 	mat4 cTransform;
 	mat4 projection;
 	vec4 eye;
@@ -61,36 +63,38 @@ public:
 		const float zNear, const float zFar );
 	mat4 Perspective( const float fovy, const float aspect,
 		const float zNear, const float zFar);
+	vec3 Getlbn();
+	vec3 Getrtf();
 
 };
 
 class Scene {
 
-	
+	vector<Camera*> cameras;
 	vector<Light*> lights;
 	Projection proj;
 	bool isShowVerticsNormals;
 	bool draw_bound_box = false;
 	Renderer* m_renderer;
+
 public:
 	
 	vector<Model*> models;
-	vector<Camera*> cameras;
+	
 	Scene() {};
 	Scene(Renderer* renderer);
 	void loadOBJModel(string fileName);
 	void loadCubeModel();
 	void lookAtModel(int modelId);
 	void rotateAroundActiveModel(Axis direction);
-	void moveActiveModel(Axis direction);
-	void rotateActiveModel(Axis direction);
-	void scaleActiveModel(Axis direction);
 	void manipulateActiveModel(Transformation T,Axis axis);
 	void setActiveCameraProjection(Projection proj);
+	const Projection GetProjection();
 	bool toggleShowVerticesNormals();
 	void draw();
 	void drawDemo();
 	bool updateDrawBoundBox();
+	Camera* GetActiveCamera();
 	int activeModel;
 	int activeLight;
 	int activeCamera;

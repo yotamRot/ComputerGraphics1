@@ -29,11 +29,13 @@
 #define MAIN_ABOUT 2
 #define ADD_CUBE 3
 #define OBJECTS 4
-
 #define FEATURES 5
+
 #define SHOW_VERTICES_NORMAL 1
 #define SHOW_BOUNDING_BOX 2
 
+#define WHEEL_SCROLL_UP 3
+#define WHEEL_SCROLL_DOWN 4
 
 #define LEFT 97
 #define RIGHT 100
@@ -51,7 +53,7 @@ int menuObjectsId;
 Transformation curTramsformation = MOVE;
 Projection curProjection = PRESPECTIVE;
 bool lb_down,rb_down,mb_down;
-uint32_t mouse_status = 0;
+GLfloat zoom = 0.0f;
 
 //----------------------------------------------------------------------------
 // Callbacks
@@ -103,6 +105,8 @@ void keyboard( unsigned char key, int x, int y )
 void mouse(int button, int state, int x, int y)
 {
 	//set down flags
+	vec3 lbn;
+	vec3 rtf;
 	switch(button) {
 		case GLUT_LEFT_BUTTON:
 			lb_down = (state==GLUT_UP)?0:1;
@@ -113,9 +117,36 @@ void mouse(int button, int state, int x, int y)
 		case GLUT_MIDDLE_BUTTON:
 			mb_down = (state==GLUT_UP)?0:1;	
 			break;
-	}
+		case WHEEL_SCROLL_UP:
+			zoom -= 3.0;
+			lbn = scene->GetActiveCamera()->Getlbn();
+			rtf = scene->GetActiveCamera()->Getrtf();
+			if (scene->GetProjection() == ORTHOGRAPHIC)
+			{
+				scene->GetActiveCamera()->Ortho(lbn.x-3, rtf.x-3, lbn.y-3, rtf.y-3, lbn.z, rtf.z);
+			}
+			if (scene->GetProjection() == PRESPECTIVE)
+			{
+				scene->GetActiveCamera()->Perspective(((360 * atan(rtf.y / lbn.z)) / M_PI) + 3, rtf.x / rtf.y, lbn.z, rtf.z);
+			}
+			break;
+		case WHEEL_SCROLL_DOWN:
+			zoom += 3.0;
+			lbn = scene->GetActiveCamera()->Getlbn();
+			rtf = scene->GetActiveCamera()->Getrtf();
+			if (scene->GetProjection() == ORTHOGRAPHIC)
+			{
+				scene->GetActiveCamera()->Ortho(lbn.x + 3, rtf.x + 3, lbn.y + 3, rtf.y + 3, lbn.z, rtf.z);
+			}
+			if (scene->GetProjection() == PRESPECTIVE)
+			{
+				scene->GetActiveCamera()->Perspective(((360 * atan(rtf.y / lbn.z)) / M_PI) - 3, rtf.x / rtf.y, lbn.z, rtf.z);
+			}
+			break;
 
+	}
 	// add your code
+	scene->draw();
 }
 
 void motion(int x, int y)
@@ -127,6 +158,7 @@ void motion(int x, int y)
 	last_x=x;
 	last_y=y;
 }
+
 
 void objectsMenu(int id)
 {

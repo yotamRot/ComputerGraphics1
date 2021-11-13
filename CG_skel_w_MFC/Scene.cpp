@@ -19,6 +19,10 @@ void Scene::loadCubeModel()
 	activeModel = models.size();
 	models.push_back(cube);
 }
+Camera* Scene::GetActiveCamera() 
+{
+	return cameras.at(activeCamera);
+}
 
 void Scene::lookAtModel(int modelId)
 {
@@ -71,8 +75,9 @@ void Scene::rotateAroundActiveModel(Axis direction)
 void Scene::setActiveCameraProjection(Projection proj)
 {
 	Camera* curCamera = cameras.at(activeCamera);
-	vec4 lbn =  vec4(-3, -3, 3, 1); // left, bottom, near
-	vec4 rtf =  vec4(3, 3, 8, 1); // right, top, far
+	vec3 lbn = curCamera->Getlbn();
+	vec3 rtf = curCamera->Getrtf();
+	this->proj = proj;
 
 	if (proj == ORTHOGRAPHIC)
 	{
@@ -114,7 +119,7 @@ void Scene::drawDemo()
 
 Scene::Scene(Renderer *renderer) : m_renderer(renderer) 
 {	
-	Camera* initCamera = new Camera();
+	Camera* initCamera = new Camera(vec3(-3, -3, 3), vec3(3, 3, 8));
 
 	// dont change in camera world of view!
 	initCamera->eye = vec4(0, 0, 0, 1);
@@ -136,6 +141,12 @@ void Scene::manipulateActiveModel(Transformation T, Axis axis)
 	curModel->manipulateModel(T, axis);
 }
 
+const Projection Scene::GetProjection()
+{
+	return proj;
+}
+
+
 void Camera::setTransformation(const mat4& transform)
 {
 	cTransform = mat4(transform);
@@ -154,22 +165,21 @@ void Camera::LookAt(const vec4& eye , const vec4& at, const vec4& up)
 mat4 Camera::Perspective(const float fovy, const float aspect,
 	const float zNear, const float zFar)
 {	
-	float radian = M_PI * fovy / 180;
-	float top = zNear * tan(radian / 2);
-	float bottom = -top;
-	float right = top * aspect;
-	float left = -right;
-	return mat4(
-		(2 * zNear) / (right - left), 0, 0, 0,
-		0, (2 * zNear) / (top - bottom), 0, 0,
-		(right + left) / (right - left), (top + bottom) / (top - bottom), (-1) * ((zFar + zNear) / (zFar - zNear)), -1,
-		0, 0, (-1) * (2 * zNear * zFar) / (zFar - zNear), 0);
+	const float radian = M_PI * fovy / 180;
+	const float top = zNear * tan(radian / 2);
+	const float bottom = -top;
+	const float right = top * aspect;
+	const float left = -right;
+	Frustum(left, right, bottom, top, zNear, zFar);
+	return projection;
 }
 
 void Camera::Frustum(const float left, const float right,
 	const float bottom, const float top,
 	const float zNear, const float zFar)
 {
+	lbn = vec3(left, bottom, zNear);
+	rtf = vec3(right, top, zFar);
 	projection = mat4(
 		(2 * zNear) / (right - left), 0, 0, 0,
 		0, (2 * zNear) / (top - bottom), 0, 0,
@@ -181,6 +191,9 @@ void Camera::Ortho(const float left, const float right,
 	const float bottom, const float top,
 	const float zNear, const float zFar)
 { 
+	lbn = vec3(left, bottom, zNear);
+	rtf = vec3(right, top, zFar);
+
 	projection = mat4(
 		(2) / (right - left), 0, 0, 0,
 		0, (2) / (top - bottom), 0, 0,
@@ -188,6 +201,15 @@ void Camera::Ortho(const float left, const float right,
 		(-1) * ((right + left) / (right - left)),
 		(-1) * ((top + bottom) / (top - bottom)),
 		(-1) * (zFar + zNear) / (zFar - zNear), 1);
+}
+
+vec3 Camera::Getlbn()
+{
+	return vec3(lbn);
+}
+vec3 Camera::Getrtf() 
+{
+	return vec3(rtf);
 }
 
 
