@@ -30,6 +30,7 @@
 #define ADD_CUBE 3
 #define OBJECTS 4
 #define FEATURES 5
+#define CLEAR 6
 
 #define SHOW_VERTICES_NORMAL 1
 #define SHOW_BOUNDING_BOX 2
@@ -251,6 +252,10 @@ void mainMenu(int id)
 		glutAddMenuEntry("Cube", scene->models.size() - 1);
 		scene->draw();
 		break;
+	case CLEAR:
+		scene->ClearScene();
+		scene->draw();
+		break;
 	}
 }
 
@@ -276,6 +281,7 @@ void initMenu()
 	glutAddSubMenu("Transformations", menuTramsformation);
 	glutAddSubMenu("Projection", menuProjections);
 	glutAddSubMenu("Features", menuFeatures);
+	glutAddMenuEntry("Clear Screen", CLEAR);
 
 	
 

@@ -182,6 +182,10 @@ vec3 MeshModel::GetCenter()
 	return vec3(center);
 }
 
+GLfloat MeshModel::GetZBoundLength()
+{
+	return z_bound_lenght;
+}
 
 void MeshModel::draw(Renderer* renderer, bool isShowVerticsNormals, bool draw_bound_box)
 {
@@ -268,22 +272,22 @@ void MeshModel::moveModel(Axis direction)
 	switch (direction)
 	{
 	case X:
-		tranlateMatrix = Translate(1, 0, 0);
+		tranlateMatrix = Translate(x_bound_lenght*0.1, 0, 0);
 		break;
 	case Xn:
-		tranlateMatrix = Translate(-1, 0, 0);
+		tranlateMatrix = Translate(-x_bound_lenght * 0.1, 0, 0);
 		break;
 	case Y:
-		tranlateMatrix = Translate(0, 1, 0);
+		tranlateMatrix = Translate(0, y_bound_lenght*0.1, 0);
 		break;
 	case Yn:
-		tranlateMatrix = Translate(0, -1, 0);
+		tranlateMatrix = Translate(0, -y_bound_lenght * 0.1, 0);
 		break;
 	case Z:
-		tranlateMatrix = Translate(0, 0, 1);
+		tranlateMatrix = Translate(0, 0, z_bound_lenght * 0.1);
 		break;
 	case Zn:
-		tranlateMatrix = Translate(0, 0, -1);
+		tranlateMatrix = Translate(0, 0, -z_bound_lenght * 0.1);
 		break;
 	default:
 		break;

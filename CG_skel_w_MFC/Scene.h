@@ -86,6 +86,7 @@ public:
 	void loadOBJModel(string fileName);
 	void loadCubeModel();
 	void lookAtModel(int modelId);
+	void ClearScene();
 	void rotateAroundActiveModel(Axis direction);
 	void manipulateActiveModel(Transformation T,Axis axis);
 	void setActiveCameraProjection(Projection proj);

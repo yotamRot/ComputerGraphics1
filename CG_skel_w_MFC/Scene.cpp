@@ -30,8 +30,14 @@ void Scene::lookAtModel(int modelId)
 	MeshModel* curModel = (MeshModel*)models.at(modelId);
 	Camera* curCamera = cameras.at(activeCamera);
 	vec4 modelCenter = vec4(curModel->GetCenter());
-	curCamera->cTransform = Translate(0, 0, 4) * Translate(modelCenter); //gets model location
+	curCamera->cTransform = Translate(0, 0, curModel->GetZBoundLength()) * Translate(modelCenter); //gets model location
 	curCamera->LookAt(curCamera->cTransform * curCamera->eye, modelCenter, curCamera->up);
+}
+
+void Scene::ClearScene()
+{
+	models.clear();
+
 }
 
 
