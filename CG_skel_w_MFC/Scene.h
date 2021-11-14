@@ -7,6 +7,7 @@
 using namespace std;
 
 #define ZOOM 2
+#define ILLEGAL_ACTIVE_MOVEL -1
 
 enum Axis
 {

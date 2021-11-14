@@ -26,6 +26,10 @@ Camera* Scene::GetActiveCamera()
 
 void Scene::Zoom(Direction direction)
 {
+	if (activeModel == ILLEGAL_ACTIVE_MOVEL)
+	{
+		return;
+	}
 	vec3 lbn;
 	vec3 rtf;
 	GLfloat fovy;
@@ -88,6 +92,8 @@ void Scene::lookAtModel(int modelId)
 void Scene::ClearScene()
 {
 	models.clear();
+	activeModel = ILLEGAL_ACTIVE_MOVEL;
+
 }
 
 
@@ -99,6 +105,10 @@ bool Scene::updateDrawBoundBox()
 
 void Scene::rotateAroundActiveModel(Axis direction)
 {	
+	if (activeModel == ILLEGAL_ACTIVE_MOVEL)
+	{
+		return;
+	}
 	MeshModel* curModel = (MeshModel*)models.at(activeModel);
 	Camera* curCamera = cameras.at(activeCamera);
 	mat4 rotationMatrix;
@@ -136,6 +146,7 @@ void Scene::setActiveCameraProjection(Projection proj)
 	{
 		curCamera->Frustum(lbn.x, rtf.x, lbn.y, rtf.y, lbn.z, rtf.z);
 	}
+	activeModel = ILLEGAL_ACTIVE_MOVEL;
 }
 
 bool Scene::toggleShowVerticesNormals()
@@ -196,6 +207,10 @@ Scene::Scene(Renderer *renderer) : m_renderer(renderer)
 
 void Scene::manipulateActiveModel(Transformation T, Axis axis)
 {
+	if (activeModel == ILLEGAL_ACTIVE_MOVEL)
+	{
+		return;
+	}
 	MeshModel* curModel = (MeshModel*)models.at(activeModel);
 	curModel->manipulateModel(T, axis);
 }
