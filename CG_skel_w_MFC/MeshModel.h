@@ -25,13 +25,17 @@ protected :
 
 public:	
 	vector<vec3>* vertex_positions;
-	vector<vec3>* vertices_end_normal_positions;
-	vector<vec3>* normals;
+	vector<vec3>* vertix_normals;
+	vector<vec3>* vertices_normal_end_positions; // used for renderer
+	vector<vec3>* faces_normals;
+	vector<vec3>* faces_centers;
+	vector<vec3>* faces_normal_end_positions; // used for renderer
 	mat4 _world_transform;
 	MeshModel(string fileName);
 	~MeshModel(void);
 	void loadFile(string fileName);
-	void draw(Renderer* renderer, bool isShowVerticsNormals, bool draw_bound_box);
+	void draw(Renderer* renderer);
+	void drawBoundingBox(Renderer* renderer);
 	vec3 getPosition();
 	void CalcBounds();
 	vec3 GetCenter();
@@ -53,7 +57,7 @@ class PrimMeshModel : public MeshModel
 public:
 	PrimMeshModel();
 	PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat lenX, GLfloat lenY, GLfloat lenZ);
-	void draw(Renderer* renderer, bool isShowVerticsNormals, bool draw_bound_box);
+	void draw(Renderer* renderer);
 };
 
 

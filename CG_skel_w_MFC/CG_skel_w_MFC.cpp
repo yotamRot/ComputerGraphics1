@@ -33,7 +33,8 @@
 #define CLEAR 6
 
 #define SHOW_VERTICES_NORMAL 1
-#define SHOW_BOUNDING_BOX 2
+#define SHOW_FACES_NORMAL 2
+#define SHOW_BOUNDING_BOX 3
 
 #define WHEEL_SCROLL_UP 3
 #define WHEEL_SCROLL_DOWN 4
@@ -167,6 +168,10 @@ void fileMenu(int id)
 				glutAddMenuEntry((LPCTSTR)dlg.GetFileName(), scene->models.size() - 1);
 
 			}
+			else
+			{
+				return;
+			}
 			break;
 	}
 	scene->lookAtModel(scene->activeModel);
@@ -185,6 +190,9 @@ void featuresMenu(int id)
 	{
 		case SHOW_VERTICES_NORMAL:
 			scene->toggleShowVerticesNormals();
+			break;
+		case SHOW_FACES_NORMAL:
+			scene->toggleShowFacesNormals();
 			break;
 		case SHOW_BOUNDING_BOX:
 			scene->updateDrawBoundBox();
@@ -238,6 +246,7 @@ void initMenu()
 	glutAddMenuEntry("Scale", SCALE);
 	int menuFeatures = glutCreateMenu(featuresMenu);
 	glutAddMenuEntry("Show Vertices Normal", SHOW_VERTICES_NORMAL);
+	glutAddMenuEntry("Show Faces Normal", SHOW_FACES_NORMAL);
 	glutAddMenuEntry("Draw Bound Box", SHOW_BOUNDING_BOX);
 	int menuProjections = glutCreateMenu(projectionMenu);
 	glutAddMenuEntry("Orthographic", ORTHOGRAPHIC);

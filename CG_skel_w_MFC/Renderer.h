@@ -14,7 +14,10 @@ class Renderer
 	float *m_zbuffer; // width*height
 	int m_width, m_height;
 	mat4 cTransform;
-	mat4 projection;
+	mat4 cProjection;
+
+	bool isShowVerticsNormals;
+	bool isShowFacesNormals;
 
 	void CreateBuffers(int width, int height);
 	void CreateLocalBuffer();
@@ -42,10 +45,9 @@ public:
 	Renderer(int width, int height);
 	~Renderer(void);
 	void Init();
-	void DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals=NULL);
+	void DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* VerticesNormals=NULL, const vector<vec3>*facesCenters = NULL, const vector<vec3>* facesNormals = NULL);
 	void DrawRectangles(const vector<vec3>* vertices, const vector<vec3>* normals =NULL);
-	void SetCameraTransform(const mat4& cTransform);
-	void SetProjection(const mat4& projection);
+	void ConfigureRenderer(const mat4& projection, const mat4& cTransform , bool isDrawVertexNormal, bool isDrawFaceNormal);
 	void SetObjectMatrices(const mat4& oTransform, const mat3& nTransform);
 	void SwapBuffers();
 	void ClearColorBuffer();

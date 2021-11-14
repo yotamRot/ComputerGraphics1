@@ -64,6 +64,7 @@ MeshModel::MeshModel(string fileName)
 {
 	_world_transform = Translate(0,0,-5);
 	loadFile(fileName);
+	CalcBounds();
 	this->preformTransform(_world_transform, MOVE);
 }
 
@@ -78,7 +79,10 @@ void MeshModel::loadFile(string fileName)
 	vector<vec3> vertices;
 	vector<vec3> verticesNormals;
 	vec3 curVertex;
-	vec3 curNormal;
+	vec3 curCenter;
+	vec3 curVertexNormal;
+	vec3 curFaceNormal;
+	vec3 triangle[3];
 
 	// while not end of file
 	while (!ifile.eof())
@@ -117,22 +121,34 @@ void MeshModel::loadFile(string fileName)
 	//vertex_positions={v1,v2,v3,v1,v3,v4}
 
 	vertex_positions = new vector<vec3>;
-	vertices_end_normal_positions = new vector<vec3>;
-	normals = new vector<vec3>;
+	vertices_normal_end_positions = new vector<vec3>;
+	vertix_normals = new vector<vec3>;
+	faces_normals = new vector<vec3>;
+	faces_centers = new vector<vec3>;
+	faces_normal_end_positions = new vector<vec3>;
 	// iterate through all stored faces and create triangles
 	for (vector<FaceIdcs>::iterator it = faces.begin(); it != faces.end(); ++it)
 	{
+		curCenter = vec3(0, 0, 0);
 		for (int i = 0; i < 3; i++)
-		{
+		{	
 			curVertex = vertices.at(it->v[i] - 1);
+			triangle[i] = curVertex;
+			curCenter += curVertex;
 			vertex_positions->push_back(curVertex); /*FIXED*/
 			if (verticesNormals.size() != 0)
 			{
-				curNormal = normalize(verticesNormals.at(it->vn[i] - 1) - vertices.at(it->v[i] - 1));
-				normals->push_back(curNormal);
-				this->vertices_end_normal_positions->push_back(curVertex + 0.1 * curNormal);
+				curVertexNormal = normalize(verticesNormals.at(it->vn[i] - 1) - vertices.at(it->v[i] - 1));
+				vertix_normals->push_back(curVertexNormal);
+				vertices_normal_end_positions->push_back(curVertex + 0.1 * curVertexNormal);
 			}
 		}
+
+		curCenter = curCenter / 3;
+		faces_centers->push_back(curCenter);
+		curFaceNormal = normalize(cross(triangle[1] - triangle[0], triangle[2] - triangle[0]));
+		faces_normals->push_back(curFaceNormal);
+		faces_normal_end_positions->push_back(curCenter + 0.1 * curFaceNormal);
 	}
 }
 
@@ -198,23 +214,11 @@ vec3 MeshModel::GetBoundsLength()
 {
 	return vec3(x_bound_lenght, y_bound_lenght, z_bound_lenght) ;
 }
-void MeshModel::draw(Renderer* renderer, bool isShowVerticsNormals, bool draw_bound_box)
-{
-	if (isShowVerticsNormals)
-	{
-		renderer->DrawTriangles(this->vertex_positions, vertices_end_normal_positions);
-	}
-	else
-	{
-		renderer->DrawTriangles(this->vertex_positions);
-	}
 
-	if (draw_bound_box)
-	{
-		CalcBounds();
-		PrimMeshModel* bound_box = new PrimMeshModel(center.x, center.y, center.z, x_bound_lenght, y_bound_lenght, z_bound_lenght);
-		bound_box->draw(renderer, isShowVerticsNormals, draw_bound_box);
-	}
+
+void MeshModel::draw(Renderer* renderer)
+{	
+	renderer->DrawTriangles(vertex_positions, vertices_normal_end_positions, faces_centers, faces_normal_end_positions);
 }
 
 vec3 MeshModel::getPosition()
@@ -271,7 +275,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	vertex_positions->push_back(vec3(posX + halfX, posY - halfY, posZ + halfZ)); // bottom left
 }
 
-void PrimMeshModel::draw(Renderer* renderer, bool isShowVerticsNormals, bool draw_bound_box)
+void PrimMeshModel::draw(Renderer* renderer)
 {
 	renderer->DrawRectangles(this->vertex_positions);
 }
@@ -280,28 +284,29 @@ void PrimMeshModel::draw(Renderer* renderer, bool isShowVerticsNormals, bool dra
 void MeshModel::moveModel(Axis direction)
 {
 	mat4 tranlateMatrix;
+	GLfloat move = (x_bound_lenght + y_bound_lenght + z_bound_lenght) / 3;
 	switch (direction)
 	{
-	case X:
-		tranlateMatrix = Translate(x_bound_lenght*0.1, 0, 0);
-		break;
-	case Xn:
-		tranlateMatrix = Translate(-x_bound_lenght * 0.1, 0, 0);
-		break;
-	case Y:
-		tranlateMatrix = Translate(0, y_bound_lenght*0.1, 0);
-		break;
-	case Yn:
-		tranlateMatrix = Translate(0, -y_bound_lenght * 0.1, 0);
-		break;
-	case Z:
-		tranlateMatrix = Translate(0, 0, z_bound_lenght * 0.1);
-		break;
-	case Zn:
-		tranlateMatrix = Translate(0, 0, -z_bound_lenght * 0.1);
-		break;
-	default:
-		break;
+		case X:
+			tranlateMatrix = Translate(move*0.1, 0, 0);
+			break;
+		case Xn:
+			tranlateMatrix = Translate(-move * 0.1, 0, 0);
+			break;
+		case Y:
+			tranlateMatrix = Translate(0, move *0.1, 0);
+			break;
+		case Yn:
+			tranlateMatrix = Translate(0, -move * 0.1, 0);
+			break;
+		case Z:
+			tranlateMatrix = Translate(0, 0, move * 0.1);
+			break;
+		case Zn:
+			tranlateMatrix = Translate(0, 0, -move * 0.1);
+			break;
+		default:
+			break;
 	}
 	preformTransform(tranlateMatrix, MOVE);
 	_world_transform = tranlateMatrix * _world_transform; // translate 
@@ -371,8 +376,8 @@ void MeshModel::scaleModel(Axis direction)
 		break;
 	}
 	_world_transform = scaleMatrix * _world_transform; // translate 
-	preformTransform(Translate(modelCenter), MOVE); //move back to orig loctaion
 	preformTransform(scaleMatrix, SCALE);
+	preformTransform(Translate(modelCenter), MOVE); //move back to orig loctaion
 }
 
 void MeshModel::preformTransform(mat4& matrix, Transformation T)
@@ -385,6 +390,9 @@ void MeshModel::preformTransform(mat4& matrix, Transformation T)
 		*it = vec3(tempVec.x / tempVec.w, tempVec.y / tempVec.w, tempVec.z / tempVec.w);
 	}
 
+	this->CalcBounds();
+	float proportionFactorNormals = ((x_bound_lenght + y_bound_lenght + z_bound_lenght) / 3) * 0.2;
+
 	noramlMatrix = matrix;
 	if (T == SCALE) // need to inverse and transpose
 	{
@@ -395,11 +403,27 @@ void MeshModel::preformTransform(mat4& matrix, Transformation T)
 
 	for (int i = 0; i < vertex_positions->size(); i++)
 	{
-		tempVec = vec4(normals->at(i));
+		tempVec = vec4(vertix_normals->at(i));
 		tempVec.w = 0; // we dont want to translate matrix!
 		tempVec = noramlMatrix * tempVec;
-		normals->at(i) = vec3(tempVec.x, tempVec.y, tempVec.z);
-		this->vertices_end_normal_positions->at(i)= vertex_positions->at(i) + normals->at(i);
+		vertix_normals->at(i) = normalize(vec3(tempVec.x, tempVec.y, tempVec.z));
+		vertices_normal_end_positions->at(i)= vertex_positions->at(i) + proportionFactorNormals * vertix_normals->at(i);
+	}
+
+	for (int i = 0; i < faces_centers->size(); i++)
+	{
+		//update Center
+		tempVec = matrix * faces_centers->at(i);
+		faces_centers->at(i) = vec3(tempVec.x / tempVec.w, tempVec.y / tempVec.w, tempVec.z / tempVec.w);
+		
+		//update Normal Vector
+		tempVec = vec4(faces_normals->at(i));
+		tempVec.w = 0; // we dont want to translate matrix!
+		tempVec = noramlMatrix * tempVec;
+		faces_normals->at(i) = normalize(vec3(tempVec.x, tempVec.y, tempVec.z));
+
+		//Updagte normal ending point
+		faces_normal_end_positions->at(i) = faces_centers->at(i) + proportionFactorNormals * vertix_normals->at(i);
 	}
 }
 
@@ -419,3 +443,9 @@ void MeshModel::manipulateModel(Transformation T, Axis axis)
 	}
 }
 
+void MeshModel::drawBoundingBox(Renderer* renderer)
+{
+	CalcBounds();
+	PrimMeshModel* bound_box = new PrimMeshModel(center.x, center.y, center.z, x_bound_lenght, y_bound_lenght, z_bound_lenght);
+	bound_box->draw(renderer);
+}

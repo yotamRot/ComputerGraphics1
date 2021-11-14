@@ -226,7 +226,7 @@ void Renderer::SetDemoBuffer()
 	}
 }
 
-void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals)
+void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* VerticesNormals, const vector<vec3>* facesCenters, const vector<vec3>* facesNormals)
 {
 	vec2 triangle [3];
 	vec2 normal [2];
@@ -241,19 +241,29 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 		i++;
 		triangle[2] = vec3ToVec2(vertices->at(i));
 
-
 		RasterizeLine(triangle[0], triangle[1]);
 		RasterizeLine(triangle[1], triangle[2]);
 		RasterizeLine(triangle[2], triangle[0]);
-		if (normals != NULL)
+
+		if ((VerticesNormals != NULL) && (isShowVerticsNormals))
 		{
 			curColor = red;
-			RasterizeLine(triangle[0], vec3ToVec2(normals->at(normalIndex)));
+			RasterizeLine(triangle[0], vec3ToVec2(VerticesNormals->at(normalIndex)));
 			normalIndex++;
-			RasterizeLine(triangle[1], vec3ToVec2(normals->at(normalIndex)));
+			RasterizeLine(triangle[1], vec3ToVec2(VerticesNormals->at(normalIndex)));
 			normalIndex++;
-			RasterizeLine(triangle[2], vec3ToVec2(normals->at(normalIndex)));
+			RasterizeLine(triangle[2], vec3ToVec2(VerticesNormals->at(normalIndex)));
 		}
+	}
+
+	if ((facesCenters != NULL) && (facesCenters != NULL) && (isShowFacesNormals))
+	{
+		curColor = red;
+		for (int i = 0; i < facesCenters->size(); i++)
+		{
+			RasterizeLine(vec3ToVec2(facesCenters->at(i)), vec3ToVec2(facesNormals->at(i)));
+		}
+		curColor = white;
 	}
 }
 
@@ -283,22 +293,20 @@ void Renderer::DrawRectangles(const vector<vec3>* vertices, const vector<vec3>* 
 vec2 Renderer::vec3ToVec2(const vec3& ver)
 {
 	vec4 tempVec = vec4(ver);
-	tempVec = this->projection * this->cTransform * tempVec;
+	tempVec = this->cProjection * this->cTransform * tempVec;
 
 	vec2 point = vec2(tempVec.x / tempVec.w, tempVec.y / tempVec.w);
 	transformToScreen(point);
 	return point;
 }
-void Renderer::SetCameraTransform(const mat4& transform)
+
+void Renderer::ConfigureRenderer(const mat4& projection, const mat4& transform, bool isDrawVertexNormal, bool isDrawFaceNormal)
 {
 	cTransform = mat4(transform);
+	cProjection = mat4(projection);
+	isShowVerticsNormals = isDrawVertexNormal;
+	isShowFacesNormals = isDrawFaceNormal;
 }
-
-void Renderer::SetProjection(const mat4& transform)
-{
-	projection = mat4(transform);
-}
-
 
 
 

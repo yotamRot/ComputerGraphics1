@@ -88,20 +88,12 @@ void Scene::lookAtModel(int modelId)
 void Scene::ClearScene()
 {
 	models.clear();
-
 }
 
 
 bool Scene::updateDrawBoundBox()
 {
-	if (draw_bound_box)		// hide boxes
-	{
-		draw_bound_box = false;
-	}
-	else					// show boxes
-	{
-		draw_bound_box = true;
-	}
+	draw_bound_box = !draw_bound_box;
 	return draw_bound_box;
 }
 
@@ -152,17 +144,27 @@ bool Scene::toggleShowVerticesNormals()
 	return isShowVerticsNormals;
 }
 
+bool Scene::toggleShowFacesNormals()
+{
+	isShowFacesNormals = !isShowFacesNormals;
+	return isShowFacesNormals;
+}
+
 void Scene::draw()
 {
 	// 1. Send the renderer the current camera transform and the projection
 	// 2. Tell all models to draw themselves
 	m_renderer->ClearColorBuffer();
-	m_renderer->SetCameraTransform(cameras[activeCamera]->cTransform);
-	m_renderer->SetProjection(cameras[activeCamera]->projection);
+	m_renderer->ConfigureRenderer(cameras[activeCamera]->projection, 
+		cameras[activeCamera]->cTransform, isShowVerticsNormals, isShowFacesNormals);
 
 	for (vector<Model*>::iterator it = models.begin(); it != models.end(); ++it)
 	{
-		(*it)->draw(this->m_renderer, this->isShowVerticsNormals, draw_bound_box);
+		(*it)->draw(m_renderer);
+		if (draw_bound_box)
+		{
+			(*it)->drawBoundingBox(this->m_renderer);
+		}
 
 	}
 	m_renderer->SwapBuffers();
@@ -185,11 +187,11 @@ Scene::Scene(Renderer *renderer) : m_renderer(renderer)
 	//set camera world view aligned with world asix with offset in z
 	initCamera->cTransform = mat4();
 	initCamera->cTransform[2][3] = 2;
-	//initCamera->LookAt(initCamera->cTransform * initCamera->eye, initCamera->cTransform * initCamera->at, initCamera->up);
 	activeCamera = 0;
 	cameras.push_back(initCamera);
 	setActiveCameraProjection(PRESPECTIVE);
-	this->isShowVerticsNormals = false;
+	isShowVerticsNormals = false;
+	isShowFacesNormals = false;
 }
 
 void Scene::manipulateActiveModel(Transformation T, Axis axis)

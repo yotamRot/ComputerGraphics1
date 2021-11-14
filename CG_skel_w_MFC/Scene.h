@@ -6,12 +6,7 @@
 #include "Renderer.h"
 using namespace std;
 
-
-
-
 #define ZOOM 2
-
-
 
 enum Axis
 {
@@ -46,8 +41,9 @@ enum Direction
 
 class Model { 
 public:
-	void virtual draw(Renderer* renderer, bool isShowVerticsNormals, bool draw_bound_box) = 0;
+	void virtual draw(Renderer* renderer) = 0;
 	vec3 virtual getPosition() = 0;
+	void virtual drawBoundingBox(Renderer* renderer) = 0;
 protected:
 	virtual ~Model() {}
 };
@@ -87,6 +83,7 @@ class Scene {
 	vector<Light*> lights;
 	Projection proj;
 	bool isShowVerticsNormals;
+	bool isShowFacesNormals;
 	bool draw_bound_box = false;
 	Renderer* m_renderer;
 
@@ -105,6 +102,7 @@ public:
 	void setActiveCameraProjection(Projection proj);
 	const Projection GetProjection();
 	bool toggleShowVerticesNormals();
+	bool toggleShowFacesNormals();
 	void draw();
 	void drawDemo();
 	bool updateDrawBoundBox();
