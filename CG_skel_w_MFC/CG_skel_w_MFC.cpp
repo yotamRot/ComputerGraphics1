@@ -36,6 +36,10 @@
 #define SHOW_FACES_NORMAL 2
 #define SHOW_BOUNDING_BOX 3
 
+#define ORTHOGRPHIC_PARAMETERS 1
+#define PRESPECTIVE_PARAMETERS 2
+
+
 #define WHEEL_SCROLL_UP 3
 #define WHEEL_SCROLL_DOWN 4
 
@@ -54,7 +58,7 @@ int last_x,last_y;
 int mainMenuId;
 int menuObjectsId;
 Transformation curTramsformation = MOVE;
-Projection curProjection = PRESPECTIVE;
+Projection curProjection = PERSPECTIVE;
 bool lb_down,rb_down,mb_down;
 
 
@@ -210,6 +214,24 @@ void projectionMenu(int id)
 	scene->draw();
 }
 
+void ProjParameresMenu(int id)
+{
+	CRltbnfDialog dlg;
+	if (dlg.DoModal() == IDOK) {
+		vec3 rtf = dlg.GetRTF();
+		vec3 lbn = dlg.GetLBN();
+		if (id == ORTHOGRPHIC_PARAMETERS)
+		{
+			scene->ChangeProjectionParameters(ORTHOGRAPHIC, rtf, lbn);
+		}
+		else	// PERSPECTIVE
+		{
+			scene->ChangeProjectionParameters(PERSPECTIVE, rtf, lbn);
+		}
+	}
+	scene->draw();
+}
+
 void mainMenu(int id)
 {
 	switch (id)
@@ -243,25 +265,42 @@ void initMenu()
 {
 	int menuFile = glutCreateMenu(fileMenu);
 	glutAddMenuEntry("Open..",FILE_OPEN);
+
+
 	int menuTramsformation = glutCreateMenu(transformationMenu);
 	glutAddMenuEntry("Move", MOVE);
 	glutAddMenuEntry("Rotate", ROTATE);
 	glutAddMenuEntry("Scale", SCALE);
+	
+
 	int menuFeatures = glutCreateMenu(featuresMenu);
 	glutAddMenuEntry("Show Vertices Normal", SHOW_VERTICES_NORMAL);
 	glutAddMenuEntry("Show Faces Normal", SHOW_FACES_NORMAL);
 	glutAddMenuEntry("Draw Bound Box", SHOW_BOUNDING_BOX);
+
+
 	int menuProjections = glutCreateMenu(projectionMenu);
 	glutAddMenuEntry("Orthographic", ORTHOGRAPHIC);
-	glutAddMenuEntry("Prespective", PRESPECTIVE);
+	glutAddMenuEntry("Prespective", PERSPECTIVE);
+	
+
+	int menuProjectionParameters = glutCreateMenu(ProjParameresMenu);
+	glutAddMenuEntry("Orthographic Parameters", ORTHOGRPHIC_PARAMETERS);
+	glutAddMenuEntry("Prespective Parameters", PRESPECTIVE_PARAMETERS);
+	
+
+
 	mainMenuId = glutCreateMenu(mainMenu);
 	glutAddSubMenu("File",menuFile);
 	glutAddMenuEntry("Demo",MAIN_DEMO);
 	glutAddMenuEntry("About",MAIN_ABOUT);
 	glutAddMenuEntry("Add Cube", ADD_CUBE);
+
 	glutAddSubMenu("Transformations", menuTramsformation);
 	glutAddSubMenu("Projection", menuProjections);
+	glutAddSubMenu("Projection Parameters", menuProjectionParameters);
 	glutAddSubMenu("Features", menuFeatures);
+
 	glutAddMenuEntry("Clear Screen", CLEAR);
 
 	

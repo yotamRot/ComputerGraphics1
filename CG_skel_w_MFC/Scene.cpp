@@ -54,7 +54,7 @@ void Scene::Zoom(Direction direction)
 		}
 
 	}
-	if (GetProjection() == PRESPECTIVE)
+	if (GetProjection() == PERSPECTIVE)
 	{
 
 		if (direction == ZOOM_IN)
@@ -133,6 +133,20 @@ void Scene::setActiveCameraProjection(Projection proj)
 	}
 }
 
+void Scene::ChangeProjectionParameters(Projection proj, vec3 rtf, vec3 lbn)
+{
+	Camera* curCamera = cameras.at(activeCamera);
+	this->proj = proj;
+	if (proj == ORTHOGRAPHIC)
+	{
+		curCamera->Ortho(lbn.x, rtf.x, lbn.y, rtf.y, lbn.z, rtf.z);
+	}
+	else
+	{
+		curCamera->Frustum(lbn.x, rtf.x, lbn.y, rtf.y, lbn.z, rtf.z);
+	}
+}
+
 bool Scene::toggleShowVerticesNormals()
 {
 	isShowVerticsNormals = !isShowVerticsNormals;
@@ -185,7 +199,7 @@ Scene::Scene(Renderer *renderer) : m_renderer(renderer)
 	activeCamera = 0;
 	activeModel = ILLEGAL_ACTIVE_MOVEL;
 	cameras.push_back(initCamera);
-	setActiveCameraProjection(PRESPECTIVE);
+	setActiveCameraProjection(PERSPECTIVE);
 	isShowVerticsNormals = false;
 	isShowFacesNormals = false;
 }

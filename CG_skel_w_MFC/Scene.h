@@ -29,7 +29,7 @@ enum Transformation
 enum Projection
 {
 	ORTHOGRAPHIC,
-	PRESPECTIVE
+	PERSPECTIVE
 };
 
 enum Direction
@@ -112,4 +112,5 @@ public:
 	int activeModel;
 	int activeLight;
 	int activeCamera;
+	void ChangeProjectionParameters(Projection proj, vec3 rtf, vec3 lbn);
 };
