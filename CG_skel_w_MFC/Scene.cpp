@@ -174,11 +174,6 @@ void Scene::drawDemo()
 Scene::Scene(Renderer *renderer) : m_renderer(renderer) 
 {	
 	Camera* initCamera = new Camera(vec3(-3, -3, 3), vec3(3, 3, 8));
-
-	// dont change in camera world of view!
-	initCamera->eye = vec4(0, 0, 0, 1);
-	initCamera->at = vec4(0, 0, -1, 1);
-	initCamera->up = vec4(0, 1, 0, 1);
 	//set camera world view aligned with world asix with offset in z
 	initCamera->cTransform = mat4();
 	initCamera->cTransform[2][3] = 2;
@@ -265,6 +260,14 @@ void Camera::Ortho(const float left, const float right,
 		(-1) * (zFar + zNear) / (zFar - zNear), 1);
 }
 
+Camera::Camera(vec3 lbn, vec3 rtf) :lbn(lbn), rtf(rtf) 
+{
+	eye = vec4(0, 0, 0, 1);
+	at = vec4(0, 0, -1, 1);
+	up = vec4(0, 1, 0, 1);
+}
+
+
 vec3 Camera::Getlbn() 
 {
 	return vec3(lbn);
@@ -275,3 +278,27 @@ vec3 Camera::Getrtf()
 }
 
 
+int Scene::addCamera()
+{
+	Camera* newCamera = new Camera(vec3(-3, -3, 3), vec3(3, 3, 8));
+	//set camera world view aligned with world asix with offset in z
+	newCamera->cTransform = mat4();
+	newCamera->cTransform[2][3] = 2;
+	cameras.push_back(newCamera);
+	return cameras.size() - 1;
+}
+void Scene::lookAtCamera(int cameraId)
+{
+	if (activeCamera == cameraId)
+	{
+		return;
+	}
+	Camera* cameraToLookAt = cameras.at(cameraId);
+	Camera* curCamera = cameras.at(activeCamera);
+	curCamera->LookAt(Translate(0, 0, 2) * cameraToLookAt->cTransform * cameraToLookAt->eye, cameraToLookAt->cTransform * cameraToLookAt->eye, curCamera->up);
+}
+
+void Scene::switchToCamera(int cameraId)
+{
+
+}

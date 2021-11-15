@@ -299,6 +299,28 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	CalcBounds();
 }
 
+CameraModel::CameraModel()
+{
+	vertex_positions = new vector<vec3>;
+	vertix_normals = new vector<vec3>; //unused
+	faces_centers = new vector<vec3>;  //unused
+	faces_normals = new vector<vec3>; //unused
+	faces_normal_end_positions = new vector<vec3>; //unused
+
+	// first triangle
+	vertex_positions->push_back(vec3(1, 0, 0));
+	vertex_positions->push_back(vec3(-1, 0, 0));
+	vertex_positions->push_back(vec3(0, 0, -1));
+
+	// second triangle
+	vertex_positions->push_back(vec3(0, 1, 0));
+	vertex_positions->push_back(vec3(0, -1, 0));
+	vertex_positions->push_back(vec3(0, 0, -1));
+	
+	CalcBounds();
+}
+
+
 void PrimMeshModel::draw(Renderer* renderer)
 {
 	renderer->DrawRectangles(vertex_positions, faces_centers, faces_normal_end_positions);

@@ -31,10 +31,16 @@
 #define OBJECTS 4
 #define FEATURES 5
 #define CLEAR 6
+#define CAMERAS 7
 
+// features menu
 #define SHOW_VERTICES_NORMAL 1
 #define SHOW_FACES_NORMAL 2
 #define SHOW_BOUNDING_BOX 3
+
+//camers menu
+#define ADD_CAMERA 1
+#define RENDER_CAMERAS 2
 
 #define WHEEL_SCROLL_UP 3
 #define WHEEL_SCROLL_DOWN 4
@@ -51,11 +57,18 @@ Scene *scene;
 Renderer *renderer;
 
 int last_x,last_y;
+bool newRotate = false;
+
+std::string cameraPrefix = "Camera ";
+ 
 int mainMenuId;
 int menuObjectsId;
+int menuSwitchToCameraId;
+int menuLookAtCameraId;
 Transformation curTramsformation = MOVE;
 Projection curProjection = PRESPECTIVE;
 bool lb_down,rb_down,mb_down;
+bool prv_lb_down = false;
 
 
 //----------------------------------------------------------------------------
@@ -112,6 +125,10 @@ void mouse(int button, int state, int x, int y)
 	switch(button) {
 		case GLUT_LEFT_BUTTON:
 			lb_down = (state==GLUT_UP)?0:1;
+			if (!lb_down)
+			{
+				newRotate = false;
+			}
 			break;
 		case GLUT_RIGHT_BUTTON:
 			rb_down = (state==GLUT_UP)?0:1;
@@ -139,13 +156,51 @@ void motion(int x, int y)
 	// update last x,y
 	last_x=x;
 	last_y=y;
+	
+	if (newRotate)
+	{
+		scene->rotateAroundActiveModel(dx, dy);
+		scene->draw();
+	}
+	else
+	{
+		newRotate = true;
+	}
 
-	scene->rotateAroundActiveModel(dx, dy);
-	scene->draw();
 }
 
 
 void objectsMenu(int id)
+{
+	scene->lookAtModel(id);
+	scene->draw();
+}
+
+void camersMenu(int id)
+{
+	int newCameraId;
+	switch (id)
+	{
+		case ADD_CAMERA:
+			newCameraId = scene->addCamera();
+			glutSetMenu(menuLookAtCameraId);
+			glutAddMenuEntry((cameraPrefix + std::to_string(newCameraId)).c_str(), newCameraId);
+			glutSetMenu(menuSwitchToCameraId);
+			glutAddMenuEntry((cameraPrefix + std::to_string(newCameraId)).c_str(), newCameraId);
+			break;
+		case RENDER_CAMERAS:
+			break;
+	}
+	scene->draw();
+}
+
+void lookAtCameraMenu(int id)
+{
+	scene->lookAtModel(id);
+	scene->draw();
+}
+
+void switchToCameraMenu(int id)
 {
 	scene->lookAtModel(id);
 	scene->draw();
@@ -247,6 +302,13 @@ void initMenu()
 	glutAddMenuEntry("Move", MOVE);
 	glutAddMenuEntry("Rotate", ROTATE);
 	glutAddMenuEntry("Scale", SCALE);
+	menuLookAtCameraId = glutCreateMenu(lookAtCameraMenu);
+	menuSwitchToCameraId = glutCreateMenu(switchToCameraMenu);
+	int menuCameras = glutCreateMenu(camersMenu);
+	glutAddMenuEntry("Add Camera", ADD_CAMERA);
+	glutAddMenuEntry("Render Camers", RENDER_CAMERAS);
+	glutAddSubMenu("Look At Camera", menuLookAtCameraId);
+	glutAddSubMenu("Select Camera", menuSwitchToCameraId);
 	int menuFeatures = glutCreateMenu(featuresMenu);
 	glutAddMenuEntry("Show Vertices Normal", SHOW_VERTICES_NORMAL);
 	glutAddMenuEntry("Show Faces Normal", SHOW_FACES_NORMAL);
@@ -263,8 +325,7 @@ void initMenu()
 	glutAddSubMenu("Projection", menuProjections);
 	glutAddSubMenu("Features", menuFeatures);
 	glutAddMenuEntry("Clear Screen", CLEAR);
-
-	
+	glutAddSubMenu("Cameras", menuCameras);
 
 
 	glutAttachMenu(GLUT_RIGHT_BUTTON);

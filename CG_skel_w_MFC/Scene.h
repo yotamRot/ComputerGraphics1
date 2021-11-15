@@ -57,9 +57,10 @@ class Camera {
 	vec3 lbn;  // left, bottom, near
 	vec3 rtf;  // right, top, far
 public:
-	Camera(vec3 lbn, vec3 rtf) :lbn(lbn), rtf(rtf) {};
+	Camera(vec3 lbn, vec3 rtf);
 	mat4 cTransform;
 	mat4 projection;
+	CameraModel model;
 	vec4 eye;
 	vec4 at;
 	vec4 up;
@@ -97,6 +98,9 @@ public:
 	void loadOBJModel(string fileName);
 	void loadCubeModel();
 	void lookAtModel(int modelId);
+	int addCamera();
+	void lookAtCamera(int cameraId);
+	void switchToCamera(int cameraId);
 	void ClearScene();
 	void rotateAroundActiveModel(int dx, int dy);
 	void manipulateActiveModel(Transformation T,Axis axis);
