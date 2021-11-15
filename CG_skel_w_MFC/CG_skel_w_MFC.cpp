@@ -192,6 +192,7 @@ void camersMenu(int id)
 			glutAddMenuEntry((cameraPrefix + std::to_string(newCameraId)).c_str(), newCameraId);
 			break;
 		case RENDER_CAMERAS:
+			scene->toggleRenderCameras();
 			break;
 	}
 	scene->draw();
@@ -199,14 +200,14 @@ void camersMenu(int id)
 
 void lookAtCameraMenu(int id)
 {
-	scene->lookAtModel(id);
+	scene->lookAtCamera(id);
 	scene->draw();
 }
 
 void switchToCameraMenu(int id)
 {
-	scene->lookAtModel(id);
-	scene->draw();
+	/*scene->lookAtModel(id);
+	scene->draw();*/
 }
 
 void fileMenu(int id)
@@ -219,15 +220,8 @@ void fileMenu(int id)
 			{
 				std::string s((LPCTSTR)dlg.GetPathName());
 				scene->loadOBJModel((LPCTSTR)dlg.GetPathName());
-				if (scene->models.size() == 1)
-				{
-					menuObjectsId = glutCreateMenu(objectsMenu);
-					glutSetMenu(mainMenuId);
-					glutAddSubMenu("objects", menuObjectsId);
-				}
 				glutSetMenu(menuObjectsId);
 				glutAddMenuEntry((LPCTSTR)dlg.GetFileName(), scene->models.size() - 1);
-
 			}
 			else
 			{
@@ -256,7 +250,7 @@ void featuresMenu(int id)
 			scene->toggleShowFacesNormals();
 			break;
 		case SHOW_BOUNDING_BOX:
-			scene->updateDrawBoundBox();
+			scene->toggleDrawBoundBox();
 			break;
 	}
 	scene->draw();
@@ -298,12 +292,6 @@ void mainMenu(int id)
 		break;
 	case ADD_CUBE:
 		scene->loadCubeModel();
-		if (scene->models.size() == 1)
-		{
-			menuObjectsId = glutCreateMenu(objectsMenu);
-			glutSetMenu(mainMenuId);
-			glutAddSubMenu("objects", menuObjectsId);
-		}
 		glutSetMenu(menuObjectsId);
 		glutAddMenuEntry("Cube", scene->models.size() - 1);
 		scene->draw();
@@ -326,7 +314,9 @@ void initMenu()
 	glutAddMenuEntry("Rotate", ROTATE);
 	glutAddMenuEntry("Scale", SCALE);
 	menuLookAtCameraId = glutCreateMenu(lookAtCameraMenu);
+	glutAddMenuEntry((cameraPrefix + "0").c_str(), 0);
 	menuSwitchToCameraId = glutCreateMenu(switchToCameraMenu);
+	glutAddMenuEntry((cameraPrefix + "0").c_str(), 0);
 	int menuCameras = glutCreateMenu(camersMenu);
 	glutAddMenuEntry("Add Camera", ADD_CAMERA);
 	glutAddMenuEntry("Render Camers", RENDER_CAMERAS);
@@ -342,6 +332,7 @@ void initMenu()
 	glutAddMenuEntry("Orthographic", ORTHOGRAPHIC);
 	glutAddMenuEntry("Prespective", PERSPECTIVE);
 	
+	menuObjectsId = glutCreateMenu(objectsMenu);
 
 	int menuProjectionParameters = glutCreateMenu(ProjParameresMenu);
 	glutAddMenuEntry("Orthographic Parameters", ORTHOGRPHIC_PARAMETERS);
@@ -351,7 +342,6 @@ void initMenu()
 
 	mainMenuId = glutCreateMenu(mainMenu);
 	glutAddSubMenu("File",menuFile);
-	glutAddMenuEntry("Demo",MAIN_DEMO);
 	glutAddMenuEntry("About",MAIN_ABOUT);
 	glutAddMenuEntry("Add Cube", ADD_CUBE);
 
@@ -359,6 +349,7 @@ void initMenu()
 	glutAddSubMenu("Projection", menuProjections);
 	glutAddSubMenu("Projection Parameters", menuProjectionParameters);
 	glutAddSubMenu("Features", menuFeatures);
+	glutAddSubMenu("objects", menuObjectsId);
 
 	glutAddMenuEntry("Clear Screen", CLEAR);
 	glutAddSubMenu("Cameras", menuCameras);

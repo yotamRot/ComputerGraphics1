@@ -65,5 +65,4 @@ class CameraModel : public MeshModel
 {
 	public:
 		CameraModel();
-		void draw(Renderer* renderer);
 };

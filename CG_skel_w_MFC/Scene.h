@@ -57,10 +57,10 @@ class Camera {
 	vec3 lbn;  // left, bottom, near
 	vec3 rtf;  // right, top, far
 public:
-	Camera(vec3 lbn, vec3 rtf);
+	Camera(vec3 lbn, vec3 rtf, int modelId);
 	mat4 cTransform;
 	mat4 projection;
-	CameraModel model;
+	int modelId;
 	vec4 eye;
 	vec4 at;
 	vec4 up;
@@ -86,7 +86,8 @@ class Scene {
 	Projection proj;
 	bool isShowVerticsNormals;
 	bool isShowFacesNormals;
-	bool draw_bound_box = false;
+	bool isRenderCameras;
+	bool isDrawBoundBox;
 	Renderer* m_renderer;
 
 public:
@@ -108,9 +109,10 @@ public:
 	const Projection GetProjection();
 	bool toggleShowVerticesNormals();
 	bool toggleShowFacesNormals();
+	bool toggleRenderCameras();
+	bool toggleDrawBoundBox();
 	void draw();
 	void drawDemo();
-	bool updateDrawBoundBox();
 	Camera* GetActiveCamera();
 	void Zoom(Direction direction);
 	int activeModel;

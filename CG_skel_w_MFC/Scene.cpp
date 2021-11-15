@@ -96,13 +96,6 @@ void Scene::ClearScene()
 
 }
 
-
-bool Scene::updateDrawBoundBox()
-{
-	draw_bound_box = !draw_bound_box;
-	return draw_bound_box;
-}
-
 void Scene::rotateAroundActiveModel(int dx, int dy)
 {	
 	if (activeModel == ILLEGAL_ACTIVE_MOVEL)
@@ -159,20 +152,43 @@ bool Scene::toggleShowFacesNormals()
 	return isShowFacesNormals;
 }
 
+bool Scene::toggleRenderCameras()
+{
+	isRenderCameras = !isRenderCameras;
+	return isRenderCameras;
+}
+
+bool Scene::toggleDrawBoundBox()
+{
+	isDrawBoundBox = !isDrawBoundBox;
+	return isDrawBoundBox;
+}
 void Scene::draw()
 {
 	// 1. Send the renderer the current camera transform and the projection
 	// 2. Tell all models to draw themselves
+	int cameraIndex = 0;
 	m_renderer->ClearColorBuffer();
 	m_renderer->ConfigureRenderer(cameras[activeCamera]->projection, 
 		cameras[activeCamera]->cTransform, isShowVerticsNormals, isShowFacesNormals);
 
+
 	for (vector<Model*>::iterator it = models.begin(); it != models.end(); ++it)
 	{
-		(*it)->draw(m_renderer);
-		if (draw_bound_box)
+		if (dynamic_cast<CameraModel*>(*it))
 		{
-			(*it)->drawBoundingBox(this->m_renderer);
+			if (isRenderCameras)
+			{
+				(*it)->draw(m_renderer); // draw camera
+			}
+		}
+		else
+		{
+			(*it)->draw(m_renderer);
+			if (isDrawBoundBox)
+			{
+				(*it)->drawBoundingBox(this->m_renderer);
+			}
 		}
 
 	}
@@ -187,16 +203,14 @@ void Scene::drawDemo()
 
 Scene::Scene(Renderer *renderer) : m_renderer(renderer) 
 {	
-	Camera* initCamera = new Camera(vec3(-3, -3, 3), vec3(3, 3, 8));
-	//set camera world view aligned with world asix with offset in z
-	initCamera->cTransform = mat4();
-	initCamera->cTransform[2][3] = 2;
+	addCamera();
 	activeCamera = 0;
 	activeModel = ILLEGAL_ACTIVE_MOVEL;
-	cameras.push_back(initCamera);
 	setActiveCameraProjection(PERSPECTIVE);
 	isShowVerticsNormals = false;
 	isShowFacesNormals = false;
+	isRenderCameras = false;
+	isDrawBoundBox = false;
 }
 
 void Scene::manipulateActiveModel(Transformation T, Axis axis)
@@ -274,7 +288,7 @@ void Camera::Ortho(const float left, const float right,
 		(-1) * (zFar + zNear) / (zFar - zNear), 1);
 }
 
-Camera::Camera(vec3 lbn, vec3 rtf) :lbn(lbn), rtf(rtf) 
+Camera::Camera(vec3 lbn, vec3 rtf, int modelId) :lbn(lbn), rtf(rtf), modelId(modelId)
 {
 	eye = vec4(0, 0, 0, 1);
 	at = vec4(0, 0, -1, 1);
@@ -294,11 +308,13 @@ vec3 Camera::Getrtf()
 
 int Scene::addCamera()
 {
-	Camera* newCamera = new Camera(vec3(-3, -3, 3), vec3(3, 3, 8));
+	CameraModel* cameraModel = new CameraModel();
+	Camera* newCamera = new Camera(vec3(-3, -3, 3), vec3(3, 3, 8), models.size());
 	//set camera world view aligned with world asix with offset in z
 	newCamera->cTransform = mat4();
 	newCamera->cTransform[2][3] = 2;
 	cameras.push_back(newCamera);
+	models.push_back(cameraModel);
 	return cameras.size() - 1;
 }
 void Scene::lookAtCamera(int cameraId)
@@ -307,9 +323,9 @@ void Scene::lookAtCamera(int cameraId)
 	{
 		return;
 	}
+	
 	Camera* cameraToLookAt = cameras.at(cameraId);
-	Camera* curCamera = cameras.at(activeCamera);
-	curCamera->LookAt(Translate(0, 0, 2) * cameraToLookAt->cTransform * cameraToLookAt->eye, cameraToLookAt->cTransform * cameraToLookAt->eye, curCamera->up);
+	lookAtModel(cameraToLookAt->modelId);
 }
 
 void Scene::switchToCamera(int cameraId)
