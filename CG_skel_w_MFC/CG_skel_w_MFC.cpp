@@ -139,6 +139,9 @@ void motion(int x, int y)
 	// update last x,y
 	last_x=x;
 	last_y=y;
+
+	scene->rotateAroundActiveModel(dx, dy);
+	scene->draw();
 }
 
 

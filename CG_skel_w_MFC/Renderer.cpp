@@ -267,7 +267,7 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* V
 	}
 }
 
-void Renderer::DrawRectangles(const vector<vec3>* vertices, const vector<vec3>* normals)
+void Renderer::DrawRectangles(const vector<vec3>* vertices, const vector<vec3>* facesCenters, const vector<vec3>* facesNormals)
 {
 	vec2 rectangle[4];
 	vec2 normal[2];
@@ -286,6 +286,16 @@ void Renderer::DrawRectangles(const vector<vec3>* vertices, const vector<vec3>* 
 		RasterizeLine(rectangle[2], rectangle[3]);
 		RasterizeLine(rectangle[3], rectangle[0]);
 
+	}
+
+	if ((facesCenters != NULL) && (facesCenters != NULL) && (isShowFacesNormals))
+	{
+		curColor = red;
+		for (int i = 0; i < facesCenters->size(); i++)
+		{
+			RasterizeLine(vec3ToVec2(facesCenters->at(i)), vec3ToVec2(facesNormals->at(i)));
+		}
+		curColor = white;
 	}
 
 

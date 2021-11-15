@@ -13,7 +13,6 @@ class MeshModel : public Model
 protected :
 	MeshModel() {}
 	void moveModel(Axis direction);
-	void rotateModel(Axis direction);
 	void scaleModel(Axis direction);
 	void preformTransform(mat4& matrix, Transformation T);
 	//add more attributes
@@ -44,6 +43,7 @@ public:
 	GLfloat GetZBoundLength();
 	vec3 GetBoundsLength();
 	void manipulateModel(Transformation T, Axis axis);
+	void rotateModel(Axis direction, int angle);
 };
 
 class PrimMeshModel : public MeshModel

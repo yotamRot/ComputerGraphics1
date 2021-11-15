@@ -103,32 +103,17 @@ bool Scene::updateDrawBoundBox()
 	return draw_bound_box;
 }
 
-void Scene::rotateAroundActiveModel(Axis direction)
+void Scene::rotateAroundActiveModel(int dx, int dy)
 {	
 	if (activeModel == ILLEGAL_ACTIVE_MOVEL)
 	{
 		return;
 	}
+
 	MeshModel* curModel = (MeshModel*)models.at(activeModel);
-	Camera* curCamera = cameras.at(activeCamera);
-	mat4 rotationMatrix;
-	curCamera->cTransform = Translate(curModel->getPosition()) * curCamera->cTransform;  // move to object center
-	switch (direction)
-	{
-		case X:
-			rotationMatrix = RotateX(3);
-			break;
-		case Y:
-			rotationMatrix = RotateY(3);
-			break;
-		case Z:
-		default:
-			break;
-	}
-	curCamera->cTransform = rotationMatrix * curCamera->cTransform; // rotate 
-	curCamera->cTransform = Translate((-1) * curModel->getPosition()) * curCamera->cTransform;  // return to orig
-	// look at model for new location
-	lookAtModel(activeModel);
+	curModel->rotateModel(Y, dx / 10);
+	curModel->rotateModel(X, dy / 10);
+
 }
 
 void Scene::setActiveCameraProjection(Projection proj)
@@ -146,7 +131,6 @@ void Scene::setActiveCameraProjection(Projection proj)
 	{
 		curCamera->Frustum(lbn.x, rtf.x, lbn.y, rtf.y, lbn.z, rtf.z);
 	}
-	activeModel = ILLEGAL_ACTIVE_MOVEL;
 }
 
 bool Scene::toggleShowVerticesNormals()
@@ -199,6 +183,7 @@ Scene::Scene(Renderer *renderer) : m_renderer(renderer)
 	initCamera->cTransform = mat4();
 	initCamera->cTransform[2][3] = 2;
 	activeCamera = 0;
+	activeModel = ILLEGAL_ACTIVE_MOVEL;
 	cameras.push_back(initCamera);
 	setActiveCameraProjection(PRESPECTIVE);
 	isShowVerticsNormals = false;

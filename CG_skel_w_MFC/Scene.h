@@ -98,7 +98,7 @@ public:
 	void loadCubeModel();
 	void lookAtModel(int modelId);
 	void ClearScene();
-	void rotateAroundActiveModel(Axis direction);
+	void rotateAroundActiveModel(int dx, int dy);
 	void manipulateActiveModel(Transformation T,Axis axis);
 	void setActiveCameraProjection(Projection proj);
 	const Projection GetProjection();
