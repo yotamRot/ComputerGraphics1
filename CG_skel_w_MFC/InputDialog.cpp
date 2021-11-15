@@ -8,10 +8,27 @@
 #define IDC_Y_EDIT 202
 #define IDC_Z_EDIT 203
 
+
+#define IDC_R_EDIT 204
+#define IDC_L_EDIT 205
+#define IDC_T_EDIT 206
+#define IDC_B_EDIT 207
+#define IDC_F_EDIT 208
+#define IDC_N_EDIT 209
+
 #define CMD_EDIT_TITLE "Command"
 #define X_EDIT_TITLE "X ="
 #define Y_EDIT_TITLE "Y ="
 #define Z_EDIT_TITLE "Z ="
+
+
+#define R_EDIT_TITLE "Right ="
+#define T_EDIT_TITLE "Top ="
+#define F_EDIT_TITLE "Far ="
+#define L_EDIT_TITLE "Left ="
+#define B_EDIT_TITLE "Bottom ="
+#define N_EDIT_TITLE "Near ="
+
 
 // ------------------------
 //    Class CInputDialog
@@ -219,4 +236,94 @@ void CCmdXyzDialog::OnPaint()
     dc.DrawText(CString(Z_EDIT_TITLE), -1, &z_rect, DT_SINGLELINE);
 
     mCmdEdit.SetFocus();
+}
+
+
+
+// ----------------------
+//    Class CRltbnfDialog
+// ----------------------
+
+CRltbnfDialog::CRltbnfDialog(CString title )
+    : CInputDialog(title), mRight(0.0), mLeft(0.0), mTop(0.0), mBottom(0.0), mFar(0.0), mNear(0.0)
+{ }
+
+CRltbnfDialog::~CRltbnfDialog()
+{ }
+
+vec3 CRltbnfDialog::GetRTF()
+{
+    return vec3(mRight, mTop, mFar);
+}
+
+vec3 CRltbnfDialog::GetLBN()
+{
+    return vec3(mLeft, mBottom, mNear);
+}
+
+void CRltbnfDialog::DoDataExchange(CDataExchange* pDX)
+{
+    CInputDialog::DoDataExchange(pDX);
+    DDX_Text(pDX, IDC_R_EDIT, mRight);
+    DDX_Text(pDX, IDC_L_EDIT, mLeft);
+    DDX_Text(pDX, IDC_T_EDIT, mTop);
+    DDX_Text(pDX, IDC_B_EDIT, mBottom);
+    DDX_Text(pDX, IDC_F_EDIT, mFar);
+    DDX_Text(pDX, IDC_N_EDIT, mNear);
+}
+
+// CXyzDialog message handlers
+BEGIN_MESSAGE_MAP(CRltbnfDialog, CInputDialog)
+    ON_WM_CREATE()
+    ON_WM_PAINT()
+END_MESSAGE_MAP()
+
+int CRltbnfDialog::OnCreate(LPCREATESTRUCT lpcs)
+{
+    mRightEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(160, 70, 200, 90), this, IDC_R_EDIT);
+
+    mLeftEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(360, 70, 400, 90), this, IDC_T_EDIT);
+
+    mTopEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(560, 70, 600, 90), this, IDC_F_EDIT);
+
+    mBottomEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(160, 170, 200, 190), this, IDC_L_EDIT);
+
+    mFarEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(360, 170, 400, 190), this, IDC_B_EDIT);
+
+    mNearEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(560, 170, 600, 190), this, IDC_N_EDIT);
+
+    return 0;
+}
+
+void CRltbnfDialog::OnPaint()
+{
+    CPaintDC dc(this);
+    dc.SetBkMode(TRANSPARENT);
+
+    CRect r_rect(100, 72, 200, 95);
+    dc.DrawText(CString(R_EDIT_TITLE), -1, &r_rect, DT_SINGLELINE);
+
+    CRect t_rect(250, 72, 400, 95);
+    dc.DrawText(CString(T_EDIT_TITLE), -1, &t_rect, DT_SINGLELINE);
+
+    CRect f_rect(500, 72, 600, 95);
+    dc.DrawText(CString(F_EDIT_TITLE), -1, &f_rect, DT_SINGLELINE);
+
+    CRect l_rect(100, 172, 200, 195);
+    dc.DrawText(CString(L_EDIT_TITLE), -1, &l_rect, DT_SINGLELINE);
+
+    CRect b_rect(250, 172, 400, 195);
+    dc.DrawText(CString(B_EDIT_TITLE), -1, &b_rect, DT_SINGLELINE);
+
+    CRect n_rect(500, 172, 600, 195);
+    dc.DrawText(CString(N_EDIT_TITLE), -1, &n_rect, DT_SINGLELINE);
+
+
+    mRightEdit.SetFocus();
 }

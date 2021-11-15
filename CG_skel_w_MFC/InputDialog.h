@@ -108,3 +108,36 @@ protected:
     afx_msg void OnPaint();
     DECLARE_MESSAGE_MAP()
 };
+
+
+
+
+class CRltbnfDialog : public CInputDialog
+{
+public:
+    CRltbnfDialog(CString title = "Input Dialog");
+    virtual ~CRltbnfDialog();
+
+    vec3 GetRTF();  //Right Top Far
+    vec3 GetLBN();  //Left Bottom Near
+protected:
+    float mRight;
+    float mLeft;
+    float mTop;
+    float mBottom;
+    float mFar;
+    float mNear;
+    CEdit mRightEdit;
+    CEdit mLeftEdit;
+    CEdit mTopEdit;
+    CEdit mBottomEdit;
+    CEdit mFarEdit;
+    CEdit mNearEdit;
+
+
+    virtual void DoDataExchange(CDataExchange* pDX);
+
+    afx_msg int OnCreate(LPCREATESTRUCT lpcs);
+    afx_msg void OnPaint();
+    DECLARE_MESSAGE_MAP()
+};
