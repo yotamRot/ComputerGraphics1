@@ -299,13 +299,15 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	CalcBounds();
 }
 
-CameraModel::CameraModel()
+CameraModel::CameraModel(int cameraIndex) : cameraIndex(cameraIndex)
 {
 	vertex_positions = new vector<vec3>;
 	vertix_normals = new vector<vec3>; //unused
 	faces_centers = new vector<vec3>;  //unused
 	faces_normals = new vector<vec3>; //unused
 	faces_normal_end_positions = new vector<vec3>; //unused
+	_world_transform[2][3] = 2; //initialized same as camera regarding location
+
 
 	// first triangle
 	vertex_positions->push_back(vec3(1, 0, 0));

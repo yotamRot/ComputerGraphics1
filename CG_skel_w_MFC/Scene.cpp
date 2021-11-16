@@ -6,19 +6,29 @@
 
 using namespace std;
 
-void Scene::loadOBJModel(string fileName)
+int Scene::loadOBJModel(string fileName)
 {
 	MeshModel *model = new MeshModel(fileName);
 	activeModel = models.size();
+	modelToVectorId.push_back(activeModel);
 	models.push_back(model);
+	return modelToVectorId.size() - 1; // new model index
 }
 
-void Scene::loadCubeModel()
+int Scene::loadCubeModel()
 {
-	PrimMeshModel* cube = new PrimMeshModel(0, 0, 0, 1,1,1);
+	PrimMeshModel* cube = new PrimMeshModel(0, 0, 0, 1 , 1, 1);
 	activeModel = models.size();
+	modelToVectorId.push_back(activeModel);
 	models.push_back(cube);
+	return modelToVectorId.size() - 1; // new model index
 }
+
+int Scene::modelMenuIdToVectorId(int menuId)
+{
+	return modelToVectorId.at(menuId);
+}
+
 Camera* Scene::GetActiveCamera() 
 {
 	return cameras.at(activeCamera);
@@ -82,11 +92,13 @@ void Scene::Zoom(Direction direction)
 void Scene::lookAtModel(int modelId)
 {
 	activeModel = modelId;
-	MeshModel* curModel = (MeshModel*)models.at(modelId);
+	MeshModel* curModel = (MeshModel*)models.at(activeModel);
 	Camera* curCamera = cameras.at(activeCamera);
 	vec4 modelCenter = vec4(curModel->GetCenter());
 	curCamera->cTransform = Translate(0, 0, 2*curModel->GetZBoundLength()) * Translate(modelCenter); //gets model location
 	curCamera->LookAt(curCamera->cTransform * curCamera->eye, modelCenter, curCamera->up);
+	CameraModel* cameraModel = (CameraModel*)models.at(curCamera->modelId);
+	cameraModel->_world_transform = curCamera->cTransform;
 }
 
 void Scene::ClearScene()
@@ -177,10 +189,11 @@ void Scene::draw()
 	{
 		if (dynamic_cast<CameraModel*>(*it))
 		{
-			if (isRenderCameras)
+			if (isRenderCameras && cameraIndex!= activeCamera) //dont want to draw active camera
 			{
 				(*it)->draw(m_renderer); // draw camera
 			}
+			cameraIndex++;
 		}
 		else
 		{
@@ -221,6 +234,11 @@ void Scene::manipulateActiveModel(Transformation T, Axis axis)
 	}
 	MeshModel* curModel = (MeshModel*)models.at(activeModel);
 	curModel->manipulateModel(T, axis);
+	
+	if (CameraModel* cameraModel = dynamic_cast<CameraModel*>(curModel))
+	{
+		cameras.at(cameraModel->cameraIndex)->cTransform = cameraModel->_world_transform;
+	}
 }
 
 const Projection Scene::GetProjection()
@@ -293,6 +311,8 @@ Camera::Camera(vec3 lbn, vec3 rtf, int modelId) :lbn(lbn), rtf(rtf), modelId(mod
 	eye = vec4(0, 0, 0, 1);
 	at = vec4(0, 0, -1, 1);
 	up = vec4(0, 1, 0, 1);
+	//set camera world view aligned with world asix with offset in z
+	cTransform[2][3] = 2;
 }
 
 
@@ -308,14 +328,12 @@ vec3 Camera::Getrtf()
 
 int Scene::addCamera()
 {
-	CameraModel* cameraModel = new CameraModel();
+	int newCameraIndex = cameras.size();
+	CameraModel* cameraModel = new CameraModel(newCameraIndex);
 	Camera* newCamera = new Camera(vec3(-3, -3, 3), vec3(3, 3, 8), models.size());
-	//set camera world view aligned with world asix with offset in z
-	newCamera->cTransform = mat4();
-	newCamera->cTransform[2][3] = 2;
 	cameras.push_back(newCamera);
 	models.push_back(cameraModel);
-	return cameras.size() - 1;
+	return newCameraIndex;
 }
 void Scene::lookAtCamera(int cameraId)
 {
@@ -330,5 +348,5 @@ void Scene::lookAtCamera(int cameraId)
 
 void Scene::switchToCamera(int cameraId)
 {
-
+	activeCamera = cameraId;
 }

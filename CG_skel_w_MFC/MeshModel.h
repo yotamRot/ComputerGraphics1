@@ -64,5 +64,6 @@ public:
 class CameraModel : public MeshModel
 {
 	public:
-		CameraModel();
+		int cameraIndex;
+		CameraModel(int cameraIndex);
 };

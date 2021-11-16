@@ -175,7 +175,7 @@ void motion(int x, int y)
 
 void objectsMenu(int id)
 {
-	scene->lookAtModel(id);
+	scene->lookAtModel(scene->modelMenuIdToVectorId(id));
 	scene->draw();
 }
 
@@ -206,12 +206,13 @@ void lookAtCameraMenu(int id)
 
 void switchToCameraMenu(int id)
 {
-	/*scene->lookAtModel(id);
-	scene->draw();*/
+	scene->switchToCamera(id);
+	scene->draw();
 }
 
 void fileMenu(int id)
 {
+	int newModelId;
 	switch (id)
 	{
 		case FILE_OPEN:
@@ -219,9 +220,9 @@ void fileMenu(int id)
 			if(dlg.DoModal()==IDOK)
 			{
 				std::string s((LPCTSTR)dlg.GetPathName());
-				scene->loadOBJModel((LPCTSTR)dlg.GetPathName());
+				newModelId =scene->loadOBJModel((LPCTSTR)dlg.GetPathName());
 				glutSetMenu(menuObjectsId);
-				glutAddMenuEntry((LPCTSTR)dlg.GetFileName(), scene->models.size() - 1);
+				glutAddMenuEntry((LPCTSTR)dlg.GetFileName(), newModelId);
 			}
 			else
 			{
@@ -282,6 +283,7 @@ void ProjParameresMenu(int id)
 
 void mainMenu(int id)
 {
+	int newModelId;
 	switch (id)
 	{
 	case MAIN_DEMO:
@@ -291,9 +293,9 @@ void mainMenu(int id)
 		AfxMessageBox(_T("Computer Graphics"));
 		break;
 	case ADD_CUBE:
-		scene->loadCubeModel();
+		newModelId = scene->loadCubeModel();
 		glutSetMenu(menuObjectsId);
-		glutAddMenuEntry("Cube", scene->models.size() - 1);
+		glutAddMenuEntry("Cube", newModelId);
 		scene->draw();
 		break;
 	case CLEAR:
@@ -307,7 +309,6 @@ void initMenu()
 {
 	int menuFile = glutCreateMenu(fileMenu);
 	glutAddMenuEntry("Open..",FILE_OPEN);
-
 
 	int menuTramsformation = glutCreateMenu(transformationMenu);
 	glutAddMenuEntry("Move", MOVE);

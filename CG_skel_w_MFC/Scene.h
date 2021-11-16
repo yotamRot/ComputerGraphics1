@@ -89,6 +89,7 @@ class Scene {
 	bool isRenderCameras;
 	bool isDrawBoundBox;
 	Renderer* m_renderer;
+	vector<int> modelToVectorId;
 
 public:
 	
@@ -96,8 +97,8 @@ public:
 	
 	Scene() {};
 	Scene(Renderer* renderer);
-	void loadOBJModel(string fileName);
-	void loadCubeModel();
+	int loadOBJModel(string fileName);
+	int loadCubeModel();
 	void lookAtModel(int modelId);
 	int addCamera();
 	void lookAtCamera(int cameraId);
@@ -113,6 +114,7 @@ public:
 	bool toggleDrawBoundBox();
 	void draw();
 	void drawDemo();
+	int modelMenuIdToVectorId(int menuId);
 	Camera* GetActiveCamera();
 	void Zoom(Direction direction);
 	int activeModel;
