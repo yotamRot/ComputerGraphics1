@@ -24,10 +24,13 @@
 
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 
+// file menu defines
 #define FILE_OPEN 1
+#define ADD_CUBE 2
+
+
 #define MAIN_DEMO 1
 #define MAIN_ABOUT 2
-#define ADD_CUBE 3
 #define OBJECTS 4
 #define FEATURES 5
 #define CLEAR 6
@@ -79,7 +82,7 @@ void reshape( int width, int height )
 
 void keyboard( unsigned char key, int x, int y )
 {
-	Axis axis;
+	TransformationDirection axis;
 	switch ( key ) {
 	case 033:			// escape
 		exit( EXIT_SUCCESS );
@@ -105,7 +108,7 @@ void keyboard( unsigned char key, int x, int y )
 	default:
 		return;
 	}
-	scene->manipulateActiveModel(curTramsformation, axis);
+	scene->manipulateActiveModel(curTramsformation, axis,scene->GetTrasformationAxis());
 	scene->draw();
 }
 
@@ -155,30 +158,31 @@ void objectsMenu(int id)
 	scene->draw();
 }
 
+
+
 void fileMenu(int id)
 {
+	CFileDialog dlg(TRUE, _T(".obj"), NULL, NULL, _T("*.obj|*.*"));
+	glutSetMenu(menuObjectsId);
 	switch (id)
 	{
 		case FILE_OPEN:
-			CFileDialog dlg(TRUE,_T(".obj"),NULL,NULL,_T("*.obj|*.*"));
+
 			if(dlg.DoModal()==IDOK)
 			{
 				std::string s((LPCTSTR)dlg.GetPathName());
 				scene->loadOBJModel((LPCTSTR)dlg.GetPathName());
-				if (scene->models.size() == 1)
-				{
-					menuObjectsId = glutCreateMenu(objectsMenu);
-					glutSetMenu(mainMenuId);
-					glutAddSubMenu("objects", menuObjectsId);
-				}
-				glutSetMenu(menuObjectsId);
 				glutAddMenuEntry((LPCTSTR)dlg.GetFileName(), scene->models.size() - 1);
-
 			}
 			else
 			{
 				return;
 			}
+			break;
+		case ADD_CUBE:
+			scene->loadCubeModel();
+			glutAddMenuEntry("Cube", scene->models.size() - 1);
+			scene->draw();
 			break;
 	}
 	scene->lookAtModel(scene->activeModel);
@@ -189,6 +193,11 @@ void fileMenu(int id)
 void transformationMenu(int id)
 {
 	curTramsformation = (Transformation)id;
+}
+
+void transAxiesMenu(int id)
+{
+	scene->SetTrasformationAxis((TransAxis)id);
 }
 
 void featuresMenu(int id)
@@ -236,23 +245,8 @@ void mainMenu(int id)
 {
 	switch (id)
 	{
-	case MAIN_DEMO:
-		scene->drawDemo();
-		break;
 	case MAIN_ABOUT:
 		AfxMessageBox(_T("Computer Graphics"));
-		break;
-	case ADD_CUBE:
-		scene->loadCubeModel();
-		if (scene->models.size() == 1)
-		{
-			menuObjectsId = glutCreateMenu(objectsMenu);
-			glutSetMenu(mainMenuId);
-			glutAddSubMenu("objects", menuObjectsId);
-		}
-		glutSetMenu(menuObjectsId);
-		glutAddMenuEntry("Cube", scene->models.size() - 1);
-		scene->draw();
 		break;
 	case CLEAR:
 		scene->ClearScene();
@@ -265,19 +259,21 @@ void initMenu()
 {
 	int menuFile = glutCreateMenu(fileMenu);
 	glutAddMenuEntry("Open..",FILE_OPEN);
-
+	glutAddMenuEntry("Add Cube", ADD_CUBE);
 
 	int menuTramsformation = glutCreateMenu(transformationMenu);
 	glutAddMenuEntry("Move", MOVE);
 	glutAddMenuEntry("Rotate", ROTATE);
 	glutAddMenuEntry("Scale", SCALE);
-	
 
+	int menuTransformationAxies = glutCreateMenu(transAxiesMenu);
+	glutAddMenuEntry("Model Axies", MODEL);
+	glutAddMenuEntry("World Axies", WORLD);
+	
 	int menuFeatures = glutCreateMenu(featuresMenu);
 	glutAddMenuEntry("Show Vertices Normal", SHOW_VERTICES_NORMAL);
 	glutAddMenuEntry("Show Faces Normal", SHOW_FACES_NORMAL);
 	glutAddMenuEntry("Draw Bound Box", SHOW_BOUNDING_BOX);
-
 
 	int menuProjections = glutCreateMenu(projectionMenu);
 	glutAddMenuEntry("Orthographic", ORTHOGRAPHIC);
@@ -288,20 +284,20 @@ void initMenu()
 	glutAddMenuEntry("Orthographic Parameters", ORTHOGRPHIC_PARAMETERS);
 	glutAddMenuEntry("Prespective Parameters", PRESPECTIVE_PARAMETERS);
 	
+	menuObjectsId = glutCreateMenu(objectsMenu);
 
-
+	glutSetMenu(mainMenuId);
 	mainMenuId = glutCreateMenu(mainMenu);
-	glutAddSubMenu("File",menuFile);
-	glutAddMenuEntry("Demo",MAIN_DEMO);
-	glutAddMenuEntry("About",MAIN_ABOUT);
-	glutAddMenuEntry("Add Cube", ADD_CUBE);
 
+	glutAddSubMenu("Load", menuFile);
 	glutAddSubMenu("Transformations", menuTramsformation);
+	glutAddSubMenu("Transformations axis", menuTransformationAxies);
 	glutAddSubMenu("Projection", menuProjections);
 	glutAddSubMenu("Projection Parameters", menuProjectionParameters);
 	glutAddSubMenu("Features", menuFeatures);
-
+	glutAddSubMenu("Objects", menuObjectsId);
 	glutAddMenuEntry("Clear Screen", CLEAR);
+	glutAddMenuEntry("About", MAIN_ABOUT);
 
 	
 

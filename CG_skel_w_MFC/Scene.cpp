@@ -24,7 +24,7 @@ Camera* Scene::GetActiveCamera()
 	return cameras.at(activeCamera);
 }
 
-void Scene::Zoom(Direction direction)
+void Scene::Zoom(ZoomDirection direction)
 {
 	if (activeModel == ILLEGAL_ACTIVE_MOVEL)
 	{
@@ -103,6 +103,8 @@ bool Scene::updateDrawBoundBox()
 	return draw_bound_box;
 }
 
+
+
 void Scene::rotateAroundActiveModel(int dx, int dy)
 {	
 	if (activeModel == ILLEGAL_ACTIVE_MOVEL)
@@ -111,8 +113,9 @@ void Scene::rotateAroundActiveModel(int dx, int dy)
 	}
 
 	MeshModel* curModel = (MeshModel*)models.at(activeModel);
-	curModel->rotateModel(Y, dx / 10);
-	curModel->rotateModel(X, dy / 10);
+	
+	curModel->rotateModel(Y, dx / 10, axis);
+	curModel->rotateModel(X, dy / 10, axis);
 
 }
 
@@ -147,6 +150,16 @@ void Scene::ChangeProjectionParameters(Projection proj, vec3 rtf, vec3 lbn)
 	}
 }
 
+void Scene::SetTrasformationAxis(TransAxis Axis)
+{
+	axis = Axis;
+}
+
+TransAxis Scene::GetTrasformationAxis()
+{
+	return axis;
+}
+
 bool Scene::toggleShowVerticesNormals()
 {
 	isShowVerticsNormals = !isShowVerticsNormals;
@@ -166,9 +179,11 @@ void Scene::draw()
 	m_renderer->ClearColorBuffer();
 	m_renderer->ConfigureRenderer(cameras[activeCamera]->projection, 
 		cameras[activeCamera]->cTransform, isShowVerticsNormals, isShowFacesNormals);
-
+	MeshModel* curModel;
 	for (vector<Model*>::iterator it = models.begin(); it != models.end(); ++it)
 	{
+		curModel = (MeshModel*)(*it);
+		m_renderer->SetObjectMatrices(curModel->GetObjectMatrix(), curModel->GetNormalMatrix());
 		(*it)->draw(m_renderer);
 		if (draw_bound_box)
 		{
@@ -202,16 +217,17 @@ Scene::Scene(Renderer *renderer) : m_renderer(renderer)
 	setActiveCameraProjection(PERSPECTIVE);
 	isShowVerticsNormals = false;
 	isShowFacesNormals = false;
+	axis = WORLD;
 }
 
-void Scene::manipulateActiveModel(Transformation T, Axis axis)
+void Scene::manipulateActiveModel(Transformation T, TransformationDirection direction, TransAxis axis)
 {
 	if (activeModel == ILLEGAL_ACTIVE_MOVEL)
 	{
 		return;
 	}
 	MeshModel* curModel = (MeshModel*)models.at(activeModel);
-	curModel->manipulateModel(T, axis);
+	curModel->manipulateModel(T, direction, axis);
 }
 
 const Projection Scene::GetProjection()

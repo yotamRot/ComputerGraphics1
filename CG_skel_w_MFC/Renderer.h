@@ -15,6 +15,8 @@ class Renderer
 	int m_width, m_height;
 	mat4 cTransform;
 	mat4 cProjection;
+	mat3 nTransform;
+	mat4 oTransform;
 
 	bool isShowVerticsNormals;
 	bool isShowFacesNormals;
