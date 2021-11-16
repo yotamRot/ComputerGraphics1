@@ -324,7 +324,7 @@ vec2 Renderer::vec3ToVec2(const vec3& ver)
 	vec4 tempVec = vec4(ver);
 	tempVec = this->cProjection * this->cTransform *  tempVec;
 
-	vec2 point = vec2(tempVec.x / tempVec.w, tempVec.y / tempVec.w);
+	vec2 point = vec2(tempVec.x, tempVec.y);
 	transformToScreen(point);
 	return point;
 }

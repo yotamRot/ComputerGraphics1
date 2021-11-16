@@ -337,14 +337,14 @@ CameraModel::CameraModel(int cameraIndex) : cameraIndex(cameraIndex)
 
 
 	// first triangle
-	vertex_positions->push_back(vec3(1, 0, 0));
-	vertex_positions->push_back(vec3(-1, 0, 0));
-	vertex_positions->push_back(vec3(0, 0, -1));
+	vertex_positions->push_back(vec3(0.25, 0, 0));
+	vertex_positions->push_back(vec3(-0.25, 0, 0));
+	vertex_positions->push_back(vec3(0, 0, -0.25));
 
 	// second triangle
-	vertex_positions->push_back(vec3(0, 1, 0));
-	vertex_positions->push_back(vec3(0, -1, 0));
-	vertex_positions->push_back(vec3(0, 0, -1));
+	vertex_positions->push_back(vec3(0, 0.25, 0));
+	vertex_positions->push_back(vec3(0, -0.25, 0));
+	vertex_positions->push_back(vec3(0, 0, -0.25));
 	
 	CalcBounds();
 }

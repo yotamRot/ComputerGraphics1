@@ -47,6 +47,7 @@
 //camers menu
 #define ADD_CAMERA 1
 #define RENDER_CAMERAS 2
+#define CONTROL_ACTIVE_CAMERA 3
 
 #define WHEEL_SCROLL_UP 3
 #define WHEEL_SCROLL_DOWN 4
@@ -197,6 +198,9 @@ void camersMenu(int id)
 		case RENDER_CAMERAS:
 			scene->toggleRenderCameras();
 			break;
+		case CONTROL_ACTIVE_CAMERA:
+			scene->ControlActiveCamera();
+			break;
 	}
 	scene->draw();
 }
@@ -330,6 +334,7 @@ void initMenu()
 	int menuCameras = glutCreateMenu(camersMenu);
 	glutAddMenuEntry("Add Camera", ADD_CAMERA);
 	glutAddMenuEntry("Render Camers", RENDER_CAMERAS);
+	glutAddMenuEntry("Control Active Camera", CONTROL_ACTIVE_CAMERA);
 	glutAddSubMenu("Look At Camera", menuLookAtCameraId);
 	glutAddSubMenu("Select Camera", menuSwitchToCameraId);
 	

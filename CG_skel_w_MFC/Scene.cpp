@@ -124,6 +124,12 @@ void Scene::rotateAroundActiveModel(int dx, int dy)
 
 }
 
+void Scene::ControlActiveCamera()
+{
+	activeModel = cameras.at(activeCamera)->modelId;
+}
+
+
 void Scene::setActiveCameraProjection(Projection proj)
 {
 	Camera* curCamera = cameras.at(activeCamera);

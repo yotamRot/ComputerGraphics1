@@ -108,6 +108,7 @@ public:
 	void switchToCamera(int cameraId);
 	void ClearScene();
 	void rotateAroundActiveModel(int dx, int dy);
+	void ControlActiveCamera();
 	void manipulateActiveModel(Transformation T,TransformationDirection direction, TransAxis axis);
 	void setActiveCameraProjection(Projection proj);
 	const Projection GetProjection();
