@@ -107,7 +107,15 @@ void Scene::ClearScene()
 {
 	models.clear();
 	activeModel = ILLEGAL_ACTIVE_MOVEL;
-
+	addCamera();
+	activeCamera = 0;
+	modelToVectorId.clear();
+	setActiveCameraProjection(PERSPECTIVE);
+	isShowVerticsNormals = false;
+	isShowFacesNormals = false;
+	isRenderCameras = false;
+	isDrawBoundBox = false;
+	axis = WORLD;
 }
 
 

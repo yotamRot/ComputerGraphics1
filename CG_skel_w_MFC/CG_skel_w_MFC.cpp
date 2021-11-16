@@ -100,25 +100,26 @@ void keyboard( unsigned char key, int x, int y )
 	case 033:			// escape
 		exit( EXIT_SUCCESS );
 		break;
-	case LEFT:  //a
+	case LEFT:			//a
 		axis = Xn;
 		break;
-	case RIGHT: //d 
+	case RIGHT:			//d 
 		axis = X;
 		break;
-	case DOWN: //s
+	case DOWN:			//s
 		axis = Yn;
 		break;
-	case UP:   //w
+	case UP:			//w
 		axis = Y;
 		break;
-	case IN:  //q
+	case IN:			//q
 		axis = Zn;
 		break;
-	case OUT: //e
+	case OUT:			//e
 		axis = Z;
 		break;
 	default:
+		AfxMessageBox(_T("Check Language is English and Caps Lock is disable"));
 		return;
 	}
 	scene->manipulateActiveModel(curTramsformation, axis,scene->GetTrasformationAxis());
@@ -221,13 +222,14 @@ void fileMenu(int id)
 {
 	int newModelId;
 	CFileDialog dlg(TRUE, _T(".obj"), NULL, NULL, _T("*.obj|*.*"));
-	glutSetMenu(menuObjectsId);
+	
 	switch (id)
 	{
 		case FILE_OPEN:
 
 			if(dlg.DoModal()==IDOK)
 			{
+				glutSetMenu(menuObjectsId);
 				std::string s((LPCTSTR)dlg.GetPathName());
 				newModelId =scene->loadOBJModel((LPCTSTR)dlg.GetPathName());
 				glutAddMenuEntry((LPCTSTR)dlg.GetFileName(), newModelId);
@@ -238,6 +240,7 @@ void fileMenu(int id)
 			}
 			break;
 		case ADD_CUBE:
+			glutSetMenu(menuObjectsId);
 			newModelId = scene->loadCubeModel();
 			glutAddMenuEntry("Cube",newModelId);
 			scene->draw();
@@ -307,7 +310,14 @@ void mainMenu(int id)
 		AfxMessageBox(_T("Computer Graphics"));
 		break;
 	case CLEAR:
+		glutSetMenu(menuObjectsId);
+		for (int i = 0; i < scene->models.size(); i++)
+		{
+			glutRemoveMenuItem(i);
+		}
 		scene->ClearScene();
+		//glutDestroyMenu(menuObjectsId);
+		//glutAddSubMenu("Objects", menuObjectsId);
 		scene->draw();
 		break;
 	}

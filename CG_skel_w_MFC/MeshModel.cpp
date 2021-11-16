@@ -178,11 +178,21 @@ void MeshModel::loadFile(string fileName)
 	//f 1 3 4
 	//Then vertex_positions should contain:
 	//vertex_positions={v1,v2,v3,v1,v3,v4}
-
+	
 	vertex_positions = new vector<vec3>;
-	vertix_normals = new vector<vec3>;
 	faces_normals = new vector<vec3>;
 	faces_centers = new vector<vec3>;
+
+	if (verticesNormals.size() != 0)
+	{
+		vertix_normals = new vector<vec3>;
+
+	}
+	else
+	{
+		vertix_normals = NULL;
+
+	}
 
 	// iterate through all stored faces and create triangles
 	for (vector<FaceIdcs>::iterator it = faces.begin(); it != faces.end(); ++it)
@@ -329,21 +339,21 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 CameraModel::CameraModel(int cameraIndex) : cameraIndex(cameraIndex)
 {
 	vertex_positions = new vector<vec3>;
-	vertix_normals = new vector<vec3>; //unused
-	faces_centers = new vector<vec3>;  //unused
-	faces_normals = new vector<vec3>; //unused
+	vertix_normals = NULL; //unused
+	faces_centers = NULL;  //unused
+	faces_normals = NULL; //unused
 	_world_transform[2][3] = 2; //initialized same as camera regarding location
 
 
 	// first triangle
-	vertex_positions->push_back(vec3(0.25, 0, 0));
-	vertex_positions->push_back(vec3(-0.25, 0, 0));
-	vertex_positions->push_back(vec3(0, 0, -0.25));
+	vertex_positions->push_back(vec3(0.1, 0, 0));
+	vertex_positions->push_back(vec3(-0.1, 0, 0));
+	vertex_positions->push_back(vec3(0, 0, -0.5));
 
 	// second triangle
-	vertex_positions->push_back(vec3(0, 0.25, 0));
-	vertex_positions->push_back(vec3(0, -0.25, 0));
-	vertex_positions->push_back(vec3(0, 0, -0.25));
+	vertex_positions->push_back(vec3(0, 0.1, 0));
+	vertex_positions->push_back(vec3(0, -0.1, 0));
+	vertex_positions->push_back(vec3(0, 0, -0.5));
 	
 	bound_box_vertices = CalcBounds();
 }
