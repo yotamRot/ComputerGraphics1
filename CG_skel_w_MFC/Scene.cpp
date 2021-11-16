@@ -195,7 +195,7 @@ void Scene::draw()
 	int cameraIndex = 0;
 	m_renderer->ClearColorBuffer();
 	m_renderer->ConfigureRenderer(cameras[activeCamera]->projection, 
-		cameras[activeCamera]->cTransform, isShowVerticsNormals, isShowFacesNormals);
+		cameras[activeCamera]->cTransform, isShowVerticsNormals, isShowFacesNormals, isDrawBoundBox);
 	MeshModel* curModel;
 
 	for (vector<Model*>::iterator it = models.begin(); it != models.end(); ++it)
@@ -213,10 +213,6 @@ void Scene::draw()
 		else
 		{
 			(*it)->draw(m_renderer);
-			if (isDrawBoundBox)
-			{
-				(*it)->drawBoundingBox(this->m_renderer);
-			}
 		}
 
 	}

@@ -14,7 +14,6 @@ protected :
 	MeshModel() {}
 	void moveModel(TransformationDirection direction, TransAxis axis);
 	void scaleModel(TransformationDirection direction, TransAxis axis);
-	void preformTransform(mat4& matrix, Transformation T);
 	//add more attributes
 	mat4 _world_normal_transform;
 	mat4 _model_normal_transform;
@@ -31,15 +30,15 @@ public:
 	vector<vec3>* faces_normals;
 	vector<vec3>* faces_centers;
 	//vector<vec3>* faces_normal_end_positions; // used for renderer
+	vector<vec3>* bound_box_vertices;
 	mat4 _world_transform;
 
 	MeshModel(string fileName);
 	~MeshModel(void);
 	void loadFile(string fileName);
 	void draw(Renderer* renderer);
-	void drawBoundingBox(Renderer* renderer);
 	vec3 GetPosition();
-	void CalcBounds();
+	vector<vec3>* CalcBounds();
 	vec3 GetCenter();
 	GLfloat GetXBoundLength();
 	GLfloat GetYBoundLength();

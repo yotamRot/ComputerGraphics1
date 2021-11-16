@@ -227,7 +227,7 @@ void Renderer::SetDemoBuffer()
 }
 
 void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* verticesNormals,
-			const vector<vec3>* facesCenters, const vector<vec3>* facesNormals)
+			const vector<vec3>* facesCenters, const vector<vec3>* facesNormals, const vector<vec3>* boundBoxVertices)
 {
 	vec2 triangle [3];
 	vec2 normal [2];
@@ -271,6 +271,10 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* v
 			RasterizeLine(vec3ToVec2(normalStart), vec3ToVec2(normalEnd));
 		}
 		curColor = white;
+	}
+	if (isShowBoundBox)
+	{
+		DrawRectangles(boundBoxVertices);
 	}
 }
 
@@ -339,12 +343,13 @@ vec3 Renderer::NormTransform(const vec3& ver)
 	return normalize(vec3(tempVec.x, tempVec.y, tempVec.z));
 }
 
-void Renderer::ConfigureRenderer(const mat4& projection, const mat4& transform, bool isDrawVertexNormal, bool isDrawFaceNormal)
+void Renderer::ConfigureRenderer(const mat4& projection, const mat4& transform, bool isDrawVertexNormal, bool isDrawFaceNormal, bool isDrawBoundBox)
 {
 	cTransform = mat4(transform);
 	cProjection = mat4(projection);
 	isShowVerticsNormals = isDrawVertexNormal;
 	isShowFacesNormals = isDrawFaceNormal;
+	isShowBoundBox = isDrawBoundBox;
 }
 
 

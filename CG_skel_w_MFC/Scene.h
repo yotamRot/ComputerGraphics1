@@ -49,7 +49,6 @@ class Model {
 public:
 	void virtual draw(Renderer* renderer) = 0;
 	vec3 virtual GetPosition() = 0;
-	void virtual drawBoundingBox(Renderer* renderer) = 0;
 protected:
 	virtual ~Model() {}
 };

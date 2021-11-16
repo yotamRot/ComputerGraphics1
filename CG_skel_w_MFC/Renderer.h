@@ -20,6 +20,7 @@ class Renderer
 
 	bool isShowVerticsNormals;
 	bool isShowFacesNormals;
+	bool isShowBoundBox;
 
 	void CreateBuffers(int width, int height);
 	void CreateLocalBuffer();
@@ -49,9 +50,13 @@ public:
 	Renderer(int width, int height);
 	~Renderer(void);
 	void Init();
-	void DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* VerticesNormals=NULL, const vector<vec3>*facesCenters = NULL, const vector<vec3>* facesNormals = NULL);
-	void DrawRectangles(const vector<vec3>* vertices, const vector<vec3>* facesCenters = NULL, const vector<vec3>* facesNormals = NULL);
-	void ConfigureRenderer(const mat4& projection, const mat4& cTransform , bool isDrawVertexNormal, bool isDrawFaceNormal);
+	void DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* VerticesNormals=NULL,
+		const vector<vec3>*facesCenters = NULL,const vector<vec3>* facesNormals = NULL,
+		const vector<vec3>* boundBoxVertices = NULL);
+	void DrawRectangles(const vector<vec3>* vertices, const vector<vec3>* facesCenters = NULL,
+		const vector<vec3>* facesNormals = NULL);
+	void ConfigureRenderer(const mat4& projection, const mat4& cTransform ,
+		bool isDrawVertexNormal, bool isDrawFaceNormal, bool isDrawBoundBox);
 	void SetObjectMatrices(const mat4& oTransform, const mat4& nTransform);
 	void SwapBuffers();
 	void ClearColorBuffer();
