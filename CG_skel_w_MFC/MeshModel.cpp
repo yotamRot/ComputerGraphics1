@@ -123,7 +123,6 @@ mat4 CreateNormalTransform(mat4& matrix, Transformation T)
 
 MeshModel::MeshModel(string fileName)
 {
-	_world_transform = Translate(0,0,-5);
 	loadFile(fileName);
 	bound_box_vertices = CalcBounds();
 }
@@ -324,7 +323,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	faces_centers->push_back(vec3(posX, posY - halfY, posZ));
 	faces_normals->push_back(vec3(0, -1, 0));
 
-	CalcBounds();
+	bound_box_vertices = CalcBounds();
 }
 
 CameraModel::CameraModel(int cameraIndex) : cameraIndex(cameraIndex)
@@ -346,7 +345,7 @@ CameraModel::CameraModel(int cameraIndex) : cameraIndex(cameraIndex)
 	vertex_positions->push_back(vec3(0, -0.25, 0));
 	vertex_positions->push_back(vec3(0, 0, -0.25));
 	
-	CalcBounds();
+	bound_box_vertices = CalcBounds();
 }
 
 

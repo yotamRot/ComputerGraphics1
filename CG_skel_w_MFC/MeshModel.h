@@ -21,7 +21,6 @@ protected :
 	float y_bound_lenght;
 	float z_bound_lenght;
 	vec3 center;
-	mat4 _model_transform;
 
 public:	
 	vector<vec3>* vertex_positions;
@@ -31,6 +30,7 @@ public:
 	vector<vec3>* faces_centers;
 	//vector<vec3>* faces_normal_end_positions; // used for renderer
 	vector<vec3>* bound_box_vertices;
+	mat4 _model_transform;
 	mat4 _world_transform;
 
 	MeshModel(string fileName);

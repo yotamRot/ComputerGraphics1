@@ -94,9 +94,11 @@ void Scene::lookAtModel(int modelId)
 	activeModel = modelId;
 	MeshModel* curModel = (MeshModel*)models.at(activeModel);
 	Camera* curCamera = cameras.at(activeCamera);
-	vec4 modelCenter = vec4(curModel->GetCenter());
-	curCamera->cTransform = Translate(0, 0, 2*curModel->GetZBoundLength()) * Translate(modelCenter); //gets model location
-	curCamera->LookAt(curCamera->cTransform * curCamera->eye, modelCenter, curCamera->up);
+	mat4 modelCenterTranslation = curModel->_world_transform * curModel->_model_transform * Translate(curModel->GetCenter());
+	vec4 modelCenter = modelCenterTranslation * vec4(vec3(0)); // (0,0,0,1)
+	mat4 eyeTranslation = Translate(0, 0, 2 * curModel->GetZBoundLength()) * modelCenterTranslation;
+	curCamera->cTransform = eyeTranslation; //gets model location
+	curCamera->LookAt(eyeTranslation * curCamera->eye, modelCenter, curCamera->up);
 	CameraModel* cameraModel = (CameraModel*)models.at(curCamera->modelId);
 	cameraModel->_world_transform = curCamera->cTransform;
 }
@@ -255,7 +257,7 @@ void Scene::manipulateActiveModel(Transformation T, TransformationDirection dire
 	
 	if (CameraModel* cameraModel = dynamic_cast<CameraModel*>(curModel))
 	{
-		cameras.at(cameraModel->cameraIndex)->cTransform = cameraModel->_world_transform;
+		cameras.at(cameraModel->cameraIndex)->cTransform = cameraModel->_world_transform * cameraModel->_model_transform;
 	}
 }
 
