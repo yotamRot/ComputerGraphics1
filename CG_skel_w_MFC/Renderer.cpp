@@ -231,51 +231,56 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* v
 {
 	vec2 triangle [3];
 	vec2 normal [2];
+	vec3 normalStart;
+	vec3 normalEnd;
 	// iterate over all vertices to draw triangles
 	for (int i = 0; i < vertices->size(); i++)
 	{
 		curColor = white;
-		triangle[0] = vec3ToVec2(vertices->at(i));
+		triangle[0] = vec3ToVec2(Transform(vertices->at(i)));
 		i++;
-		triangle[1] = vec3ToVec2(vertices->at(i));
+		triangle[1] = vec3ToVec2(Transform(vertices->at(i)));
 		i++;
-		triangle[2] = vec3ToVec2(vertices->at(i));
+		triangle[2] = vec3ToVec2(Transform(vertices->at(i)));
 
 		RasterizeLine(triangle[0], triangle[1]);
 		RasterizeLine(triangle[1], triangle[2]);
 		RasterizeLine(triangle[2], triangle[0]);
 	}
 
-	//if ((verticesNormals != NULL) && (isShowVerticsNormals))
-	//{
-	//	// iterate over all vertices to draw vertices normals
-	//	for (int i = 0; i < vertices->size(); i++)
-	//	{
-	//			curColor = red;
-	//			RasterizeLine(triangle[0], vec3ToVec2(vertices->at(i) + 0.1/* proportional*/ * nTransform * verticesNormals->at(i)));
-	//			i++;
-	//			RasterizeLine(triangle[1], vec3ToVec2(vertices->at(i) + 0.1/* proportional*/ * nTransform * verticesNormals->at(i)));
-	//			i++;
-	//			RasterizeLine(triangle[2], vec3ToVec2(vertices->at(i) + 0.1/* proportional*/ * nTransform * verticesNormals->at(i)));
-	//	}	
-	//}
+	if ((verticesNormals != NULL) && (isShowVerticsNormals))
+	{
+		curColor = red;
+		// iterate over all vertices to draw vertices normals
+		for (int i = 0; i < vertices->size(); i++)
+		{
+				normalStart = Transform(vertices->at(i));
+				normalEnd = normalStart + 0.1 * NormTransform(verticesNormals->at(i));
+				RasterizeLine(vec3ToVec2(normalStart), vec3ToVec2(normalEnd));
+		}	
+	}
 
-	//if ((facesCenters != NULL) && (facesCenters != NULL) && (isShowFacesNormals))
-	//{
-	//	curColor = red;
-	//	// iterate over all faces to draw faces normals
-	//	for (int i = 0; i < facesCenters->size(); i++)
-	//	{
-	//		RasterizeLine(vec3ToVec2(facesCenters->at(i)), vec3ToVec2(facesCenters->at(i) + 0.1/* proportional*/ facesNormals->at(i)));
-	//	}
-	//	curColor = white;
-	//}
+	if ((facesCenters != NULL) && (facesCenters != NULL) && (isShowFacesNormals))
+	{
+		curColor = red;
+		// iterate over all faces to draw faces normals
+		for (int i = 0; i < facesCenters->size(); i++)
+		{
+			normalStart = Transform(facesCenters->at(i));
+			normalEnd = normalStart + 0.1 * NormTransform(facesNormals->at(i));
+			RasterizeLine(vec3ToVec2(normalStart), vec3ToVec2(normalEnd));
+		}
+		curColor = white;
+	}
 }
 
 void Renderer::DrawRectangles(const vector<vec3>* vertices, const vector<vec3>* facesCenters, const vector<vec3>* facesNormals)
 {
 	vec2 rectangle[4];
 	vec2 normal[2];
+	vec3 start;
+	vec3 end;
+
 	// iterate over all vertices to draw rectangles
 	for (auto it = vertices->begin(); it != vertices->end(); ++it)
 	{
@@ -293,8 +298,7 @@ void Renderer::DrawRectangles(const vector<vec3>* vertices, const vector<vec3>* 
 		RasterizeLine(rectangle[3], rectangle[0]);
 
 	}
-	vec3 start;
-	vec3 end;
+
 	if ((facesCenters != NULL) && (facesCenters != NULL) && (isShowFacesNormals))
 	{
 		curColor = red;
