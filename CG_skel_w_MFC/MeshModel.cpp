@@ -81,7 +81,6 @@ MeshModel::MeshModel(string fileName)
 	_world_transform = Translate(0,0,-5);
 	loadFile(fileName);
 	CalcBounds();
-	this->preformTransform(_world_transform, MOVE);
 }
 
 MeshModel::~MeshModel(void)
