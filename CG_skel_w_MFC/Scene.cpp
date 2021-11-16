@@ -34,7 +34,7 @@ Camera* Scene::GetActiveCamera()
 	return cameras.at(activeCamera);
 }
 
-void Scene::Zoom(Direction direction)
+void Scene::Zoom(ZoomDirection direction)
 {
 	if (activeModel == ILLEGAL_ACTIVE_MOVEL)
 	{
@@ -108,6 +108,8 @@ void Scene::ClearScene()
 
 }
 
+
+
 void Scene::rotateAroundActiveModel(int dx, int dy)
 {	
 	if (activeModel == ILLEGAL_ACTIVE_MOVEL)
@@ -116,8 +118,9 @@ void Scene::rotateAroundActiveModel(int dx, int dy)
 	}
 
 	MeshModel* curModel = (MeshModel*)models.at(activeModel);
-	curModel->rotateModel(Y, dx / 10);
-	curModel->rotateModel(X, dy / 10);
+	
+	curModel->rotateModel(Y, dx / 10, axis);
+	curModel->rotateModel(X, dy / 10, axis);
 
 }
 
@@ -152,6 +155,16 @@ void Scene::ChangeProjectionParameters(Projection proj, vec3 rtf, vec3 lbn)
 	}
 }
 
+void Scene::SetTrasformationAxis(TransAxis Axis)
+{
+	axis = Axis;
+}
+
+TransAxis Scene::GetTrasformationAxis()
+{
+	return axis;
+}
+
 bool Scene::toggleShowVerticesNormals()
 {
 	isShowVerticsNormals = !isShowVerticsNormals;
@@ -183,10 +196,12 @@ void Scene::draw()
 	m_renderer->ClearColorBuffer();
 	m_renderer->ConfigureRenderer(cameras[activeCamera]->projection, 
 		cameras[activeCamera]->cTransform, isShowVerticsNormals, isShowFacesNormals);
-
+	MeshModel* curModel;
 
 	for (vector<Model*>::iterator it = models.begin(); it != models.end(); ++it)
 	{
+		curModel = (MeshModel*)(*it);
+		m_renderer->SetObjectMatrices(curModel->GetObjectMatrix(), curModel->GetNormalMatrix());
 		if (dynamic_cast<CameraModel*>(*it))
 		{
 			if (isRenderCameras && cameraIndex!= activeCamera) //dont want to draw active camera
@@ -224,16 +239,17 @@ Scene::Scene(Renderer *renderer) : m_renderer(renderer)
 	isShowFacesNormals = false;
 	isRenderCameras = false;
 	isDrawBoundBox = false;
+	axis = WORLD;
 }
 
-void Scene::manipulateActiveModel(Transformation T, Axis axis)
+void Scene::manipulateActiveModel(Transformation T, TransformationDirection direction, TransAxis axis)
 {
 	if (activeModel == ILLEGAL_ACTIVE_MOVEL)
 	{
 		return;
 	}
 	MeshModel* curModel = (MeshModel*)models.at(activeModel);
-	curModel->manipulateModel(T, axis);
+	curModel->manipulateModel(T, direction, axis);
 	
 	if (CameraModel* cameraModel = dynamic_cast<CameraModel*>(curModel))
 	{

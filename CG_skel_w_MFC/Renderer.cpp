@@ -226,15 +226,15 @@ void Renderer::SetDemoBuffer()
 	}
 }
 
-void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* VerticesNormals, const vector<vec3>* facesCenters, const vector<vec3>* facesNormals)
+void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* verticesNormals,
+			const vector<vec3>* facesCenters, const vector<vec3>* facesNormals)
 {
 	vec2 triangle [3];
 	vec2 normal [2];
-	int normalIndex;
+	// iterate over all vertices to draw triangles
 	for (int i = 0; i < vertices->size(); i++)
 	{
 		curColor = white;
-		normalIndex = i;
 		triangle[0] = vec3ToVec2(vertices->at(i));
 		i++;
 		triangle[1] = vec3ToVec2(vertices->at(i));
@@ -244,42 +244,48 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* V
 		RasterizeLine(triangle[0], triangle[1]);
 		RasterizeLine(triangle[1], triangle[2]);
 		RasterizeLine(triangle[2], triangle[0]);
-
-		if ((VerticesNormals != NULL) && (isShowVerticsNormals))
-		{
-			curColor = red;
-			RasterizeLine(triangle[0], vec3ToVec2(VerticesNormals->at(normalIndex)));
-			normalIndex++;
-			RasterizeLine(triangle[1], vec3ToVec2(VerticesNormals->at(normalIndex)));
-			normalIndex++;
-			RasterizeLine(triangle[2], vec3ToVec2(VerticesNormals->at(normalIndex)));
-		}
 	}
 
-	if ((facesCenters != NULL) && (facesCenters != NULL) && (isShowFacesNormals))
-	{
-		curColor = red;
-		for (int i = 0; i < facesCenters->size(); i++)
-		{
-			RasterizeLine(vec3ToVec2(facesCenters->at(i)), vec3ToVec2(facesNormals->at(i)));
-		}
-		curColor = white;
-	}
+	//if ((verticesNormals != NULL) && (isShowVerticsNormals))
+	//{
+	//	// iterate over all vertices to draw vertices normals
+	//	for (int i = 0; i < vertices->size(); i++)
+	//	{
+	//			curColor = red;
+	//			RasterizeLine(triangle[0], vec3ToVec2(vertices->at(i) + 0.1/* proportional*/ * nTransform * verticesNormals->at(i)));
+	//			i++;
+	//			RasterizeLine(triangle[1], vec3ToVec2(vertices->at(i) + 0.1/* proportional*/ * nTransform * verticesNormals->at(i)));
+	//			i++;
+	//			RasterizeLine(triangle[2], vec3ToVec2(vertices->at(i) + 0.1/* proportional*/ * nTransform * verticesNormals->at(i)));
+	//	}	
+	//}
+
+	//if ((facesCenters != NULL) && (facesCenters != NULL) && (isShowFacesNormals))
+	//{
+	//	curColor = red;
+	//	// iterate over all faces to draw faces normals
+	//	for (int i = 0; i < facesCenters->size(); i++)
+	//	{
+	//		RasterizeLine(vec3ToVec2(facesCenters->at(i)), vec3ToVec2(facesCenters->at(i) + 0.1/* proportional*/ facesNormals->at(i)));
+	//	}
+	//	curColor = white;
+	//}
 }
 
 void Renderer::DrawRectangles(const vector<vec3>* vertices, const vector<vec3>* facesCenters, const vector<vec3>* facesNormals)
 {
 	vec2 rectangle[4];
 	vec2 normal[2];
+	// iterate over all vertices to draw rectangles
 	for (auto it = vertices->begin(); it != vertices->end(); ++it)
 	{
-		rectangle[0] = vec3ToVec2(*it);
+		rectangle[0] = vec3ToVec2(Transform(*it));
 		it++;
-		rectangle[1] = vec3ToVec2(*it);
+		rectangle[1] = vec3ToVec2(Transform(*it));
 		it++;
-		rectangle[2] = vec3ToVec2(*it);
+		rectangle[2] = vec3ToVec2(Transform(*it));
 		it++;
-		rectangle[3] = vec3ToVec2(*it);
+		rectangle[3] = vec3ToVec2(Transform(*it));
 
 		RasterizeLine(rectangle[0], rectangle[1]);
 		RasterizeLine(rectangle[1], rectangle[2]);
@@ -287,27 +293,46 @@ void Renderer::DrawRectangles(const vector<vec3>* vertices, const vector<vec3>* 
 		RasterizeLine(rectangle[3], rectangle[0]);
 
 	}
-
+	vec3 start;
+	vec3 end;
 	if ((facesCenters != NULL) && (facesCenters != NULL) && (isShowFacesNormals))
 	{
 		curColor = red;
+		// iterate over all faces to draw faces normals
 		for (int i = 0; i < facesCenters->size(); i++)
 		{
-			RasterizeLine(vec3ToVec2(facesCenters->at(i)), vec3ToVec2(facesNormals->at(i)));
+			start = Transform(facesCenters->at(i));
+			end = Transform(facesCenters->at(i)) + 0.1 * NormTransform(facesNormals->at(i));
+			RasterizeLine(vec3ToVec2(start), vec3ToVec2(end));
 		}
 		curColor = white;
 	}
 
 
 }
+
 vec2 Renderer::vec3ToVec2(const vec3& ver)
 {
 	vec4 tempVec = vec4(ver);
-	tempVec = this->cProjection * this->cTransform * tempVec;
+	tempVec = this->cProjection * this->cTransform *  tempVec;
 
 	vec2 point = vec2(tempVec.x / tempVec.w, tempVec.y / tempVec.w);
 	transformToScreen(point);
 	return point;
+}
+
+vec3 Renderer::Transform(const vec3& ver)
+{
+	vec4 tempVec = oTransform * vec4(ver);
+	return vec3(tempVec.x / tempVec.w, tempVec.y / tempVec.w, tempVec.z / tempVec.w);
+}
+
+vec3 Renderer::NormTransform(const vec3& ver)
+{
+	vec4 tempVec = vec4(ver);
+	tempVec.w = 0;
+	tempVec = nTransform * tempVec;
+	return normalize(vec3(tempVec.x, tempVec.y, tempVec.z));
 }
 
 void Renderer::ConfigureRenderer(const mat4& projection, const mat4& transform, bool isDrawVertexNormal, bool isDrawFaceNormal)
@@ -418,4 +443,11 @@ void Renderer::ResizeBuffers(int width, int height)
 	m_outBuffer = new float[3 * m_width * m_height];
 	m_zbuffer = new float[m_width * m_height];
 
+}
+
+
+void Renderer::SetObjectMatrices(const mat4& oTransform, const mat4& nTransform)
+{
+	this->oTransform = oTransform;
+	this->nTransform = nTransform;
 }

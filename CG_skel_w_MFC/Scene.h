@@ -9,7 +9,7 @@ using namespace std;
 #define ZOOM 2
 #define ILLEGAL_ACTIVE_MOVEL -1
 
-enum Axis
+enum TransformationDirection
 {
 	X,
 	Xn,
@@ -32,18 +32,23 @@ enum Projection
 	PERSPECTIVE
 };
 
-enum Direction
+enum ZoomDirection
 {
 	ZOOM_IN,
 	ZOOM_OUT
 };
 
+enum TransAxis
+{
+	MODEL,
+	WORLD
+};
 
 
 class Model { 
 public:
 	void virtual draw(Renderer* renderer) = 0;
-	vec3 virtual getPosition() = 0;
+	vec3 virtual GetPosition() = 0;
 	void virtual drawBoundingBox(Renderer* renderer) = 0;
 protected:
 	virtual ~Model() {}
@@ -90,11 +95,10 @@ class Scene {
 	bool isDrawBoundBox;
 	Renderer* m_renderer;
 	vector<int> modelToVectorId;
-
+	TransAxis axis;
 public:
 	
 	vector<Model*> models;
-	
 	Scene() {};
 	Scene(Renderer* renderer);
 	int loadOBJModel(string fileName);
@@ -105,7 +109,7 @@ public:
 	void switchToCamera(int cameraId);
 	void ClearScene();
 	void rotateAroundActiveModel(int dx, int dy);
-	void manipulateActiveModel(Transformation T,Axis axis);
+	void manipulateActiveModel(Transformation T,TransformationDirection direction, TransAxis axis);
 	void setActiveCameraProjection(Projection proj);
 	const Projection GetProjection();
 	bool toggleShowVerticesNormals();
@@ -116,9 +120,11 @@ public:
 	void drawDemo();
 	int modelMenuIdToVectorId(int menuId);
 	Camera* GetActiveCamera();
-	void Zoom(Direction direction);
+	void Zoom(ZoomDirection direction);
 	int activeModel;
 	int activeLight;
 	int activeCamera;
 	void ChangeProjectionParameters(Projection proj, vec3 rtf, vec3 lbn);
+	void SetTrasformationAxis(TransAxis Axis);
+	TransAxis GetTrasformationAxis();
 };

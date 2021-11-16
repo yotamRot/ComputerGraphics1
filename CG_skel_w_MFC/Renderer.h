@@ -15,6 +15,8 @@ class Renderer
 	int m_width, m_height;
 	mat4 cTransform;
 	mat4 cProjection;
+	mat4 nTransform;
+	mat4 oTransform;
 
 	bool isShowVerticsNormals;
 	bool isShowFacesNormals;
@@ -29,6 +31,8 @@ class Renderer
 	void DrawPixel(int x, int y);
 	void transformToScreen(vec2& vec);
 	vec2 vec3ToVec2(const vec3& ver);
+	vec3 NormTransform(const vec3& ver);
+	vec3 Transform(const vec3& ver);
 
 
 
@@ -48,7 +52,7 @@ public:
 	void DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* VerticesNormals=NULL, const vector<vec3>*facesCenters = NULL, const vector<vec3>* facesNormals = NULL);
 	void DrawRectangles(const vector<vec3>* vertices, const vector<vec3>* facesCenters = NULL, const vector<vec3>* facesNormals = NULL);
 	void ConfigureRenderer(const mat4& projection, const mat4& cTransform , bool isDrawVertexNormal, bool isDrawFaceNormal);
-	void SetObjectMatrices(const mat4& oTransform, const mat3& nTransform);
+	void SetObjectMatrices(const mat4& oTransform, const mat4& nTransform);
 	void SwapBuffers();
 	void ClearColorBuffer();
 	void ClearDepthBuffer();
