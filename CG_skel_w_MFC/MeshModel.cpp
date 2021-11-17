@@ -561,13 +561,14 @@ GLfloat MeshModel::GetProportionalValue()
 
 
 
-mat4 MeshModel::manipulateModel(Transformation T, TransformationDirection direction, TransAxis axis)
+mat4 MeshModel::manipulateModel(Transformation T, TransformationDirection direction,
+								TransAxis axis, float power)
 {
 	mat4 cameraInverseMatrix;
 	switch (T)
 	{
 		case ROTATE:
-			cameraInverseMatrix = rotateModel(direction, 10, axis);
+			cameraInverseMatrix = rotateModel(direction, power, axis);
 			break;
 		case MOVE:
 			cameraInverseMatrix = moveModel(direction, axis);

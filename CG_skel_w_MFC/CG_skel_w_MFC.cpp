@@ -122,7 +122,7 @@ void keyboard( unsigned char key, int x, int y )
 		AfxMessageBox(_T("Check Language is English and Caps Lock is disable"));
 		return;
 	}
-	scene->manipulateActiveModel(curTramsformation, axis,scene->GetTrasformationAxis());
+	scene->manipulateActiveModel(curTramsformation, axis,scene->GetTrasformationAxis(),10);
 	scene->draw();
 }
 
@@ -166,7 +166,9 @@ void motion(int x, int y)
 	
 	if (newRotate)
 	{
-		scene->rotateAroundActiveModel(dx, dy);
+		scene->manipulateActiveModel(ROTATE, Y, MODEL, dx);
+		scene->manipulateActiveModel(ROTATE, X, MODEL, dy);
+		//scene->rotateAroundActiveModel(dx, dy);
 		scene->draw();
 	}
 	else
@@ -221,7 +223,7 @@ void fileMenu(int id)
 {
 	int newModelId;
 	CFileDialog dlg(TRUE, _T(".obj"), NULL, NULL, _T("*.obj|*.*"));
-	
+	char* tmp;
 	switch (id)
 	{
 		case FILE_OPEN:
@@ -304,6 +306,7 @@ void ProjParameresMenu(int id)
 
 void mainMenu(int id)
 {
+	int tmp;
 	switch (id)
 	{
 	case MAIN_ABOUT:
@@ -311,13 +314,29 @@ void mainMenu(int id)
 		break;
 	case CLEAR:
 		glutSetMenu(menuObjectsId);
-		for (int i = 0; i < scene->models.size(); i++)
+		tmp = glutGet(GLUT_MENU_NUM_ITEMS);
+		for (int i = 1; i <= tmp; i++)
 		{
-			glutRemoveMenuItem(i);
+			
+			glutRemoveMenuItem(1);
 		}
+		glutSetMenu(menuLookAtCameraId);
+		tmp = glutGet(GLUT_MENU_NUM_ITEMS);
+		for (int i = 1; i <= tmp; i++)
+		{
+
+			glutRemoveMenuItem(1);
+		}
+		glutAddMenuEntry((cameraPrefix + "0").c_str(), 0);
+		glutSetMenu(menuSwitchToCameraId);
+		tmp = glutGet(GLUT_MENU_NUM_ITEMS);
+		for (int i = 1; i <= tmp; i++)
+		{
+
+			glutRemoveMenuItem(1);
+		}
+		glutAddMenuEntry((cameraPrefix + "0").c_str(), 0);
 		scene->ClearScene();
-		//glutDestroyMenu(menuObjectsId);
-		//glutAddSubMenu("Objects", menuObjectsId);
 		scene->draw();
 		break;
 	}

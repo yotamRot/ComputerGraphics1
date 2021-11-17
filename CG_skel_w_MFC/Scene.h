@@ -94,11 +94,10 @@ class Scene {
 	bool isRenderCameras;
 	bool isDrawBoundBox;
 	Renderer* m_renderer;
-	vector<int> modelToVectorId;
 	TransAxis axis;
 	void ResetZoom();
 public:
-	
+	vector<int> modelToVectorId;
 	vector<Model*> models;
 	Scene() {};
 	Scene(Renderer* renderer);
@@ -111,7 +110,8 @@ public:
 	void ClearScene();
 	void rotateAroundActiveModel(int dx, int dy);
 	void ControlActiveCamera();
-	void manipulateActiveModel(Transformation T,TransformationDirection direction, TransAxis axis);
+	void manipulateActiveModel(Transformation T,TransformationDirection direction,
+								TransAxis axis, float power);
 	void setActiveCameraProjection(Projection proj);
 	const Projection GetProjection();
 	bool toggleShowVerticesNormals();

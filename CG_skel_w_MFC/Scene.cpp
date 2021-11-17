@@ -275,7 +275,8 @@ Scene::Scene(Renderer *renderer) : m_renderer(renderer)
 	axis = MODEL;
 }
 
-void Scene::manipulateActiveModel(Transformation T, TransformationDirection direction, TransAxis axis)
+void Scene::manipulateActiveModel(Transformation T, TransformationDirection direction
+									, TransAxis axis, float power)
 {
 	if (activeModel == ILLEGAL_ACTIVE_MOVEL)
 	{
@@ -283,7 +284,7 @@ void Scene::manipulateActiveModel(Transformation T, TransformationDirection dire
 	}
 
 	MeshModel* curModel = (MeshModel*)models.at(activeModel);
-	mat4 cameraInverseMat = curModel->manipulateModel(T, direction, axis);
+	mat4 cameraInverseMat = curModel->manipulateModel(T, direction, axis,power);
 	
 	if (CameraModel* cameraModel = dynamic_cast<CameraModel*>(curModel))
 	{

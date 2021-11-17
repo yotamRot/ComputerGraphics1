@@ -42,7 +42,8 @@ public:
 	GLfloat GetYBoundLength();
 	GLfloat GetZBoundLength();
 	vec3 GetBoundsLength();
-	mat4 manipulateModel(Transformation T, TransformationDirection direction, TransAxis axis);
+	mat4 manipulateModel(Transformation T, TransformationDirection direction,
+						TransAxis axis, float power);
 	mat4 rotateModel(TransformationDirection direction, int angle, TransAxis axis);
 	mat4 GetObjectMatrix();
 	mat4 GetNormalMatrix();
