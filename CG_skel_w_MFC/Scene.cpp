@@ -95,15 +95,33 @@ void Scene::lookAtModel(int modelId)
 	MeshModel* curModel = (MeshModel*)models.at(activeModel);
 	Camera* curCamera = cameras.at(activeCamera);
 	CameraModel* cameraModel =(CameraModel *) curCamera->model;
-	
+	float maxModelAxisSize = max(max(curModel->GetZBoundLength(), curModel->GetXBoundLength()), curModel->GetYBoundLength());
 	// model in camera cord
 	vec3 m_modelCenter = curModel->GetCenter();
-	vec4 c_modelCenter =  cameraModel->_m_TransformInv * cameraModel->_w_TransformInv * curModel->_world_transform * curModel->_model_transform * m_modelCenter;
-	vec4 c_offsetModelCenter = Translate(0, 0, 3 * curModel->GetZBoundLength()) * c_modelCenter;
-	
-	mat4 c_w_InvMatrix = curCamera->LookAt(c_offsetModelCenter, c_modelCenter, curCamera->up);
-	mat4 c_w_Matrix = Translate(0, 0, 3 * curModel->GetZBoundLength()) * cameraModel->_world_transform * cameraModel->_model_transform;
+	vec4 c_atCenter = cameraModel->_m_TransformInv * cameraModel->_w_TransformInv * curModel->_world_transform * curModel->_model_transform * m_modelCenter;
+	vec4 c_from = Translate(0, 0, 3 * maxModelAxisSize) * Translate(c_atCenter) * vec4(vec3());
+	vec4 c_atDirection = c_atCenter - c_from;
+	c_atDirection.w = 0;
+
+	mat4 c_w_InvMatrix = curCamera->LookAt(c_from, c_from + c_atDirection, curCamera->up);
+	mat4 c_w_Matrix = Translate(0, 0, 3 * curModel->GetZBoundLength()) * curModel->_world_transform * curModel->_model_transform;
 	curCamera->setTransformation(c_w_InvMatrix, c_w_Matrix);
+	ResetZoom();
+}
+
+void Scene::ResetZoom()
+{
+	Camera* curCamera = cameras.at(activeCamera);
+	vec3 lbn = vec3(-0.5, -0.5, 0.5);
+	vec3 rtf = vec3(0.5, 0.5, 5);
+	if (proj == ORTHOGRAPHIC)
+	{
+		curCamera->Ortho(lbn.x, rtf.x, lbn.y, rtf.y, lbn.z, rtf.z);
+	}
+	else
+	{
+		curCamera->Frustum(lbn.x, rtf.x, lbn.y, rtf.y, lbn.z, rtf.z);
+	}
 }
 
 void Scene::ClearScene()
@@ -120,7 +138,6 @@ void Scene::ClearScene()
 	isDrawBoundBox = false;
 	axis = MODEL;
 }
-
 
 
 void Scene::rotateAroundActiveModel(int dx, int dy)
@@ -293,9 +310,7 @@ void Camera::setTransformation(const mat4& invTransform, const mat4& Transform)
 {
 	CameraModel* cameraModel =(CameraModel *) this->model;
 	cameraModel->_w_TransformInv = cameraModel->_w_TransformInv * invTransform;
-	cameraModel->_m_TransformInv = mat4();
-	cameraModel->_world_transform = cameraModel->_world_transform * Transform;
-	cameraModel->_model_transform = mat4();
+	cameraModel->_world_transform = Transform * cameraModel->_world_transform;
 }
 
 mat4 Camera::LookAt(const vec4& eye , const vec4& at, const vec4& up)

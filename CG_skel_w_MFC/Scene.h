@@ -81,6 +81,7 @@ public:
 	vec3 Getlbn();
 	vec3 Getrtf();
 
+
 };
 
 class Scene {
@@ -95,6 +96,7 @@ class Scene {
 	Renderer* m_renderer;
 	vector<int> modelToVectorId;
 	TransAxis axis;
+	void ResetZoom();
 public:
 	
 	vector<Model*> models;
