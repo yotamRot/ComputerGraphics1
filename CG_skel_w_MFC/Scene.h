@@ -29,7 +29,8 @@ enum Transformation
 enum Projection
 {
 	ORTHOGRAPHIC,
-	PERSPECTIVE
+	PERSPECTIVE,
+	FRUSTUM
 };
 
 enum ZoomDirection
@@ -126,7 +127,7 @@ public:
 	int activeModel;
 	int activeLight;
 	int activeCamera;
-	void ChangeProjectionParameters(Projection proj, vec3 rtf, vec3 lbn);
+	void ChangeProjectionParameters(Projection proj, vec3 rtf, vec3 lbn, vec4 pers_param=vec4());
 	void SetTrasformationAxis(TransAxis Axis);
 	TransAxis GetTrasformationAxis();
 	vec3 Getlbn();

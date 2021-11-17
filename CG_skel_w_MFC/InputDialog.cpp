@@ -16,6 +16,10 @@
 #define IDC_B_EDIT 207
 #define IDC_F_EDIT 208
 #define IDC_N_EDIT 209
+#define IDC_FOVY_EDIT 210
+#define IDC_ASPECT_EDIT 211
+
+
 
 #define CMD_EDIT_TITLE "Command"
 #define X_EDIT_TITLE "X ="
@@ -29,6 +33,8 @@
 #define L_EDIT_TITLE "Left ="
 #define B_EDIT_TITLE "Bottom ="
 #define N_EDIT_TITLE "Near ="
+#define FOVY_EDIT_TITLE "Fovy ="
+#define ASPECT_EDIT_TITLE "Aspect ="
 
 
 vec3 rtf;
@@ -301,16 +307,16 @@ int CRltbnfDialog::OnCreate(LPCREATESTRUCT lpcs)
         CRect(160, 70, 200, 90), this, IDC_R_EDIT);
 
     mLeftEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
-        CRect(360, 70, 400, 90), this, IDC_T_EDIT);
+        CRect(360, 70, 400, 90), this, IDC_L_EDIT);
 
     mTopEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
-        CRect(560, 70, 600, 90), this, IDC_F_EDIT);
+        CRect(560, 70, 600, 90), this, IDC_T_EDIT);
 
     mBottomEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
-        CRect(160, 170, 200, 190), this, IDC_L_EDIT);
+        CRect(160, 170, 200, 190), this, IDC_B_EDIT);
 
     mFarEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
-        CRect(360, 170, 400, 190), this, IDC_B_EDIT);
+        CRect(360, 170, 400, 190), this, IDC_F_EDIT);
 
     mNearEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
         CRect(560, 170, 600, 190), this, IDC_N_EDIT);
@@ -343,4 +349,80 @@ void CRltbnfDialog::OnPaint()
 
 
     mRightEdit.SetFocus();
+}
+
+
+
+
+
+// ----------------------
+//    Class CPerspDialog
+// ----------------------
+
+CPerspDialog::CPerspDialog(CString title)
+    : CInputDialog(title), mFovy(0.0), mAspect(0.0), mFar(0.0), mNear(0.0)
+{ }
+
+CPerspDialog::~CPerspDialog()
+{ }
+
+vec4 CPerspDialog::GetParams()
+{
+    return vec4(mFovy, mAspect, mNear, mFar);
+}
+
+void CPerspDialog::DoDataExchange(CDataExchange* pDX)
+{
+    CInputDialog::DoDataExchange(pDX);
+    DDX_Text(pDX, IDC_FOVY_EDIT, mFovy);
+    DDX_Text(pDX, IDC_ASPECT_EDIT, mAspect);
+    DDX_Text(pDX, IDC_F_EDIT, mFar);
+    DDX_Text(pDX, IDC_N_EDIT, mNear);
+}
+
+// CXyzDialog message handlers
+BEGIN_MESSAGE_MAP(CPerspDialog, CInputDialog)
+    ON_WM_CREATE()
+    ON_WM_PAINT()
+END_MESSAGE_MAP()
+
+int CPerspDialog::OnCreate(LPCREATESTRUCT lpcs)
+{
+    mFovyEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(160, 70, 200, 90), this, IDC_FOVY_EDIT);
+
+    mNearEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(360, 70, 400, 90), this, IDC_N_EDIT);
+
+
+    mAspectEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(160, 170, 200, 190), this, IDC_ASPECT_EDIT);
+
+    mFarEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(360, 170, 400, 190), this, IDC_F_EDIT);
+
+
+    return 0;
+}
+
+void CPerspDialog::OnPaint()
+{
+    CPaintDC dc(this);
+    dc.SetBkMode(TRANSPARENT);
+
+    CRect r_rect(100, 72, 200, 95);
+    dc.DrawText(CString(FOVY_EDIT_TITLE), -1, &r_rect, DT_SINGLELINE);
+
+    CRect t_rect(250, 72, 400, 95);
+    dc.DrawText(CString(N_EDIT_TITLE), -1, &t_rect, DT_SINGLELINE);
+
+
+    CRect l_rect(100, 172, 200, 195);
+    dc.DrawText(CString(ASPECT_EDIT_TITLE), -1, &l_rect, DT_SINGLELINE);
+
+    CRect b_rect(250, 172, 400, 195);
+    dc.DrawText(CString(F_EDIT_TITLE), -1, &b_rect, DT_SINGLELINE);
+
+
+    mFovyEdit.SetFocus();
 }

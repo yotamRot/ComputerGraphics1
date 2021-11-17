@@ -177,7 +177,7 @@ void Scene::setActiveCameraProjection(Projection proj)
 	}
 }
 
-void Scene::ChangeProjectionParameters(Projection proj, vec3 rtf, vec3 lbn)
+void Scene::ChangeProjectionParameters(Projection proj, vec3 rtf, vec3 lbn,vec4 pers_param)
 {
 	Camera* curCamera = cameras.at(activeCamera);
 	this->proj = proj;
@@ -185,9 +185,13 @@ void Scene::ChangeProjectionParameters(Projection proj, vec3 rtf, vec3 lbn)
 	{
 		curCamera->Ortho(lbn.x, rtf.x, lbn.y, rtf.y, lbn.z, rtf.z);
 	}
-	else
+	else if(proj == FRUSTUM)
 	{
 		curCamera->Frustum(lbn.x, rtf.x, lbn.y, rtf.y, lbn.z, rtf.z);
+	}
+	else if (proj == PERSPECTIVE)
+	{
+		curCamera->Perspective(pers_param.x, pers_param.y, pers_param.z, pers_param.w);
 	}
 }
 

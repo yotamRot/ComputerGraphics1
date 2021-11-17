@@ -142,3 +142,30 @@ protected:
     afx_msg void OnPaint();
     DECLARE_MESSAGE_MAP()
 };
+
+
+class CPerspDialog : public CInputDialog
+{
+public:
+    CPerspDialog(CString title = "Input Dialog");
+    virtual ~CPerspDialog();
+
+    vec4 GetParams();  //fovy aspect near Far
+
+protected:
+    float mFovy;
+    float mAspect;
+    float mFar;
+    float mNear;
+    CEdit mFovyEdit;
+    CEdit mAspectEdit;
+    CEdit mFarEdit;
+    CEdit mNearEdit;
+
+
+    virtual void DoDataExchange(CDataExchange* pDX);
+
+    afx_msg int OnCreate(LPCREATESTRUCT lpcs);
+    afx_msg void OnPaint();
+    DECLARE_MESSAGE_MAP()
+};

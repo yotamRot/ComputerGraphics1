@@ -43,6 +43,7 @@
 
 #define ORTHOGRPHIC_PARAMETERS 1
 #define PRESPECTIVE_PARAMETERS 2
+#define FRUSTUM_PARAMETERS 3
 
 //camers menu
 #define ADD_CAMERA 1
@@ -288,19 +289,33 @@ void projectionMenu(int id)
 void ProjParameresMenu(int id)
 {
 	setLbnRtf(scene->Getlbn(), scene->Getrtf());
-	CRltbnfDialog dlg;
-	if (dlg.DoModal() == IDOK) {
-		vec3 rtf = dlg.GetRTF();
-		vec3 lbn = dlg.GetLBN();
-		if (id == ORTHOGRPHIC_PARAMETERS)
-		{
-			scene->ChangeProjectionParameters(ORTHOGRAPHIC, rtf, lbn);
-		}
-		else	// PERSPECTIVE
-		{
-			scene->ChangeProjectionParameters(PERSPECTIVE, rtf, lbn);
+	if (id == PRESPECTIVE_PARAMETERS)
+	{
+		CPerspDialog dlg;
+		if (dlg.DoModal() == IDOK) {
+			vec4 param = dlg.GetParams();
+			scene->ChangeProjectionParameters(PERSPECTIVE, vec3(), vec3(), param);
 		}
 	}
+	else
+	{
+		CRltbnfDialog dlg;
+		if (dlg.DoModal() == IDOK)
+		{
+			vec3 rtf = dlg.GetRTF();
+			vec3 lbn = dlg.GetLBN();
+			if (id == ORTHOGRPHIC_PARAMETERS)
+			{
+				scene->ChangeProjectionParameters(ORTHOGRAPHIC, rtf, lbn);
+			}
+			else if (id == FRUSTUM_PARAMETERS)
+			{
+				scene->ChangeProjectionParameters(PERSPECTIVE, rtf, lbn);
+			}
+
+		}
+	}
+
 	scene->draw();
 }
 
@@ -380,6 +395,7 @@ void initMenu()
 	int menuProjectionParameters = glutCreateMenu(ProjParameresMenu);
 	glutAddMenuEntry("Orthographic Parameters", ORTHOGRPHIC_PARAMETERS);
 	glutAddMenuEntry("Prespective Parameters", PRESPECTIVE_PARAMETERS);
+	glutAddMenuEntry("Frustum Parameters", FRUSTUM_PARAMETERS);
 	
 	menuObjectsId = glutCreateMenu(objectsMenu);
 
