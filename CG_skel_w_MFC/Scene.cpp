@@ -96,12 +96,11 @@ void Scene::lookAtModel(int modelId)
 	Camera* curCamera = cameras.at(activeCamera);
 	
 	// model in camera cord
-	vec4 modelCenter = curCamera->cTransform * curModel->_world_transform * curModel->_model_transform * curModel->GetCenter();
-	vec4 offsetModelCenter = Translate(0, 0, 2 * curModel->GetZBoundLength()) * modelCenter;
+	vec3 m_modelCenter = curModel->GetCenter();
+	vec4 c_modelCenter = curCamera->cTransform * curModel->_world_transform * curModel->_model_transform * m_modelCenter;
+	vec4 c_offsetModelCenter = Translate(0, 0, 3 * curModel->GetZBoundLength()) * c_modelCenter;
+	curCamera->LookAt(c_offsetModelCenter, c_modelCenter, curCamera->up);
 
-	curCamera->LookAt(offsetModelCenter, modelCenter, curCamera->up);
-	//CameraModel* cameraModel = (CameraModel*)models.at(curCamera->modelId);
-	//cameraModel->_world_transform = curCamera->cTransform;
 }
 
 void Scene::ClearScene()
@@ -345,8 +344,6 @@ Camera::Camera(vec3 lbn, vec3 rtf, int modelId) :lbn(lbn), rtf(rtf), modelId(mod
 	at = vec4(0, 0, -1, 1);
 	up = vec4(0, 1, 0, 1);
 	//set camera world view aligned with world asix with offset in z
-	cTransformInv = matrixInverse(Translate(0, 0, -2), MOVE);
-	cTransform = Translate(0, 0, -2);
 }
 
 
@@ -364,7 +361,7 @@ int Scene::addCamera()
 {
 	int newCameraIndex = cameras.size();
 	CameraModel* cameraModel = new CameraModel(newCameraIndex);
-	Camera* newCamera = new Camera(vec3(-3, -3, 0), vec3(3, 3, 2), models.size());
+	Camera* newCamera = new Camera(vec3(-0.5, -0.5, 0.5), vec3(0.5, 0.5, 5), models.size());
 	cameras.push_back(newCamera);
 	models.push_back(cameraModel);
 	return newCameraIndex;

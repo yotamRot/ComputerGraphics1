@@ -150,7 +150,6 @@ void mouse(int button, int state, int x, int y)
 		case WHEEL_SCROLL_DOWN:
 			scene->Zoom(ZOOM_OUT);
 			break;
-
 	}
 	// add your code
 	scene->draw();
@@ -377,7 +376,6 @@ void initMenu()
 	glutAddMenuEntry("Clear Screen", CLEAR);
 	glutAddMenuEntry("About", MAIN_ABOUT);
 	glutAddSubMenu("Cameras", menuCameras);
-
 
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 }

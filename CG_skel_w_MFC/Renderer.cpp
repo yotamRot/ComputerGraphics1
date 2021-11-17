@@ -30,7 +30,7 @@ Renderer::~Renderer(void)
 void Renderer::transformToScreen(vec2& vec)
 {
 	vec.x = (m_width / 2) * (vec.x + 1);
-	vec.y = ((m_height / 2) * (vec.y + 1) / 2);
+	vec.y = (m_height / 2) * (vec.y + 1);
 }
 
 
