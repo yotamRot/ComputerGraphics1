@@ -98,11 +98,11 @@ void Scene::lookAtModel(int modelId)
 	
 	// model in camera cord
 	vec3 m_modelCenter = curModel->GetCenter();
-	vec4 c_modelCenter = cameraModel->_w_TransformInv * cameraModel->_model_transform * curModel->_world_transform * curModel->_model_transform * m_modelCenter;
+	vec4 c_modelCenter =  cameraModel->_m_TransformInv * cameraModel->_w_TransformInv * curModel->_world_transform * curModel->_model_transform * m_modelCenter;
 	vec4 c_offsetModelCenter = Translate(0, 0, 3 * curModel->GetZBoundLength()) * c_modelCenter;
 	
 	mat4 c_w_InvMatrix = curCamera->LookAt(c_offsetModelCenter, c_modelCenter, curCamera->up);
-	mat4 c_w_Matrix = Translate(0, 0, 3 * curModel->GetZBoundLength()) * curModel->_world_transform * curModel->_model_transform;
+	mat4 c_w_Matrix = Translate(0, 0, 3 * curModel->GetZBoundLength()) * cameraModel->_world_transform * cameraModel->_model_transform;
 	curCamera->setTransformation(c_w_InvMatrix, c_w_Matrix);
 }
 
@@ -292,9 +292,9 @@ const Projection Scene::GetProjection()
 void Camera::setTransformation(const mat4& invTransform, const mat4& Transform)
 {
 	CameraModel* cameraModel =(CameraModel *) this->model;
-	cameraModel->_w_TransformInv = invTransform;
+	cameraModel->_w_TransformInv = cameraModel->_w_TransformInv * invTransform;
 	cameraModel->_m_TransformInv = mat4();
-	cameraModel->_world_transform = Transform;
+	cameraModel->_world_transform = cameraModel->_world_transform * Transform;
 	cameraModel->_model_transform = mat4();
 }
 
