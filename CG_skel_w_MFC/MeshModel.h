@@ -70,3 +70,5 @@ class CameraModel : public MeshModel
 		int cameraIndex;
 		CameraModel(int cameraIndex);
 };
+
+mat4 matrixInverse(mat4& mat, Transformation T);

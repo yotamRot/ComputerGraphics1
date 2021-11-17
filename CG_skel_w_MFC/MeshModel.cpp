@@ -124,6 +124,7 @@ mat4 CreateNormalTransform(mat4& matrix, Transformation T)
 MeshModel::MeshModel(string fileName)
 {
 	loadFile(fileName);
+	this->_world_transform[2][3] = -5;
 	bound_box_vertices = CalcBounds();
 }
 

@@ -63,6 +63,7 @@ class Camera {
 public:
 	Camera(vec3 lbn, vec3 rtf, int modelId);
 	mat4 cTransform;
+	mat4 cTransformInv;
 	mat4 projection;
 	int modelId;
 	vec4 eye;

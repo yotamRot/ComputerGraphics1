@@ -94,13 +94,14 @@ void Scene::lookAtModel(int modelId)
 	activeModel = modelId;
 	MeshModel* curModel = (MeshModel*)models.at(activeModel);
 	Camera* curCamera = cameras.at(activeCamera);
-	mat4 modelCenterTranslation = curModel->_world_transform * curModel->_model_transform * Translate(curModel->GetCenter());
-	vec4 modelCenter = modelCenterTranslation * vec4(vec3(0)); // (0,0,0,1)
-	mat4 eyeTranslation = Translate(0, 0, 2 * curModel->GetZBoundLength()) * modelCenterTranslation;
-	curCamera->cTransform = eyeTranslation; //gets model location
-	curCamera->LookAt(eyeTranslation * curCamera->eye, modelCenter, curCamera->up);
-	CameraModel* cameraModel = (CameraModel*)models.at(curCamera->modelId);
-	cameraModel->_world_transform = curCamera->cTransform;
+	
+	// model in camera cord
+	vec4 modelCenter = curCamera->cTransform * curModel->_world_transform * curModel->_model_transform * curModel->GetCenter();
+	vec4 offsetModelCenter = Translate(0, 0, 2 * curModel->GetZBoundLength()) * modelCenter;
+
+	curCamera->LookAt(offsetModelCenter, modelCenter, curCamera->up);
+	//CameraModel* cameraModel = (CameraModel*)models.at(curCamera->modelId);
+	//cameraModel->_world_transform = curCamera->cTransform;
 }
 
 void Scene::ClearScene()
@@ -211,7 +212,7 @@ void Scene::draw()
 	int cameraIndex = 0;
 	m_renderer->ClearColorBuffer();
 	m_renderer->ConfigureRenderer(cameras[activeCamera]->projection, 
-		cameras[activeCamera]->cTransform, isShowVerticsNormals, isShowFacesNormals, isDrawBoundBox);
+		cameras[activeCamera]->cTransformInv, isShowVerticsNormals, isShowFacesNormals, isDrawBoundBox);
 	MeshModel* curModel;
 
 	for (vector<Model*>::iterator it = models.begin(); it != models.end(); ++it)
@@ -268,7 +269,8 @@ void Scene::manipulateActiveModel(Transformation T, TransformationDirection dire
 	if (CameraModel* cameraModel = dynamic_cast<CameraModel*>(curModel))
 	{
 		modelCamera = cameras.at(cameraModel->cameraIndex);
-		modelCamera->cTransform = modelCamera->cTransform * cameraInverseMat;
+		modelCamera->cTransformInv = modelCamera->cTransformInv * cameraInverseMat;
+
 	}
 }
 
@@ -280,7 +282,7 @@ const Projection Scene::GetProjection()
 
 void Camera::setTransformation(const mat4& transform)
 {
-	cTransform = mat4(transform);
+	cTransformInv = mat4(transform);
 }
 
 void Camera::LookAt(const vec4& eye , const vec4& at, const vec4& up)
@@ -343,7 +345,8 @@ Camera::Camera(vec3 lbn, vec3 rtf, int modelId) :lbn(lbn), rtf(rtf), modelId(mod
 	at = vec4(0, 0, -1, 1);
 	up = vec4(0, 1, 0, 1);
 	//set camera world view aligned with world asix with offset in z
-	cTransform[2][3] = 2;
+	cTransformInv = matrixInverse(Translate(0, 0, -2), MOVE);
+	cTransform = Translate(0, 0, -2);
 }
 
 
@@ -361,7 +364,7 @@ int Scene::addCamera()
 {
 	int newCameraIndex = cameras.size();
 	CameraModel* cameraModel = new CameraModel(newCameraIndex);
-	Camera* newCamera = new Camera(vec3(-3, -3, 3), vec3(3, 3, 8), models.size());
+	Camera* newCamera = new Camera(vec3(-3, -3, 0), vec3(3, 3, 2), models.size());
 	cameras.push_back(newCamera);
 	models.push_back(cameraModel);
 	return newCameraIndex;
