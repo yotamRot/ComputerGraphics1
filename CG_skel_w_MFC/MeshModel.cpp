@@ -372,10 +372,16 @@ mat4 matrixInverse(mat4& mat , Transformation T)
 	switch (T)
 	{
 		case MOVE:
+			InverseMat = mat;
+			InverseMat[0][3] = (-1) * mat[0][3];
+			InverseMat[1][3] = (-1) * mat[1][3];;
+			InverseMat[2][3] = (-1) * mat[2][3];
+			break;
 		case ROTATE:
 			InverseMat = transpose(mat);
 			break;
 		case SCALE:
+			InverseMat = mat;
 			InverseMat[0][0] = 1 / mat[0][0];
 			InverseMat[1][1] = 1 / mat[1][1];
 			InverseMat[2][2] = 1 / mat[2][2];

@@ -127,9 +127,9 @@ void Scene::ResetZoom()
 void Scene::ClearScene()
 {
 	models.clear();
+	cameras.clear();
 	activeModel = ILLEGAL_ACTIVE_MOVEL;
-	addCamera();
-	activeCamera = 0;
+	activeCamera = addCamera();
 	modelToVectorId.clear();
 	setActiveCameraProjection(PERSPECTIVE);
 	isShowVerticsNormals = false;
@@ -137,6 +137,7 @@ void Scene::ClearScene()
 	isRenderCameras = false;
 	isDrawBoundBox = false;
 	axis = MODEL;
+	ResetZoom();
 }
 
 
@@ -264,8 +265,7 @@ void Scene::drawDemo()
 
 Scene::Scene(Renderer *renderer) : m_renderer(renderer) 
 {	
-	addCamera();
-	activeCamera = 0;
+	activeCamera = addCamera();
 	activeModel = ILLEGAL_ACTIVE_MOVEL;
 	setActiveCameraProjection(PERSPECTIVE);
 	isShowVerticsNormals = false;
