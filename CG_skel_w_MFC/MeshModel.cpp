@@ -365,7 +365,25 @@ void PrimMeshModel::draw(Renderer* renderer)
 }
 
 
-void MeshModel::moveModel(TransformationDirection direction, TransAxis axis)
+mat4 matrixInverse(mat4& mat , Transformation T)
+{
+	mat4 InverseMat;
+	switch (T)
+	{
+		case MOVE:
+		case ROTATE:
+			InverseMat = transpose(mat);
+			break;
+		case SCALE:
+			InverseMat[0][0] = 1 / mat[0][0];
+			InverseMat[1][1] = 1 / mat[1][1];
+			InverseMat[2][2] = 1 / mat[2][2];
+			break;
+	}
+	return InverseMat;
+}
+
+mat4 MeshModel::moveModel(TransformationDirection direction, TransAxis axis)
 {
 	mat4 tranlateMatrix;
 	const GLfloat move = (x_bound_lenght + y_bound_lenght + z_bound_lenght) / 3;
@@ -401,11 +419,13 @@ void MeshModel::moveModel(TransformationDirection direction, TransAxis axis)
 	{
 		_model_transform = tranlateMatrix * _model_transform;						// translate in model axis
 	}
+	return matrixInverse(tranlateMatrix, MOVE);
 }
 
-void MeshModel::rotateModel(TransformationDirection direction, int angle, TransAxis axis)
+mat4 MeshModel::rotateModel(TransformationDirection direction, int angle, TransAxis axis)
 {
 	mat4 rotateMatrix;
+	mat4 cameraInverseMatrix;
 	vec3 translationVector;
 	switch (direction)
 	{
@@ -435,24 +455,39 @@ void MeshModel::rotateModel(TransformationDirection direction, int angle, TransA
 	if (axis == WORLD)
 	{
 		translationVector = GetPosition();
+		cameraInverseMatrix = matrixInverse(Translate((-1) * translationVector),MOVE);
 		_world_transform = Translate((-1) * translationVector) * _world_transform;	// move to the origin
-		_world_transform = rotateMatrix * _world_transform;							// rotate in world axis
-		_world_transform = Translate(translationVector) * _world_transform;			// move back to old location
+
+		_world_transform = rotateMatrix * _world_transform;	// rotate in world axis
+		cameraInverseMatrix = cameraInverseMatrix * matrixInverse(rotateMatrix,ROTATE);
+
+		_world_transform = Translate(translationVector) * _world_transform;		 	// move back to old location
+		cameraInverseMatrix = cameraInverseMatrix * matrixInverse(Translate(translationVector),MOVE);
+
 		_world_normal_transform = CreateNormalTransform(rotateMatrix, ROTATE) * _world_normal_transform;
 	}
 	else		// axis == MODEL	
 	{
 		translationVector = GetCenter();
+		cameraInverseMatrix = matrixInverse(Translate((-1) * translationVector), MOVE);
 		_model_transform = Translate((-1) * translationVector) * _model_transform;	// move to the origin
+
 		_model_transform = rotateMatrix * _model_transform;							// rotate in world axis
+		cameraInverseMatrix = cameraInverseMatrix * matrixInverse(rotateMatrix, ROTATE);
+
 		_model_transform = Translate(translationVector) * _model_transform;			// move back to old location
+		cameraInverseMatrix = cameraInverseMatrix * matrixInverse(Translate(translationVector), MOVE);
+
 		_model_normal_transform = CreateNormalTransform(rotateMatrix, ROTATE) * _model_normal_transform;
 	}
+	return cameraInverseMatrix;
 }
 
-void MeshModel::scaleModel(TransformationDirection direction, TransAxis axis)
+mat4 MeshModel::scaleModel(TransformationDirection direction, TransAxis axis)
 {
 	mat4 scaleMatrix;
+	mat4 scaleInverse;
+	mat4 cameraInverseMatrix;
 	vec3 translationVector;
 	switch (direction)
 	{
@@ -482,21 +517,34 @@ void MeshModel::scaleModel(TransformationDirection direction, TransAxis axis)
 	if (axis == WORLD)
 	{
 		translationVector = GetPosition();
+
 		_world_transform = Translate((-1) * translationVector) * _world_transform;	// move to the origin
+		cameraInverseMatrix = matrixInverse(Translate((-1) * translationVector), MOVE);
+
 		_world_transform = scaleMatrix * _world_transform;							// scale in world axis
+		cameraInverseMatrix = cameraInverseMatrix * matrixInverse(scaleMatrix, SCALE);
+
 		_world_transform = Translate(translationVector) * _world_transform;			// move back to old location
+		cameraInverseMatrix = cameraInverseMatrix * matrixInverse(Translate(translationVector), MOVE);
+
 		_world_normal_transform = CreateNormalTransform(scaleMatrix, SCALE) * _world_normal_transform;
 	}
 	else		// axis == MODEL	
 	{
 		translationVector = GetCenter();
+
 		_model_transform = Translate((-1) * translationVector) * _model_transform;	// move to the origin
+		cameraInverseMatrix = matrixInverse(Translate((-1) * translationVector),MOVE);
+
 		_model_transform = scaleMatrix * _model_transform;							// scale in world axis
+		cameraInverseMatrix = cameraInverseMatrix * matrixInverse(scaleMatrix, SCALE);
+
 		_model_transform = Translate(translationVector) * _model_transform;			// move back to old location
+		cameraInverseMatrix = cameraInverseMatrix * matrixInverse(Translate(translationVector), MOVE);
+
 		_model_normal_transform = CreateNormalTransform(scaleMatrix, SCALE) * _model_normal_transform;
-
 	}
-
+	return cameraInverseMatrix;
 }
 
 GLfloat MeshModel::GetProportionalValue()
@@ -506,20 +554,22 @@ GLfloat MeshModel::GetProportionalValue()
 
 
 
-void MeshModel::manipulateModel(Transformation T, TransformationDirection direction, TransAxis axis)
+mat4 MeshModel::manipulateModel(Transformation T, TransformationDirection direction, TransAxis axis)
 {
+	mat4 cameraInverseMatrix;
 	switch (T)
 	{
 		case ROTATE:
-			rotateModel(direction, 10, axis);
+			cameraInverseMatrix = rotateModel(direction, 10, axis);
 			break;
 		case MOVE:
-			moveModel(direction, axis);
+			cameraInverseMatrix = moveModel(direction, axis);
 			break;
 		case SCALE:
-			scaleModel(direction, axis);
+			cameraInverseMatrix = scaleModel(direction, axis);
 			break;
 	}
+	return cameraInverseMatrix;
 }
 
 

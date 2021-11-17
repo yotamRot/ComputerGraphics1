@@ -260,12 +260,15 @@ void Scene::manipulateActiveModel(Transformation T, TransformationDirection dire
 	{
 		return;
 	}
+	mat4 cameraInverseMat;
+	Camera* modelCamera;
 	MeshModel* curModel = (MeshModel*)models.at(activeModel);
-	curModel->manipulateModel(T, direction, axis);
+	cameraInverseMat = curModel->manipulateModel(T, direction, axis);
 	
 	if (CameraModel* cameraModel = dynamic_cast<CameraModel*>(curModel))
 	{
-		cameras.at(cameraModel->cameraIndex)->cTransform = cameraModel->_world_transform * cameraModel->_model_transform;
+		modelCamera = cameras.at(cameraModel->cameraIndex);
+		modelCamera->cTransform = modelCamera->cTransform * cameraInverseMat;
 	}
 }
 
