@@ -61,16 +61,15 @@ class Camera {
 	vec3 lbn;  // left, bottom, near
 	vec3 rtf;  // right, top, far
 public:
-	Camera(vec3 lbn, vec3 rtf, int modelId);
-	mat4 cTransform;
-	mat4 cTransformInv;
+	Camera(vec3 lbn, vec3 rtf, int modelId, Model* model);
 	mat4 projection;
 	int modelId;
+	Model* model;
 	vec4 eye;
 	vec4 at;
 	vec4 up;
-	void setTransformation(const mat4& transform);
-	void LookAt(const vec4& eye, const vec4& at, const vec4& up );
+	void setTransformation(const mat4& invTransform, const mat4& Transform);
+	mat4 LookAt(const vec4& eye, const vec4& at, const vec4& up );
 	void Ortho( const float left, const float right,
 		const float bottom, const float top,
 		const float zNear, const float zFar );

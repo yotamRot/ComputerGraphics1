@@ -68,6 +68,8 @@ class CameraModel : public MeshModel
 {
 	public:
 		int cameraIndex;
+		mat4 _w_TransformInv;
+		mat4 _m_TransformInv;
 		CameraModel(int cameraIndex);
 };
 

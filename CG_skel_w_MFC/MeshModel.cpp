@@ -573,8 +573,6 @@ mat4 MeshModel::manipulateModel(Transformation T, TransformationDirection direct
 	return cameraInverseMatrix;
 }
 
-
-
 mat4 MeshModel::GetObjectMatrix()
 {
 	return _world_transform * _model_transform;
