@@ -284,7 +284,8 @@ vec3 MeshModel::GetBoundsLength()
 
 void MeshModel::draw(Renderer* renderer)
 {	
-	renderer->DrawTriangles(vertex_positions, vertix_normals, faces_centers, faces_normals, bound_box_vertices);
+	GLfloat proportionalValue = GetProportionalValue();
+	renderer->DrawTriangles(vertex_positions, vertix_normals, faces_centers, faces_normals, bound_box_vertices,proportionalValue);
 }
 
 vec3 MeshModel::GetPosition()
@@ -305,7 +306,6 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	GLfloat halfX = lenX * 0.5f;
 	GLfloat halfY = lenY * 0.5f;
 	GLfloat halfZ = lenZ * 0.5f;
-	GLfloat proportionFactorNormals = 0.1 * ((lenX + lenY + lenZ) / 3) ;
 
 	// front face
 	faces_centers->push_back(vec3(posX, posY, posZ + halfZ));
@@ -549,7 +549,7 @@ mat4 MeshModel::scaleModel(TransformationDirection direction, TransAxis axis)
 
 GLfloat MeshModel::GetProportionalValue()
 {
-	return ((x_bound_lenght + y_bound_lenght + z_bound_lenght) / 3) * 0.2;
+	return ((x_bound_lenght + y_bound_lenght + z_bound_lenght) / 3) * 0.1;
 }
 
 

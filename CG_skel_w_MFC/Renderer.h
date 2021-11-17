@@ -52,7 +52,7 @@ public:
 	void Init();
 	void DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* VerticesNormals=NULL,
 		const vector<vec3>*facesCenters = NULL,const vector<vec3>* facesNormals = NULL,
-		const vector<vec3>* boundBoxVertices = NULL);
+		const vector<vec3>* boundBoxVertices = NULL, GLfloat proportionalValue = 0);
 	void DrawRectangles(const vector<vec3>* vertices, const vector<vec3>* facesCenters = NULL,
 		const vector<vec3>* facesNormals = NULL);
 	void ConfigureRenderer(const mat4& projection, const mat4& cTransform ,

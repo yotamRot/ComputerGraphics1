@@ -227,7 +227,8 @@ void Renderer::SetDemoBuffer()
 }
 
 void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* verticesNormals,
-			const vector<vec3>* facesCenters, const vector<vec3>* facesNormals, const vector<vec3>* boundBoxVertices)
+			const vector<vec3>* facesCenters, const vector<vec3>* facesNormals,
+			const vector<vec3>* boundBoxVertices, GLfloat proportionalValue)
 {
 	vec2 triangle [3];
 	vec2 normal [2];
@@ -255,7 +256,7 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* v
 		for (int i = 0; i < vertices->size(); i++)
 		{
 				normalStart = Transform(vertices->at(i));
-				normalEnd = normalStart + 0.1 * NormTransform(verticesNormals->at(i));
+				normalEnd = normalStart + proportionalValue * NormTransform(verticesNormals->at(i));
 				RasterizeLine(vec3ToVec2(normalStart), vec3ToVec2(normalEnd));
 		}	
 	}
@@ -267,7 +268,7 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* v
 		for (int i = 0; i < facesCenters->size(); i++)
 		{
 			normalStart = Transform(facesCenters->at(i));
-			normalEnd = normalStart + 0.1 * NormTransform(facesNormals->at(i));
+			normalEnd = normalStart + proportionalValue * NormTransform(facesNormals->at(i));
 			RasterizeLine(vec3ToVec2(normalStart), vec3ToVec2(normalEnd));
 		}
 		curColor = white;
