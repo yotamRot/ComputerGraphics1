@@ -230,7 +230,7 @@ void Scene::draw()
 	int cameraIndex = 0;
 	mat4 curProjection = cameras[activeCamera]->projection;
 	CameraModel* curCameraModel = (CameraModel*)(cameras[activeCamera]->model);
-	mat4 curCameraInv = curCameraModel->_m_TransformInv * curCameraModel->_w_TransformInv;
+	mat4 curCameraInv = curCameraModel->_w_TransformInv * curCameraModel->_m_TransformInv;
 	m_renderer->ClearColorBuffer();
 	m_renderer->ConfigureRenderer(curProjection, curCameraInv, isShowVerticsNormals, isShowFacesNormals, isDrawBoundBox);
 	MeshModel* curModel;
@@ -338,6 +338,7 @@ mat4 Camera::Perspective(const float fovy, const float aspect,
 	return projection;
 }
 
+
 void Camera::Frustum(const float left, const float right,
 	const float bottom, const float top,
 	const float zNear, const float zFar)
@@ -409,4 +410,15 @@ void Scene::lookAtCamera(int cameraId)
 void Scene::switchToCamera(int cameraId)
 {
 	activeCamera = cameraId;
+}
+
+vec3 Scene::Getlbn()
+{
+	Camera* activeCamera = GetActiveCamera();
+	return activeCamera->Getlbn();
+}
+vec3 Scene::Getrtf()
+{
+	Camera* activeCamera = GetActiveCamera();
+	return activeCamera->Getrtf();
 }

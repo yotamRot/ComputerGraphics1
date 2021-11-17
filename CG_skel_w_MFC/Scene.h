@@ -129,4 +129,6 @@ public:
 	void ChangeProjectionParameters(Projection proj, vec3 rtf, vec3 lbn);
 	void SetTrasformationAxis(TransAxis Axis);
 	TransAxis GetTrasformationAxis();
+	vec3 Getlbn();
+	vec3 Getrtf();
 };

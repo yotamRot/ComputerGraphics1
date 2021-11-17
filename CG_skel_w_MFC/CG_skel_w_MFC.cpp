@@ -285,6 +285,7 @@ void projectionMenu(int id)
 
 void ProjParameresMenu(int id)
 {
+	setLbnRtf(scene->Getlbn(), scene->Getrtf());
 	CRltbnfDialog dlg;
 	if (dlg.DoModal() == IDOK) {
 		vec3 rtf = dlg.GetRTF();

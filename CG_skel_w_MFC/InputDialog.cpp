@@ -30,6 +30,15 @@
 #define N_EDIT_TITLE "Near ="
 
 
+vec3 rtf;
+vec3 lbn;
+
+void setLbnRtf(vec3 Ilbn, vec3 Irtf)
+{
+    rtf = Irtf;
+    lbn = Ilbn;
+}
+
 // ------------------------
 //    Class CInputDialog
 // ------------------------
@@ -245,7 +254,7 @@ void CCmdXyzDialog::OnPaint()
 // ----------------------
 
 CRltbnfDialog::CRltbnfDialog(CString title )
-    : CInputDialog(title), mRight(0.0), mLeft(0.0), mTop(0.0), mBottom(0.0), mFar(0.0), mNear(0.0)
+    : CInputDialog(title), mRight(rtf.x), mLeft(lbn.x), mTop(rtf.y), mBottom(lbn.y), mFar(rtf.z), mNear(lbn.z)
 { }
 
 CRltbnfDialog::~CRltbnfDialog()

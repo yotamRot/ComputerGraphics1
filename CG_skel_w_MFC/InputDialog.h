@@ -6,6 +6,7 @@ using std::string;
 
 #include "vec.h"
 
+void setLbnRtf(vec3 Ilbn, vec3 Irtf);
 // ------------------------
 //    Class CInputDialog
 // ------------------------
