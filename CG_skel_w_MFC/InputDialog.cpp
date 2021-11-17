@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "CG_skel_w_MFC.h"
 #include "InputDialog.h"
+#include <math.h>
 
 #define IDC_CMD_EDIT 200
 #define IDC_X_EDIT 201
@@ -35,8 +36,15 @@ vec3 lbn;
 
 void setLbnRtf(vec3 Ilbn, vec3 Irtf)
 {
-    rtf = Irtf;
-    lbn = Ilbn;
+    Ilbn = Ilbn * 100;
+    Irtf = Irtf * 100;
+
+    rtf.x = float(round(Irtf.x) / 100);
+    rtf.y = float(round(Irtf.y) / 100);
+    rtf.z = float(round(Irtf.z) / 100);
+    lbn.x = float(round(Ilbn.x) / 100);
+    lbn.y = float(round(Ilbn.y) / 100);
+    lbn.z = float(round(Ilbn.z) / 100);
 }
 
 // ------------------------
