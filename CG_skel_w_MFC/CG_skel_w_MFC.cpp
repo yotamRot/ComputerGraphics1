@@ -96,7 +96,6 @@ void reshape( int width, int height )
 	scene->MaintingCamerasRatios(oldWidth, oldHeight, width, height);
 	oldWidth = width;
 	oldHeight = height;
-
 }
 
 void keyboard( unsigned char key, int x, int y )
@@ -204,7 +203,14 @@ void camersMenu(int id)
 			glutAddMenuEntry((cameraPrefix + std::to_string(newCameraId)).c_str(), newCameraId);
 			break;
 		case RENDER_CAMERAS:
-			scene->toggleRenderCameras();
+			if (scene->toggleRenderCameras())
+			{
+				glutChangeToMenuEntry(2, "Hide Cameras", RENDER_CAMERAS);
+			}
+			else
+			{
+				glutChangeToMenuEntry(2, "Render Cameras", RENDER_CAMERAS);
+			}
 			break;
 		case CONTROL_ACTIVE_CAMERA:
 			scene->ControlActiveCamera();
@@ -273,13 +279,34 @@ void featuresMenu(int id)
 	switch (id)
 	{
 		case SHOW_VERTICES_NORMAL:
-			scene->toggleShowVerticesNormals();
+			if (scene->toggleShowVerticesNormals())
+			{
+				glutChangeToMenuEntry(1, "Hide Vertices Normal", SHOW_VERTICES_NORMAL);
+			}
+			else
+			{
+				glutChangeToMenuEntry(1, "Show Vertices Normal", SHOW_VERTICES_NORMAL);
+			}
 			break;
 		case SHOW_FACES_NORMAL:
-			scene->toggleShowFacesNormals();
+			if (scene->toggleShowFacesNormals())
+			{
+				glutChangeToMenuEntry(2, "Hide Faces Normal", SHOW_FACES_NORMAL);
+			}
+			else
+			{
+				glutChangeToMenuEntry(2, "Show Faces Normal", SHOW_FACES_NORMAL);
+			}
 			break;
 		case SHOW_BOUNDING_BOX:
-			scene->toggleDrawBoundBox();
+			if (scene->toggleDrawBoundBox())
+			{
+				glutChangeToMenuEntry(3, "Hide Bounding Box", SHOW_BOUNDING_BOX);
+			}
+			else
+			{
+				glutChangeToMenuEntry(3, "Show Bounding Box", SHOW_BOUNDING_BOX);
+			}
 			break;
 	}
 	scene->draw();
@@ -382,7 +409,7 @@ void initMenu()
 	glutAddMenuEntry((cameraPrefix + "0").c_str(), 0);
 	int menuCameras = glutCreateMenu(camersMenu);
 	glutAddMenuEntry("Add Camera", ADD_CAMERA);
-	glutAddMenuEntry("Render Camers", RENDER_CAMERAS);
+	glutAddMenuEntry("Render Cameras", RENDER_CAMERAS);
 	glutAddMenuEntry("Control Active Camera", CONTROL_ACTIVE_CAMERA);
 	glutAddSubMenu("Look At Camera", menuLookAtCameraId);
 	glutAddSubMenu("Select Camera", menuSwitchToCameraId);
@@ -390,7 +417,7 @@ void initMenu()
 	int menuFeatures = glutCreateMenu(featuresMenu);
 	glutAddMenuEntry("Show Vertices Normal", SHOW_VERTICES_NORMAL);
 	glutAddMenuEntry("Show Faces Normal", SHOW_FACES_NORMAL);
-	glutAddMenuEntry("Draw Bound Box", SHOW_BOUNDING_BOX);
+	glutAddMenuEntry("Show Bounding Box", SHOW_BOUNDING_BOX);
 
 	int menuProjections = glutCreateMenu(projectionMenu);
 	glutAddMenuEntry("Orthographic", ORTHOGRAPHIC);

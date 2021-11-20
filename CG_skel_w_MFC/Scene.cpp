@@ -48,7 +48,7 @@ void Scene::Zoom(ZoomDirection direction)
 	rtf = GetActiveCamera()->Getrtf();
 	MeshModel* curModel = (MeshModel*)models.at(activeModel);
 	bounds = curModel->GetBoundsLength();
-	if (GetProjection() == ORTHOGRAPHIC)
+	if (proj == ORTHOGRAPHIC)
 	{
 		if(direction == ZOOM_IN)
 		{
@@ -64,7 +64,7 @@ void Scene::Zoom(ZoomDirection direction)
 		}
 
 	}
-	if (GetProjection() == PERSPECTIVE)
+	if (proj == FRUSTUM)
 	{
 
 		if (direction == ZOOM_IN)
@@ -153,15 +153,7 @@ void Scene::ClearScene()
 {
 	models.clear();
 	cameras.clear();
-	activeModel = ILLEGAL_ACTIVE_MOVEL;
-	activeCamera = addCamera();
-	modelToVectorId.clear();
-	setActiveCameraProjection(PERSPECTIVE);
-	isShowVerticsNormals = false;
-	isShowFacesNormals = false;
-	isRenderCameras = false;
-	isDrawBoundBox = false;
-	axis = MODEL;
+	InitScene();
 	ResetZoom();
 }
 
@@ -190,7 +182,7 @@ void Scene::setActiveCameraProjection(Projection proj)
 	}
 }
 
-void Scene::ChangeProjectionParameters(Projection proj, vec3 rtf, vec3 lbn,vec4 pers_param)
+void Scene::ChangeProjectionParameters(Projection proj, vec3& rtf, vec3& lbn,vec4 pers_param)
 {
 	Camera* curCamera = cameras.at(activeCamera);
 	this->proj = proj;
@@ -282,16 +274,21 @@ void Scene::drawDemo()
 
 Scene::Scene(Renderer *renderer) : m_renderer(renderer) 
 {	
+	InitScene();
+}
+
+void Scene::InitScene()
+{
 	activeCamera = addCamera();
 	activeModel = ILLEGAL_ACTIVE_MOVEL;
-	setActiveCameraProjection(FRUSTUM);
+	proj = FRUSTUM;
+	setActiveCameraProjection(proj);
 	isShowVerticsNormals = false;
 	isShowFacesNormals = false;
 	isRenderCameras = false;
 	isDrawBoundBox = false;
 	axis = MODEL;
 }
-
 void Scene::manipulateActiveModel(Transformation T, TransformationDirection direction
 									, TransAxis axis, float power)
 {
@@ -453,6 +450,8 @@ void Scene::lookAtCamera(int cameraId)
 void Scene::switchToCamera(int cameraId)
 {
 	activeCamera = cameraId;
+	Camera* activeCamera = cameras.at(cameraId);
+	ChangeProjectionParameters(proj, activeCamera->Getrtf(), activeCamera->Getlbn());
 }
 
 vec3 Scene::Getlbn()

@@ -103,6 +103,7 @@ public:
 	vector<Model*> models;
 	Scene() {};
 	Scene(Renderer* renderer);
+	void InitScene();
 	int loadOBJModel(string fileName);
 	int loadCubeModel();
 	void lookAtModel(int modelId);
@@ -127,7 +128,7 @@ public:
 	int activeModel;
 	int activeLight;
 	int activeCamera;
-	void ChangeProjectionParameters(Projection proj, vec3 rtf, vec3 lbn, vec4 pers_param=vec4());
+	void ChangeProjectionParameters(Projection proj, vec3& rtf, vec3& lbn, vec4 pers_param=vec4());
 	void SetTrasformationAxis(TransAxis Axis);
 	TransAxis GetTrasformationAxis();
 	vec3 Getlbn();

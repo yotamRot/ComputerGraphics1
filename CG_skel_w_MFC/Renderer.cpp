@@ -317,7 +317,6 @@ void Renderer::DrawRectangles(const vector<vec3>* vertices, const vector<vec3>* 
 		curColor = white;
 	}
 
-
 }
 
 vec2 Renderer::vec3ToVec2(const vec3& ver)
