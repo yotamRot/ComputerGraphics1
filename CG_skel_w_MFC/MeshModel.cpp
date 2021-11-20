@@ -289,13 +289,21 @@ void MeshModel::draw(Renderer* renderer)
 	renderer->DrawTriangles(vertex_positions, vertix_normals, faces_centers, faces_normals, bound_box_vertices,proportionalValue);
 }
 
-vec3 MeshModel::GetPosition()
+vec3 MeshModel::GetPosition(TransAxis axis)
 {
-	return vec3(this->_model_transform[0][3]/ this->_model_transform[3][3],
-		this->_model_transform[1][3]/ this->_model_transform[3][3],
-		this->_model_transform[2][3]/ this->_model_transform[3][3]);
+	if (axis == MODEL)
+	{
+		return vec3(_model_transform[0][3] / _model_transform[3][3],
+			_model_transform[1][3] / _model_transform[3][3],
+			_model_transform[2][3] / _model_transform[3][3]);
+	}
+	else
+	{
+		return vec3(_world_transform[0][3] / _world_transform[3][3],
+			_world_transform[1][3] / _world_transform[3][3],
+			_world_transform[2][3] / _world_transform[3][3]);
+	}
 }
-
 
 
 PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat lenX, GLfloat lenY, GLfloat lenZ) :posX(posX), posY(posY), posZ(posZ), lenX(lenX), lenY(lenY), lenZ(lenZ)
@@ -458,10 +466,9 @@ mat4 MeshModel::rotateModel(TransformationDirection direction, int angle, TransA
 		break;
 	}
 
-
+	translationVector = GetPosition(axis);
 	if (axis == WORLD)
 	{
-		translationVector = GetPosition();
 		cameraInverseMatrix = matrixInverse(Translate((-1) * translationVector),MOVE);
 		_world_transform = Translate((-1) * translationVector) * _world_transform;	// move to the origin
 
@@ -475,7 +482,6 @@ mat4 MeshModel::rotateModel(TransformationDirection direction, int angle, TransA
 	}
 	else		// axis == MODEL	
 	{
-		translationVector = GetCenter();
 		cameraInverseMatrix = matrixInverse(Translate((-1) * translationVector), MOVE);
 		_model_transform = Translate((-1) * translationVector) * _model_transform;	// move to the origin
 
@@ -520,11 +526,9 @@ mat4 MeshModel::scaleModel(TransformationDirection direction, TransAxis axis)
 		break;
 	}
 
-
+	translationVector = GetPosition(axis);
 	if (axis == WORLD)
 	{
-		translationVector = GetPosition();
-
 		_world_transform = Translate((-1) * translationVector) * _world_transform;	// move to the origin
 		cameraInverseMatrix = matrixInverse(Translate((-1) * translationVector), MOVE);
 
@@ -538,7 +542,6 @@ mat4 MeshModel::scaleModel(TransformationDirection direction, TransAxis axis)
 	}
 	else		// axis == MODEL	
 	{
-		translationVector = GetCenter();
 
 		_model_transform = Translate((-1) * translationVector) * _model_transform;	// move to the origin
 		cameraInverseMatrix = matrixInverse(Translate((-1) * translationVector),MOVE);

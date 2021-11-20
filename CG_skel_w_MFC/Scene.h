@@ -49,7 +49,7 @@ enum TransAxis
 class Model { 
 public:
 	void virtual draw(Renderer* renderer) = 0;
-	vec3 virtual GetPosition() = 0;
+	vec3 virtual GetPosition(TransAxis axis) = 0;
 protected:
 	virtual ~Model() {}
 };
@@ -79,6 +79,7 @@ public:
 		const float zNear, const float zFar );
 	mat4 Perspective( const float fovy, const float aspect,
 		const float zNear, const float zFar);
+	void MaintainRatio(float widthFactor, float heightFactor, Projection proj);
 	vec3 Getlbn();
 	vec3 Getrtf();
 
@@ -109,7 +110,6 @@ public:
 	void lookAtCamera(int cameraId);
 	void switchToCamera(int cameraId);
 	void ClearScene();
-	void rotateAroundActiveModel(int dx, int dy);
 	void ControlActiveCamera();
 	void manipulateActiveModel(Transformation T,TransformationDirection direction,
 								TransAxis axis, float power);
@@ -132,4 +132,5 @@ public:
 	TransAxis GetTrasformationAxis();
 	vec3 Getlbn();
 	vec3 Getrtf();
+	void MaintingCamerasRatios(int oldWidth, int oldHeight, int newWidth, int newHeight);
 };

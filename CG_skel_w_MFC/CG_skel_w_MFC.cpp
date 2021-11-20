@@ -65,6 +65,7 @@ Scene *scene;
 Renderer *renderer;
 
 int last_x,last_y;
+int oldWidth,oldHeight;
 bool newRotate = false;
 
 std::string cameraPrefix = "Camera ";
@@ -78,7 +79,6 @@ Projection curProjection = PERSPECTIVE;
 bool lb_down,rb_down,mb_down;
 bool prv_lb_down = false;
 
-
 //----------------------------------------------------------------------------
 // Callbacks
 
@@ -89,9 +89,14 @@ void display( void )
 
 void reshape( int width, int height )
 {
+
 //update the renderer's buffers
 	renderer->ResizeBuffers(width, height);
 	glViewport(0, 0, width, height);
+	scene->MaintingCamerasRatios(oldWidth, oldHeight, width, height);
+	oldWidth = width;
+	oldHeight = height;
+
 }
 
 void keyboard( unsigned char key, int x, int y )
@@ -310,7 +315,7 @@ void ProjParameresMenu(int id)
 			}
 			else if (id == FRUSTUM_PARAMETERS)
 			{
-				scene->ChangeProjectionParameters(PERSPECTIVE, rtf, lbn);
+				scene->ChangeProjectionParameters(FRUSTUM, rtf, lbn);
 			}
 
 		}
@@ -441,7 +446,8 @@ int my_main( int argc, char **argv )
 	fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
 	
-	
+	oldWidth = 512;
+	oldHeight = 512;
 	renderer = new Renderer(512,512);
 	scene = new Scene(renderer);
 	//----------------------------------------------------------------------------

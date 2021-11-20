@@ -14,6 +14,7 @@ protected :
 	MeshModel() {}
 	mat4 moveModel(TransformationDirection direction, TransAxis axis);
 	mat4 scaleModel(TransformationDirection direction, TransAxis axis);
+	mat4 rotateModel(TransformationDirection direction, int angle, TransAxis axis);
 	//add more attributes
 	mat4 _world_normal_transform;
 	mat4 _model_normal_transform;
@@ -35,7 +36,7 @@ public:
 	~MeshModel(void);
 	void loadFile(string fileName);
 	void draw(Renderer* renderer);
-	vec3 GetPosition();
+	vec3 GetPosition(TransAxis axis);
 	vector<vec3>* CalcBounds();
 	vec3 GetCenter();
 	GLfloat GetXBoundLength();
@@ -44,7 +45,6 @@ public:
 	vec3 GetBoundsLength();
 	mat4 manipulateModel(Transformation T, TransformationDirection direction,
 						TransAxis axis, float power);
-	mat4 rotateModel(TransformationDirection direction, int angle, TransAxis axis);
 	mat4 GetObjectMatrix();
 	mat4 GetNormalMatrix();
 	GLfloat GetProportionalValue();

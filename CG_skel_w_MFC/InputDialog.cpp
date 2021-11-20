@@ -307,16 +307,16 @@ int CRltbnfDialog::OnCreate(LPCREATESTRUCT lpcs)
         CRect(160, 70, 200, 90), this, IDC_R_EDIT);
 
     mLeftEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
-        CRect(360, 70, 400, 90), this, IDC_L_EDIT);
+        CRect(360, 70, 400, 90), this, IDC_T_EDIT);
 
     mTopEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
-        CRect(560, 70, 600, 90), this, IDC_T_EDIT);
+        CRect(560, 70, 600, 90), this, IDC_F_EDIT);
 
     mBottomEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
-        CRect(160, 170, 200, 190), this, IDC_B_EDIT);
+        CRect(160, 170, 200, 190), this, IDC_L_EDIT);
 
     mFarEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
-        CRect(360, 170, 400, 190), this, IDC_F_EDIT);
+        CRect(360, 170, 400, 190), this, IDC_B_EDIT);
 
     mNearEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
         CRect(560, 170, 600, 190), this, IDC_N_EDIT);
@@ -347,12 +347,8 @@ void CRltbnfDialog::OnPaint()
     CRect n_rect(500, 172, 600, 195);
     dc.DrawText(CString(N_EDIT_TITLE), -1, &n_rect, DT_SINGLELINE);
 
-
     mRightEdit.SetFocus();
 }
-
-
-
 
 
 // ----------------------

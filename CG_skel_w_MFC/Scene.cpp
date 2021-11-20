@@ -89,23 +89,48 @@ void Scene::Zoom(ZoomDirection direction)
 	}
 }
 
+//void Scene::lookAtModel(int modelId)
+//{
+//	activeModel = modelId;
+//	MeshModel* curModel = (MeshModel*)models.at(activeModel);
+//	Camera* curCamera = cameras.at(activeCamera);
+//	CameraModel* cameraModel =(CameraModel *) curCamera->model;
+//	float maxModelAxisSize = max(max(curModel->GetZBoundLength(), curModel->GetXBoundLength()), curModel->GetYBoundLength());
+//	// model in camera cord
+//	vec3 m_modelCenter = curModel->GetCenter();
+//	vec4 c_atCenter = cameraModel->_m_TransformInv * cameraModel->_w_TransformInv * curModel->_world_transform * curModel->_model_transform * m_modelCenter;
+//	vec4 c_from = Translate(0, 0, 3 * maxModelAxisSize) * Translate(c_atCenter) * vec4(vec3());
+//	vec4 c_atDirection = normalize(c_atCenter/ c_atCenter.w - c_from / c_from.w);
+//
+//	mat4 c_w_InvMatrix = curCamera->LookAt(c_from, c_from + c_atDirection,	 curCamera->up);
+//	mat4 c_w_Matrix = Translate(0, 0, 3 * curModel->GetZBoundLength()) * curModel->_world_transform * curModel->_model_transform;
+//	curCamera->setTransformation(c_w_InvMatrix, c_w_Matrix);
+//	ResetZoom();
+//}
+
+
 void Scene::lookAtModel(int modelId)
 {
 	activeModel = modelId;
 	MeshModel* curModel = (MeshModel*)models.at(activeModel);
 	Camera* curCamera = cameras.at(activeCamera);
+	//reset Camera
 	CameraModel* cameraModel =(CameraModel *) curCamera->model;
+	cameraModel->_m_TransformInv = mat4();
+	cameraModel->_w_TransformInv = mat4();
+	cameraModel->_model_transform = mat4();
+	cameraModel->_world_transform = mat4();
+
 	float maxModelAxisSize = max(max(curModel->GetZBoundLength(), curModel->GetXBoundLength()), curModel->GetYBoundLength());
 	// model in camera cord
-	vec3 m_modelCenter = curModel->GetCenter();
-	vec4 c_atCenter = cameraModel->_m_TransformInv * cameraModel->_w_TransformInv * curModel->_world_transform * curModel->_model_transform * m_modelCenter;
-	vec4 c_from = Translate(0, 0, 3 * maxModelAxisSize) * Translate(c_atCenter) * vec4(vec3());
-	vec4 c_atDirection = c_atCenter - c_from;
-	c_atDirection.w = 0;
+	mat4 toModelTransform = curModel->_world_transform * curModel->_model_transform * Translate(curModel->GetCenter());
+	mat4 fromModelTransform = Translate(0, 0, 3 * maxModelAxisSize) * curModel->_world_transform * curModel->_model_transform * Translate(curModel->GetCenter());
+	vec4 c_atCenter = toModelTransform * vec4(vec3());
+	vec4 c_from = fromModelTransform * vec4(vec3());
+	vec4 c_atDirection = normalize(c_atCenter/ c_atCenter.w - c_from / c_from.w);
 
-	mat4 c_w_InvMatrix = curCamera->LookAt(c_from, c_from + c_atDirection, curCamera->up);
-	mat4 c_w_Matrix = Translate(0, 0, 3 * curModel->GetZBoundLength()) * curModel->_world_transform * curModel->_model_transform;
-	curCamera->setTransformation(c_w_InvMatrix, c_w_Matrix);
+	cameraModel->_m_TransformInv = curCamera->LookAt(c_from, c_from + c_atDirection,curCamera->up);
+	cameraModel->_world_transform = fromModelTransform;
 	ResetZoom();
 }
 
@@ -141,19 +166,7 @@ void Scene::ClearScene()
 }
 
 
-void Scene::rotateAroundActiveModel(int dx, int dy)
-{	
-	if (activeModel == ILLEGAL_ACTIVE_MOVEL)
-	{
-		return;
-	}
 
-	MeshModel* curModel = (MeshModel*)models.at(activeModel);
-	
-	curModel->rotateModel(Y, dx / 10, axis);
-	curModel->rotateModel(X, dy / 10, axis);
-
-}
 
 void Scene::ControlActiveCamera()
 {
@@ -271,7 +284,7 @@ Scene::Scene(Renderer *renderer) : m_renderer(renderer)
 {	
 	activeCamera = addCamera();
 	activeModel = ILLEGAL_ACTIVE_MOVEL;
-	setActiveCameraProjection(PERSPECTIVE);
+	setActiveCameraProjection(FRUSTUM);
 	isShowVerticsNormals = false;
 	isShowFacesNormals = false;
 	isRenderCameras = false;
@@ -314,7 +327,7 @@ const Projection Scene::GetProjection()
 void Camera::setTransformation(const mat4& invTransform, const mat4& Transform)
 {
 	CameraModel* cameraModel =(CameraModel *) this->model;
-	cameraModel->_w_TransformInv = cameraModel->_w_TransformInv * invTransform;
+	cameraModel->_m_TransformInv = cameraModel->_m_TransformInv * invTransform;
 	cameraModel->_world_transform = Transform * cameraModel->_world_transform;
 }
 
@@ -381,14 +394,39 @@ Camera::Camera(vec3 lbn, vec3 rtf, int modelId, Model* model) :lbn(lbn), rtf(rtf
 	//set camera world view aligned with world asix with offset in z
 }
 
+void Scene::MaintingCamerasRatios(int oldWidth, int oldHeight, int newWidth, int newHeight)
+{
+	float widthRatio = (float)newWidth / (float)oldWidth;
+	float heightRatio = (float)newHeight / (float)oldHeight;
+	for (auto it = cameras.begin(); it != cameras.end(); ++it)
+	{
+		(*it)->MaintainRatio(widthRatio, heightRatio, proj);
+	}
+}
+
+void Camera::MaintainRatio(float widthRatio, float heightRatio, Projection proj)
+{
+	lbn.x = lbn.x * widthRatio;
+	rtf.x = rtf.x * widthRatio;
+	lbn.y = lbn.y * heightRatio;
+	rtf.y = rtf.y * heightRatio;
+	if (proj == ORTHOGRAPHIC)
+	{
+		Ortho(lbn.x, rtf.x, lbn.y, rtf.y, lbn.z, rtf.z);
+	}
+	else if (proj == FRUSTUM)
+	{
+		Frustum(lbn.x, rtf.x, lbn.y, rtf.y, lbn.z, rtf.z);
+	}
+}
 
 vec3 Camera::Getlbn() 
 {
-	return vec3(lbn);
+	return lbn;
 }
 vec3 Camera::Getrtf()
 {
-	return vec3(rtf);
+	return rtf;
 }
 
 
