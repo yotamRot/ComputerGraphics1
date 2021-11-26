@@ -32,6 +32,7 @@ class Renderer
 	void DrawPixel(int x, int y);
 	void transformToScreen(vec2& vec);
 	vec2 vec3ToVec2(const vec3& ver);
+	bool shouldDrawModel(const vector<vec3>* boundingBox);
 	vec3 NormTransform(const vec3& ver);
 	vec3 Transform(const vec3& ver);
 

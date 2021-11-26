@@ -464,3 +464,4 @@ vec3 Scene::Getrtf()
 	Camera* activeCamera = GetActiveCamera();
 	return activeCamera->Getrtf();
 }
+

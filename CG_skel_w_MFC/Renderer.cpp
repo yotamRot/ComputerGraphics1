@@ -234,6 +234,11 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* v
 	vec2 normal [2];
 	vec3 normalStart;
 	vec3 normalEnd;
+
+	if (!shouldDrawModel(boundBoxVertices))
+	{
+		return;
+	}
 	// iterate over all vertices to draw triangles
 	for (int i = 0; i < vertices->size(); i++)
 	{
@@ -285,7 +290,10 @@ void Renderer::DrawRectangles(const vector<vec3>* vertices, const vector<vec3>* 
 	vec2 normal[2];
 	vec3 start;
 	vec3 end;
-
+	if (!shouldDrawModel(vertices))
+	{
+		return;
+	}
 	// iterate over all vertices to draw rectangles
 	for (auto it = vertices->begin(); it != vertices->end(); ++it)
 	{
@@ -318,7 +326,24 @@ void Renderer::DrawRectangles(const vector<vec3>* vertices, const vector<vec3>* 
 	}
 
 }
+bool Renderer::shouldDrawModel(const vector<vec3>* boundingBox)
+{
+	vec4 maxBounds = cProjection * cTransform * vec4(Transform(vec3(boundingBox->at(1).x, boundingBox->at(0).y, boundingBox->at(0).z)));
+	vec4 minBounds = cProjection * cTransform * vec4(Transform(vec3(boundingBox->at(0).x, boundingBox->at(2).y, boundingBox->at(4).z)));
+	//check max
+	
+	if (minBounds.x > minBounds.w || minBounds.y > minBounds.w || minBounds.z > minBounds.w)
+	{
+		return false;
+	}
 
+	if (maxBounds.x < -maxBounds.w || maxBounds.y < -maxBounds.w || maxBounds.z < -maxBounds.w)
+	{
+		return false;
+	}
+
+	return true;
+}
 vec2 Renderer::vec3ToVec2(const vec3& ver)
 {
 	vec4 tempVec = vec4(ver);

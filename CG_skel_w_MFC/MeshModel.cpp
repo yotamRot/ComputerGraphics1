@@ -253,12 +253,14 @@ vector<vec3>* MeshModel::CalcBounds()
 			min_bound.z = vertex_positions->at(i).z;
 		}
 	}
+	
 	x_bound_lenght = abs(max_bound.x - min_bound.x);
 	y_bound_lenght = abs(max_bound.y - min_bound.y);
 	z_bound_lenght = abs(max_bound.z - min_bound.z);
 	center = (max_bound + min_bound) / 2;
 	return SetRectangleVertices(center.x, center.y, center.z, x_bound_lenght, y_bound_lenght, z_bound_lenght);
 }
+
 
 vec3 MeshModel::GetCenter()
 {
