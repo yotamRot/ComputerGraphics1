@@ -17,6 +17,8 @@ class Renderer
 	mat4 cProjection;
 	mat4 nTransform;
 	mat4 oTransform;
+	int* x_min;
+	int* x_max;
 
 	bool isShowVerticsNormals;
 	bool isShowFacesNormals;
@@ -63,4 +65,6 @@ public:
 	void ClearDepthBuffer();
 	void SetDemoBuffer();
 	void ResizeBuffers(int width, int height);
+	void ScanConvert();
+	void SetTringleLimits(int x, int y);
 };

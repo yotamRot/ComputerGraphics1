@@ -34,13 +34,13 @@ void Renderer::transformToScreen(vec2& vec)
 }
 
 
-
 void Renderer::DrawPixel(int x, int y)
 {
 	if (x < 1 || x >= m_width || y < 1 || y >= m_height)
-		{
-			return;
-		}
+	{
+		return;
+	}
+	SetTringleLimits(x, y);
 	m_outBuffer[INDEX(m_width, x, y, 0)] = curColor.red;	m_outBuffer[INDEX(m_width, x, y, 1)] = curColor.green;	m_outBuffer[INDEX(m_width, x, y, 2)] = curColor.blue;
 }
 
@@ -206,8 +206,12 @@ void Renderer::CreateBuffers(int width, int height)
 	m_width = width;
 	m_height = height;
 	CreateOpenGLBuffer(); //Do not remove this line.
-	m_outBuffer = new float[3*m_width*m_height];
+	m_outBuffer = new float[3 * m_width * m_height];
 	m_zbuffer = new float[m_width * m_height];
+	x_min = new int[m_height];
+	x_max = new int[m_height];
+	memset(x_min, 0, sizeof(int) * m_height);
+	memset(x_max, 0, sizeof(int) * m_height);
 }
 
 void Renderer::SetDemoBuffer()
@@ -247,6 +251,10 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* v
 		RasterizeLine(triangle[0], triangle[1]);
 		RasterizeLine(triangle[1], triangle[2]);
 		RasterizeLine(triangle[2], triangle[0]);
+
+		ScanConvert();
+		memset(x_min, 0, sizeof(int) * m_height);
+		memset(x_max, 0, sizeof(int) * m_height);
 	}
 
 	if ((verticesNormals != NULL) && (isShowVerticsNormals))
@@ -277,6 +285,7 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* v
 	{
 		DrawRectangles(boundBoxVertices);
 	}
+
 }
 
 void Renderer::DrawRectangles(const vector<vec3>* vertices, const vector<vec3>* facesCenters, const vector<vec3>* facesNormals)
@@ -289,6 +298,7 @@ void Renderer::DrawRectangles(const vector<vec3>* vertices, const vector<vec3>* 
 	// iterate over all vertices to draw rectangles
 	for (auto it = vertices->begin(); it != vertices->end(); ++it)
 	{
+		curColor = white;
 		rectangle[0] = vec3ToVec2(Transform(*it));
 		it++;
 		rectangle[1] = vec3ToVec2(Transform(*it));
@@ -446,12 +456,17 @@ void Renderer::ResizeBuffers(int width, int height)
 {
 	delete m_outBuffer;
 	delete m_zbuffer;
+	delete x_min;
+	delete x_max;
 	m_width = width;
 	m_height = height;
 	CreateOpenGLBuffer(); //Do not remove this line.
 	m_outBuffer = new float[3 * m_width * m_height];
 	m_zbuffer = new float[m_width * m_height];
-
+	x_min = new int[m_height];
+	x_max = new int[m_height];
+	memset(x_min, 0, sizeof(int) * m_height);
+	memset(x_max, 0, sizeof(int) * m_height);
 }
 
 
@@ -459,4 +474,33 @@ void Renderer::SetObjectMatrices(const mat4& oTransform, const mat4& nTransform)
 {
 	this->oTransform = oTransform;
 	this->nTransform = nTransform;
+}
+
+void Renderer::ScanConvert()
+{
+	curColor = blue;
+	for (int y = 0; y < m_height; y++)
+	{
+		for (int i = x_min[y]; i < x_max[y]; i++)
+		{
+			DrawPixel(i, y);
+		}
+	}
+}
+
+void Renderer::SetTringleLimits(int x, int y)
+{
+	if (x_min[y] == 0) // x values starts from 1
+	{
+		x_min[y] = x;
+		x_max[y] = x;
+	}
+	else if (x < x_min[y])
+	{
+		x_min[y] = x;
+	}
+	if (x > x_max[y])
+	{
+		x_max[y] = x;
+	}
 }
