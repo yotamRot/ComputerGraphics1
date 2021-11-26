@@ -36,7 +36,7 @@ public:
 	~MeshModel(void);
 	void loadFile(string fileName);
 	void draw(Renderer* renderer);
-	vec3 GetPosition(TransAxis axis);
+	vec3 CenteringTranslation(TransAxis axis);
 	vector<vec3>* CalcBounds();
 	vec3 GetCenter();
 	GLfloat GetXBoundLength();

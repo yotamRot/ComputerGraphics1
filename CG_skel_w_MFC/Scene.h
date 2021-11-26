@@ -49,7 +49,7 @@ enum TransAxis
 class Model { 
 public:
 	void virtual draw(Renderer* renderer) = 0;
-	vec3 virtual GetPosition(TransAxis axis) = 0;
+	vec3 virtual CenteringTranslation(TransAxis axis) = 0;
 protected:
 	virtual ~Model() {}
 };

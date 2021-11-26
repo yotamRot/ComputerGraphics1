@@ -289,19 +289,21 @@ void MeshModel::draw(Renderer* renderer)
 	renderer->DrawTriangles(vertex_positions, vertix_normals, faces_centers, faces_normals, bound_box_vertices,proportionalValue);
 }
 
-vec3 MeshModel::GetPosition(TransAxis axis)
+vec3 MeshModel::CenteringTranslation(TransAxis axis)
 {
+	vec3 worldCenterize = vec3(_world_transform[0][3] / _world_transform[3][3],
+		_world_transform[1][3] / _world_transform[3][3],
+		_world_transform[2][3] / _world_transform[3][3]);
+	vec3 modelCenterize = GetCenter() + vec3(_model_transform[0][3] / _model_transform[3][3],
+		_model_transform[1][3] / _model_transform[3][3],
+		_model_transform[2][3] / _model_transform[3][3]);
 	if (axis == MODEL)
 	{
-		return vec3(_model_transform[0][3] / _model_transform[3][3],
-			_model_transform[1][3] / _model_transform[3][3],
-			_model_transform[2][3] / _model_transform[3][3]);
+		return modelCenterize;
 	}
 	else
 	{
-		return vec3(_world_transform[0][3] / _world_transform[3][3],
-			_world_transform[1][3] / _world_transform[3][3],
-			_world_transform[2][3] / _world_transform[3][3]);
+		return worldCenterize;
 	}
 }
 
@@ -441,7 +443,7 @@ mat4 MeshModel::rotateModel(TransformationDirection direction, int angle, TransA
 {
 	mat4 rotateMatrix;
 	mat4 cameraInverseMatrix;
-	vec3 translationVector;
+	vec3 centeringVec;
 	switch (direction)
 	{
 	case X:
@@ -466,30 +468,30 @@ mat4 MeshModel::rotateModel(TransformationDirection direction, int angle, TransA
 		break;
 	}
 
-	translationVector = GetPosition(axis);
+	centeringVec = CenteringTranslation(axis);
 	if (axis == WORLD)
 	{
-		cameraInverseMatrix = matrixInverse(Translate((-1) * translationVector),MOVE);
-		_world_transform = Translate((-1) * translationVector) * _world_transform;	// move to the origin
+		cameraInverseMatrix = matrixInverse(Translate((-1) * centeringVec),MOVE);
+		_world_transform = Translate((-1) * centeringVec) * _world_transform;	// move to the origin
 
 		_world_transform = rotateMatrix * _world_transform;	// rotate in world axis
 		cameraInverseMatrix = cameraInverseMatrix * matrixInverse(rotateMatrix,ROTATE);
 
-		_world_transform = Translate(translationVector) * _world_transform;		 	// move back to old location
-		cameraInverseMatrix = cameraInverseMatrix * matrixInverse(Translate(translationVector),MOVE);
+		_world_transform = Translate(centeringVec) * _world_transform;		 	// move back to old location
+		cameraInverseMatrix = cameraInverseMatrix * matrixInverse(Translate(centeringVec),MOVE);
 
 		_world_normal_transform = CreateNormalTransform(rotateMatrix, ROTATE) * _world_normal_transform;
 	}
 	else		// axis == MODEL	
 	{
-		cameraInverseMatrix = matrixInverse(Translate((-1) * translationVector), MOVE);
-		_model_transform = Translate((-1) * translationVector) * _model_transform;	// move to the origin
+		cameraInverseMatrix = matrixInverse(Translate((-1) * centeringVec), MOVE);
+		_model_transform = Translate((-1) * centeringVec) * _model_transform;	// move to the origin
 
 		_model_transform = rotateMatrix * _model_transform;							// rotate in world axis
 		cameraInverseMatrix = cameraInverseMatrix * matrixInverse(rotateMatrix, ROTATE);
 
-		_model_transform = Translate(translationVector) * _model_transform;			// move back to old location
-		cameraInverseMatrix = cameraInverseMatrix * matrixInverse(Translate(translationVector), MOVE);
+		_model_transform = Translate(centeringVec) * _model_transform;			// move back to old location
+		cameraInverseMatrix = cameraInverseMatrix * matrixInverse(Translate(centeringVec), MOVE);
 
 		_model_normal_transform = CreateNormalTransform(rotateMatrix, ROTATE) * _model_normal_transform;
 	}
@@ -501,7 +503,7 @@ mat4 MeshModel::scaleModel(TransformationDirection direction, TransAxis axis)
 	mat4 scaleMatrix;
 	mat4 scaleInverse;
 	mat4 cameraInverseMatrix;
-	vec3 translationVector;
+	vec3 centeringVec;
 	switch (direction)
 	{
 	case X:
@@ -526,31 +528,31 @@ mat4 MeshModel::scaleModel(TransformationDirection direction, TransAxis axis)
 		break;
 	}
 
-	translationVector = GetPosition(axis);
+	centeringVec = CenteringTranslation(axis);
 	if (axis == WORLD)
 	{
-		_world_transform = Translate((-1) * translationVector) * _world_transform;	// move to the origin
-		cameraInverseMatrix = matrixInverse(Translate((-1) * translationVector), MOVE);
+		_world_transform = Translate((-1) * centeringVec) * _world_transform;	// move to the origin
+		cameraInverseMatrix = matrixInverse(Translate((-1) * centeringVec), MOVE);
 
 		_world_transform = scaleMatrix * _world_transform;							// scale in world axis
 		cameraInverseMatrix = cameraInverseMatrix * matrixInverse(scaleMatrix, SCALE);
 
-		_world_transform = Translate(translationVector) * _world_transform;			// move back to old location
-		cameraInverseMatrix = cameraInverseMatrix * matrixInverse(Translate(translationVector), MOVE);
+		_world_transform = Translate(centeringVec) * _world_transform;			// move back to old location
+		cameraInverseMatrix = cameraInverseMatrix * matrixInverse(Translate(centeringVec), MOVE);
 
 		_world_normal_transform = CreateNormalTransform(scaleMatrix, SCALE) * _world_normal_transform;
 	}
 	else		// axis == MODEL	
 	{
 
-		_model_transform = Translate((-1) * translationVector) * _model_transform;	// move to the origin
-		cameraInverseMatrix = matrixInverse(Translate((-1) * translationVector),MOVE);
+		_model_transform = Translate((-1) * centeringVec) * _model_transform;	// move to the origin
+		cameraInverseMatrix = matrixInverse(Translate((-1) * centeringVec),MOVE);
 
 		_model_transform = scaleMatrix * _model_transform;							// scale in world axis
 		cameraInverseMatrix = cameraInverseMatrix * matrixInverse(scaleMatrix, SCALE);
 
-		_model_transform = Translate(translationVector) * _model_transform;			// move back to old location
-		cameraInverseMatrix = cameraInverseMatrix * matrixInverse(Translate(translationVector), MOVE);
+		_model_transform = Translate(centeringVec) * _model_transform;			// move back to old location
+		cameraInverseMatrix = cameraInverseMatrix * matrixInverse(Translate(centeringVec), MOVE);
 
 		_model_normal_transform = CreateNormalTransform(scaleMatrix, SCALE) * _model_normal_transform;
 	}
