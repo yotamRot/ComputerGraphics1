@@ -124,8 +124,8 @@ mat4 CreateNormalTransform(mat4& matrix, Transformation T)
 MeshModel::MeshModel(string fileName)
 {
 	loadFile(fileName);
-	this->_world_transform[2][3] = -5;
 	bound_box_vertices = CalcBounds();
+	_world_transform[2][3] = -5;
 }
 
 MeshModel::~MeshModel(void)
@@ -296,7 +296,7 @@ vec3 MeshModel::CenteringTranslation(TransAxis axis)
 	vec3 worldCenterize = vec3(_world_transform[0][3] / _world_transform[3][3],
 		_world_transform[1][3] / _world_transform[3][3],
 		_world_transform[2][3] / _world_transform[3][3]);
-	vec3 modelCenterize = GetCenter() + vec3(_model_transform[0][3] / _model_transform[3][3],
+	vec3 modelCenterize = vec3(_model_transform[0][3] / _model_transform[3][3],
 		_model_transform[1][3] / _model_transform[3][3],
 		_model_transform[2][3] / _model_transform[3][3]);
 	if (axis == MODEL)

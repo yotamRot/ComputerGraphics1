@@ -138,7 +138,7 @@ void Scene::ResetZoom()
 {
 	Camera* curCamera = cameras.at(activeCamera);
 	vec3 lbn = vec3(-0.5, -0.5, 0.5);
-	vec3 rtf = vec3(0.5, 0.5, 5);
+	vec3 rtf = vec3(0.5, 0.5, 50);
 	if (proj == ORTHOGRAPHIC)
 	{
 		curCamera->Ortho(lbn.x, rtf.x, lbn.y, rtf.y, lbn.z, rtf.z);
