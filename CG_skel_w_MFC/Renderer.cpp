@@ -280,16 +280,13 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* v
 	}
 	if (isShowBoundBox)
 	{
-		DrawRectangles(boundBoxVertices);
+		DrawBoundingBox(boundBoxVertices);
 	}
 }
 
-void Renderer::DrawRectangles(const vector<vec3>* vertices, const vector<vec3>* facesCenters, const vector<vec3>* facesNormals)
+void Renderer::DrawBoundingBox(const vector<vec3>* vertices)
 {
 	vec2 rectangle[4];
-	vec2 normal[2];
-	vec3 start;
-	vec3 end;
 	if (!shouldDrawModel(vertices))
 	{
 		return;
@@ -311,20 +308,6 @@ void Renderer::DrawRectangles(const vector<vec3>* vertices, const vector<vec3>* 
 		RasterizeLine(rectangle[3], rectangle[0]);
 
 	}
-
-	if ((facesCenters != NULL) && (facesCenters != NULL) && (isShowFacesNormals))
-	{
-		curColor = red;
-		// iterate over all faces to draw faces normals
-		for (int i = 0; i < facesCenters->size(); i++)
-		{
-			start = Transform(facesCenters->at(i));
-			end = Transform(facesCenters->at(i)) + 0.1 * NormTransform(facesNormals->at(i));
-			RasterizeLine(vec3ToVec2(start), vec3ToVec2(end));
-		}
-		curColor = white;
-	}
-
 }
 bool Renderer::shouldDrawModel(const vector<vec3>* boundingBox)
 {

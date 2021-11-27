@@ -53,7 +53,7 @@ vector<vec3>* SetRectangleVertices(GLfloat posX, GLfloat posY, GLfloat posZ, GLf
 	GLfloat halfY = lenY * 0.5f;
 	GLfloat halfZ = lenZ * 0.5f;
 
-	// front face
+	// front face triangels
 	vertices->push_back(vec3(posX - halfX, posY + halfY, posZ + halfZ)); // top left
 	vertices->push_back(vec3(posX + halfX, posY + halfY, posZ + halfZ)); // top right
 	vertices->push_back(vec3(posX + halfX, posY - halfY, posZ + halfZ)); // bottom right
@@ -287,8 +287,7 @@ vec3 MeshModel::GetBoundsLength()
 
 void MeshModel::draw(Renderer* renderer)
 {	
-	GLfloat proportionalValue = GetProportionalValue();
-	renderer->DrawTriangles(vertex_positions, vertix_normals, faces_centers, faces_normals, bound_box_vertices,proportionalValue);
+	renderer->DrawTriangles(vertex_positions, vertix_normals, faces_centers, faces_normals, bound_box_vertices, GetProportionalValue());
 }
 
 vec3 MeshModel::CenteringTranslation(TransAxis axis)
@@ -312,40 +311,132 @@ vec3 MeshModel::CenteringTranslation(TransAxis axis)
 
 PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat lenX, GLfloat lenY, GLfloat lenZ) :posX(posX), posY(posY), posZ(posZ), lenX(lenX), lenY(lenY), lenZ(lenZ)
 {
-	vertex_positions = SetRectangleVertices(posX, posY, posZ, lenX, lenY, lenZ);
+	vertex_positions = new vector<vec3>;
 	faces_centers = new vector<vec3>;
 	faces_normals = new vector<vec3>;
 	//faces_normal_end_positions = new vector<vec3>;
+	vec3 triangle[3];
 	GLfloat halfX = lenX * 0.5f;
 	GLfloat halfY = lenY * 0.5f;
 	GLfloat halfZ = lenZ * 0.5f;
 
-	// front face
-	faces_centers->push_back(vec3(posX, posY, posZ + halfZ));
+
+
+	// front face triangels
+	triangle[0] = vec3(posX - halfX, posY - halfY, posZ + halfZ); // bottom left
+	triangle[1] = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top left
+	triangle[2] = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom right
+	vertex_positions->push_back(triangle[0]); 
+	vertex_positions->push_back(triangle[1]); 
+	vertex_positions->push_back(triangle[2]); 
+	faces_centers->push_back((triangle[0]+ triangle[1]+triangle[2]) / 3);
 	faces_normals->push_back(vec3(0, 0, 1));
 
-	// back face
+	triangle[0] = vec3(posX - halfX, posY + halfY, posZ + halfZ); // bottom left
+	triangle[1] = vec3(posX + halfX, posY + halfY, posZ + halfZ); // top left
+	triangle[2] = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom right
+	vertex_positions->push_back(triangle[0]);
+	vertex_positions->push_back(triangle[1]);
+	vertex_positions->push_back(triangle[2]);
+	faces_centers->push_back((triangle[0] + triangle[1] + triangle[2]) / 3);
+	faces_normals->push_back(vec3(0, 0, 1));
 
-	faces_centers->push_back(vec3(posX, posY, posZ - halfZ));
+	// back face triangels
+	triangle[0] = vec3(posX - halfX, posY - halfY, posZ - halfZ); // bottom left
+	triangle[1] = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
+	triangle[2] = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
+	vertex_positions->push_back(triangle[0]);
+	vertex_positions->push_back(triangle[1]);
+	vertex_positions->push_back(triangle[2]);
+	faces_centers->push_back((triangle[0] + triangle[1] + triangle[2]) / 3);
 	faces_normals->push_back(vec3(0, 0, -1));
 
-	// left face
+	triangle[0] = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
+	triangle[1] = vec3(posX + halfX, posY + halfY, posZ - halfZ); // top right
+	triangle[2] = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
+	vertex_positions->push_back(triangle[0]);
+	vertex_positions->push_back(triangle[1]);
+	vertex_positions->push_back(triangle[2]);
+	faces_centers->push_back((triangle[0] + triangle[1] + triangle[2]) / 3);
+	faces_normals->push_back(vec3(0, 0, -1));
 
-	faces_centers->push_back(vec3(posX - halfX, posY, posZ));
+	// left face triangels
+	triangle[0] = vec3(posX - halfX, posY - halfY, posZ - halfZ); // bottom left
+	triangle[1] = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
+	triangle[2] = vec3(posX - halfX, posY - halfY, posZ + halfZ); // bottom right
+	vertex_positions->push_back(triangle[0]);
+	vertex_positions->push_back(triangle[1]);
+	vertex_positions->push_back(triangle[2]);
+	faces_centers->push_back((triangle[0] + triangle[1] + triangle[2]) / 3);
 	faces_normals->push_back(vec3(-1, 0, 0));
 
-	// right face
-	faces_centers->push_back(vec3(posX + halfX, posY, posZ));
+	triangle[0] = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
+	triangle[1] = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top right
+	triangle[2] = vec3(posX - halfX, posY - halfY, posZ + halfZ); // bottom right
+	vertex_positions->push_back(triangle[0]);
+	vertex_positions->push_back(triangle[1]);
+	vertex_positions->push_back(triangle[2]);
+	faces_centers->push_back((triangle[0] + triangle[1] + triangle[2]) / 3);
+	faces_normals->push_back(vec3(-1, 0, 0));
+
+	// right face triangels
+	triangle[0] = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom left
+	triangle[1] = vec3(posX + halfX, posY + halfY, posZ - halfZ); // top left
+	triangle[2] = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom right
+	vertex_positions->push_back(triangle[0]);
+	vertex_positions->push_back(triangle[1]);
+	vertex_positions->push_back(triangle[2]);
+	faces_centers->push_back((triangle[0] + triangle[1] + triangle[2]) / 3);
 	faces_normals->push_back(vec3(1, 0, 0));
 
-	// top face
-	faces_centers->push_back(vec3(posX, posY + halfY, posZ));
+	triangle[0] = vec3(posX + halfX, posY + halfY, posZ - halfZ); // top left
+	triangle[1] = vec3(posX + halfX, posY + halfY, posZ - halfZ); // top right
+	triangle[2] = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
+	vertex_positions->push_back(triangle[0]);
+	vertex_positions->push_back(triangle[1]);
+	vertex_positions->push_back(triangle[2]);
+	faces_centers->push_back((triangle[0] + triangle[1] + triangle[2]) / 3);
+	faces_normals->push_back(vec3(1, 0, 0));
+
+
+	// top face triangels
+	triangle[0] = vec3(posX - halfX, posY + halfY, posZ - halfZ); // bottom left
+	triangle[1] = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top left
+	triangle[2] = vec3(posX + halfX, posY + halfY, posZ - halfZ); // bottom right
+	vertex_positions->push_back(triangle[0]);
+	vertex_positions->push_back(triangle[1]);
+	vertex_positions->push_back(triangle[2]);
+	faces_centers->push_back((triangle[0] + triangle[1] + triangle[2]) / 3);
 	faces_normals->push_back(vec3(0, 1, 0));
 
-	// down face
-	faces_centers->push_back(vec3(posX, posY - halfY, posZ));
+	triangle[0] = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top left
+	triangle[1] = vec3(posX + halfX, posY + halfY, posZ + halfZ); // top right
+	triangle[2] = vec3(posX + halfX, posY + halfY, posZ - halfZ); // bottom right
+	vertex_positions->push_back(triangle[0]);
+	vertex_positions->push_back(triangle[1]);
+	vertex_positions->push_back(triangle[2]);
+	faces_centers->push_back((triangle[0] + triangle[1] + triangle[2]) / 3);
+	faces_normals->push_back(vec3(0, 1, 0));
+	
+	// down face triangels
+	triangle[0] = vec3(posX - halfX, posY - halfY, posZ - halfZ); // bottom left
+	triangle[1] = vec3(posX - halfX, posY - halfY, posZ + halfZ); // top left
+	triangle[2] = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
+	vertex_positions->push_back(triangle[0]);
+	vertex_positions->push_back(triangle[1]);
+	vertex_positions->push_back(triangle[2]);
+	faces_centers->push_back((triangle[0] + triangle[1] + triangle[2]) / 3);
 	faces_normals->push_back(vec3(0, -1, 0));
 
+	triangle[0] = vec3(posX - halfX, posY - halfY, posZ + halfZ); // top left
+	triangle[1] = vec3(posX + halfX, posY - halfY, posZ + halfZ); // top right
+	triangle[2] = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
+	vertex_positions->push_back(triangle[0]);
+	vertex_positions->push_back(triangle[1]);
+	vertex_positions->push_back(triangle[2]);
+	faces_centers->push_back((triangle[0] + triangle[1] + triangle[2]) / 3);
+	faces_normals->push_back(vec3(0, -1, 0));
+ 
 	bound_box_vertices = CalcBounds();
 }
 
@@ -370,13 +461,6 @@ CameraModel::CameraModel(int cameraIndex) : cameraIndex(cameraIndex)
 	
 	bound_box_vertices = CalcBounds();
 }
-
-
-void PrimMeshModel::draw(Renderer* renderer)
-{
-	renderer->DrawRectangles(vertex_positions, faces_centers, faces_normals);
-}
-
 
 mat4 matrixInverse(mat4& mat , Transformation T)
 {

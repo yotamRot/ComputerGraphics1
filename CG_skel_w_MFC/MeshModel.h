@@ -61,9 +61,7 @@ class PrimMeshModel : public MeshModel
 public:
 	PrimMeshModel();
 	PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat lenX, GLfloat lenY, GLfloat lenZ);
-	void draw(Renderer* renderer);
 };
-
 
 class CameraModel : public MeshModel
 {
