@@ -93,7 +93,7 @@ void Scene::Zoom(ZoomDirection direction)
 //{
 //	activeModel = modelId;
 //	MeshModel* curModel = (MeshModel*)models.at(activeModel);
-//	Camera* curCamera = cameras.at(activeCamera);
+//	Camera* curCamera = cameras.at(activeCamera
 //	CameraModel* cameraModel =(CameraModel *) curCamera->model;
 //	float maxModelAxisSize = max(max(curModel->GetZBoundLength(), curModel->GetXBoundLength()), curModel->GetYBoundLength());
 //	// model in camera cord
@@ -263,7 +263,11 @@ void Scene::draw()
 		}
 
 	}
+	m_renderer->ZBufferScanConvert();
+
 	m_renderer->SwapBuffers();
+	//m_renderer->ClearColorBuffer();
+	//m_renderer->ClearDepthBuffer();
 }
 
 void Scene::drawDemo()
@@ -431,7 +435,7 @@ int Scene::addCamera()
 {
 	int newCameraIndex = cameras.size();
 	CameraModel* cameraModel = new CameraModel(newCameraIndex);
-	Camera* newCamera = new Camera(vec3(-0.5, -0.5, 0.5), vec3(0.5, 0.5, 5), models.size(), cameraModel);
+	Camera* newCamera = new Camera(vec3(-2, -2, 0.5), vec3(2, 2, 50), models.size(), cameraModel);
 	cameras.push_back(newCamera);
 	models.push_back(cameraModel);
 	return newCameraIndex;
