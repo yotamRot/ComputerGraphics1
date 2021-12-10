@@ -395,15 +395,17 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	facesNormals->push_back(curFaceNormal);
 
 	// right face triangels
-	p1 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom left
-	p2 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // top left
-	p3 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom right
+	//high triangle
+	p1 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom left
+	p2 = vec3(posX + halfX, posY + halfY, posZ + halfZ); // top left
+	p3 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // top right
 	curTriangle = Triangle(p1, p2, p3);
 	triangles->push_back(curTriangle);
 	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(1, 0, 0));
 	facesNormals->push_back(curFaceNormal);
 
-	p1 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // top left
+	//low triangle
+	p1 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom left
 	p2 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // top right
 	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
 	curTriangle = Triangle(p1, p2, p3);

@@ -45,8 +45,8 @@ Renderer::~Renderer(void)
 
 void Renderer::transformToScreen(vec2& vec)
 {
-	vec.x = (m_width / 2) * (vec.x + 1);
-	vec.y = (m_height / 2) * (vec.y + 1);
+	vec.x = floorf((m_width / 2) * (vec.x + 1));
+	vec.y = floorf((m_height / 2) * (vec.y + 1));
 }
 
 
@@ -94,16 +94,15 @@ void Triangle::Rasterize()
 float Triangle::GetZ(int x, int y)
 {
 	float A1, A2, A3;
-	float a1, a2, a3;
 	vec2 cord = vec2(x, y);
-	A1 = length(cross(vec3((p1 - cord), 0), vec3((p2 - cord), 0)));
-	A2 = length(cross(vec3((p2 - cord), 0), vec3((p3 - cord), 0)));
-	A3 = length(cross(vec3((p3 - cord), 0), vec3((p1 - cord), 0)));
+	vec3 vec0 = vec3(p1 - cord, 0);
+	vec3 vec1 = vec3(p2 - cord, 0);
+	vec3 vec2 = vec3(p3 - cord, 0);
+	A1 = length(cross(vec0, vec1));
+	A2 = length(cross(vec1, vec2));
+	A3 = length(cross(vec2, vec0));
 	float normalFactor = A1 + A2 + A3;
-	a1 = A1 / normalFactor;
-	a2 = A2 / normalFactor;
-	a3 = A3 / normalFactor;
-	return a1 * C_p1_3d.z + a2 * C_p2_3d.z + a3 * C_p3_3d.z;	
+	return (A1 * C_p1_3d.z + A2 * C_p2_3d.z + A3 * C_p3_3d.z) / normalFactor;
 }
 
 void Triangle::UpdateShape()
@@ -587,7 +586,7 @@ void Renderer::ZBufferScanConvert()
 	int minX, maxX;
 
 
-	A.insert(shapesSet.begin(), shapesSet.end());
+	//A.insert(shapesSet.begin(), shapesSet.end());
 
 	for (int x = 0; x < m_width; x++)
 	{
@@ -597,7 +596,8 @@ void Renderer::ZBufferScanConvert()
 		}
 
 	}
-	for (auto it = A.begin(); it != A.end(); ++it)
+
+	for (auto it = shapesSet.begin(); it != shapesSet.end(); ++it)
 	{
 		curColor = colors[(*it)->shapeColorIndex];
 		yMin = max(0, (*it)->yMin);
@@ -612,8 +612,8 @@ void Renderer::ZBufferScanConvert()
 
 
 			
-			minX = (*it)->Xranges[y].minX;
-			maxX = (*it)->Xranges[y].maxX;
+			minX = max((*it)->Xranges[y].minX,0);
+			maxX = min((*it)->Xranges[y].maxX, m_width -1);
 			for (int i = minX; i <= maxX; i++)
 			{
 				z = abs((*it)->GetZ(i, y));
@@ -623,7 +623,6 @@ void Renderer::ZBufferScanConvert()
 					DrawPixel(i, y);
 
 				}
-
 			}
 
 
