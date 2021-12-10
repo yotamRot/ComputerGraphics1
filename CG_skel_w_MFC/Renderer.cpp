@@ -98,9 +98,9 @@ float Triangle::GetZ(int x, int y)
 	vec3 vec0 = vec3(p1 - cord, 0);
 	vec3 vec1 = vec3(p2 - cord, 0);
 	vec3 vec2 = vec3(p3 - cord, 0);
-	A1 = length(cross(vec0, vec1));
-	A2 = length(cross(vec1, vec2));
-	A3 = length(cross(vec2, vec0));
+	A1 = length(cross(vec1, vec2));
+	A2 = length(cross(vec2, vec0));
+	A3 = length(cross(vec0, vec1));
 	float normalFactor = A1 + A2 + A3;
 	return (A1 * C_p1_3d.z + A2 * C_p2_3d.z + A3 * C_p3_3d.z) / normalFactor;
 }
