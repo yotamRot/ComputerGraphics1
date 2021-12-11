@@ -8,25 +8,37 @@
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 #define ZINDEX(width,x,y) (x+y*width)
+#define DRAW_OPEN_MODELS
+
 
 struct color{
 	int red, green, blue;
-} white{ 1,1,1 }, red{ 1,0,0 }, green{ 0, 1, 0 }, blue{ 0,0,1 };
+} white{ 1, 1, 1 }, red{ 1, 0, 0 }, green{ 0, 1, 0 }, blue{ 0, 0, 1 };
+
 
 color curColor = red;
 color colors[] = { white, red ,green ,blue };
 int colorIndex = 0;
 extern Renderer * renderer;
 
+Normal invlid_normal = Normal(vec3(0, 0), vec3(0, 0),vertix_normal, 0, false);
 
-Triangle::Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d) : p1_3d(p1_3d), p2_3d(p2_3d), p3_3d(p3_3d)
+Triangle::Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d, Normal& normal, Normal& p1_normal, Normal& p2_normal, Normal& p3_normal)
+	: p1_3d(p1_3d), p2_3d(p2_3d), p3_3d(p3_3d) , normal(normal), p1_normal(p1_normal), p2_normal(p2_normal) , p3_normal(p3_normal)
 {
 	should_draw = true;
 }
 
-Normal::Normal(vec3& p1_3d, vec3& p2_3d) :p1_3d(p1_3d), p2_3d(p2_3d)
+Line::Line(vec3& p1_3d, vec3& p2_3d) :p1_3d(p1_3d), p2_3d(p2_3d)
 {
+	shapeColorIndex = BLUE;
+	should_draw = true;
+	//shapeColorIndex = BLUE;
+}
 
+Normal::Normal(vec3& p1_3d, vec3& p2_3d,NormalKind normal_kind, float normal_size, bool is_valid) : Line(p1_3d, p2_3d),normal_kind(normal_kind), normal_size(normal_size), is_valid(is_valid)
+{
+	shapeColorIndex = RED;
 }
 
 // gives the maximum in array
@@ -52,7 +64,7 @@ float mini(float arr[], int n) {
 	return m;
 }
 
-bool LiangBarskyClipping(vec3 point1, vec3 point2, vec3 max, vec3 min)
+bool LiangBarskyClipping(vec3& point1, vec3& point2, vec3& max, vec3& min)
 {
 	// defining variables
 	float p[7];
@@ -195,7 +207,7 @@ void RasterizeArrangeVeritcs(vec2& ver1, vec2& ver2, bool byX = true)
 
 }
 
-void Normal::Rasterize()
+void Line::Rasterize()
 {
 	RasterizeLine(p1, p2);
 }
@@ -221,6 +233,51 @@ float Triangle::GetZ(int x, int y)
 	return (A1 * C_p1_3d.z + A2 * C_p2_3d.z + A3 * C_p3_3d.z) / normalFactor;
 }
 
+bool Triangle::ShouldDrawShape()
+{
+	vec4 tmp[4];
+
+	if (dot(normal.C_p2_3d, -(normal.C_p1_3d) < 0))
+	{
+		return false;
+	}
+	mat4 proj = renderer->GetProjection();
+
+	tmp[1] = proj * vec4(C_p1_3d);
+	tmp[2] = proj * vec4(C_p2_3d);
+	tmp[3] = proj * vec4(C_p3_3d);
+
+	if (!LiangBarskyClipping(vec3(tmp[1].x, tmp[1].y, tmp[1].z), vec3(tmp[2].x, tmp[2].y, tmp[2].z), vec3(tmp[1].w), vec3(-tmp[1].w)) ||
+		!LiangBarskyClipping(vec3(tmp[1].x, tmp[1].y, tmp[1].z), vec3(tmp[3].x, tmp[3].y, tmp[3].z), vec3(tmp[1].w), vec3(-tmp[1].w)) ||
+		!LiangBarskyClipping(vec3(tmp[3].x, tmp[3].y, tmp[3].z), vec3(tmp[2].x, tmp[2].y, tmp[2].z), vec3(tmp[2].w), vec3(-tmp[2].w)))
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+
+bool Line::ShouldDrawShape()
+{
+	vec4 tmp[4];
+
+	mat4 proj = renderer->GetProjection();
+
+	tmp[1] = proj * vec4(C_p1_3d);
+	tmp[2] = proj * vec4(C_p2_3d);
+
+	if (!LiangBarskyClipping(vec3(tmp[1].x, tmp[1].y, tmp[1].z), vec3(tmp[2].x, tmp[2].y, tmp[2].z), vec3(tmp[1].w), vec3(-tmp[1].w)))
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+
 void Triangle::UpdateShape()
 {
 	Xranges.clear();
@@ -232,42 +289,73 @@ void Triangle::UpdateShape()
 	p3 = renderer->vec3ToVec2(C_p3_3d);
 	yMax = max(max(p1.y, p2.y), p3.y);
 	yMin = min(min(p1.y, p2.y), p3.y);
+	renderer->yMin = min(yMin, renderer->yMin);
+	renderer->yMax = max(yMin, renderer->yMax);
+	
+	if (normal.is_valid)
+	{
+		normal.UpdateShape();
+	}
+
+	if (p1_normal.is_valid)
+	{
+		p1_normal.UpdateShape();
+	}
+
+	if (p2_normal.is_valid)
+	{
+		p2_normal.UpdateShape();
+	}
+
+	if (p3_normal.is_valid)
+	{
+		p3_normal.UpdateShape();
+	}
+
 	colorIndex = (colorIndex + 1) % 4;
 	shapeColorIndex = colorIndex;
-	vec4 tmp[4];
-	mat4 proj = renderer->GetProjection();
-	tmp[1] = proj * vec4(C_p1_3d);
-	tmp[2] = proj * vec4(C_p2_3d);
-	tmp[3] = proj * vec4(C_p3_3d);
+	should_draw = ShouldDrawShape();
 
-	if (!LiangBarskyClipping(vec3(tmp[1].x, tmp[1].y, tmp[1].z), vec3(tmp[2].x, tmp[2].y, tmp[2].z), vec3(tmp[1].w), vec3(-tmp[1].w)) ||
-		!LiangBarskyClipping(vec3(tmp[1].x, tmp[1].y, tmp[1].z), vec3(tmp[3].x, tmp[3].y, tmp[3].z), vec3(tmp[1].w), vec3(-tmp[1].w)) ||
-		!LiangBarskyClipping(vec3(tmp[3].x, tmp[3].y, tmp[3].z), vec3(tmp[2].x, tmp[2].y, tmp[2].z), vec3(tmp[2].w), vec3(-tmp[2].w)))
-	{
-		this->should_draw = false;
-	}
-	else
-	{
-		this->should_draw = true;
-	}
 }
 
 
-float Normal::GetZ(int x, int y)
+float Line::GetZ(int x, int y)
 {
 	const float t = length(vec2(x, y) - p1) / length(p2 - p1);
 	return C_p1_3d.z * t + (1-t) * C_p2_3d.z;
 }
 
+
+void Line::UpdateShape()
+{
+	Xranges.clear();
+
+	C_p1_3d = renderer->Transform(p1_3d);
+	C_p2_3d = renderer->Transform(p2_3d);
+	p1 = renderer->vec3ToVec2(C_p1_3d);
+	p2 = renderer->vec3ToVec2(C_p2_3d);
+
+	yMax = max(p1.y, p2.y);
+	yMin = min(p1.y, p2.y);
+
+	renderer->yMin = min(yMin, renderer->yMin);
+	renderer->yMax = max(yMin, renderer->yMax);
+
+	should_draw = ShouldDrawShape();
+}
+
 void Normal::UpdateShape()
 {
 	Xranges.clear();
-	C_p1_3d = renderer->NormTransform(p1_3d);
-	C_p2_3d = renderer->NormTransform(p2_3d);
+
+	C_p1_3d = renderer->Transform(p1_3d);
+	C_p2_3d = C_p1_3d + normal_size * (renderer->NormTransform(p2_3d));
 	p1 = renderer->vec3ToVec2(C_p1_3d);
 	p2 = renderer->vec3ToVec2(C_p2_3d);
 	yMax = max(p1.y, p2.y);
 	yMin = min(p1.y, p2.y);
+
+	should_draw = ShouldDrawShape();
 }
 
 void Shape::RasterizeLine(vec2 ver1, vec2 ver2)
@@ -452,13 +540,11 @@ bool CustomCompareYMax::operator()( Shape* shape1,  Shape* shape2) const
 	return shape1->yMax < shape2->yMax;
 }
 
-void Renderer::DrawTriangles(vector<Triangle>* triangles,vector<Normal>* verticesNormals,
-			vector<Normal>* facesNormals,
-			 vector<vec3>* boundBoxVertices, GLfloat proportionalValue)
+void Renderer::DrawTriangles(vector<Triangle>* triangles,
+	vector<Line>* boundBoxLines, GLfloat proportionalValue)
 {
 	Triangle* triangle;
 	Normal* normal;
-	vec4 tmp[4];
 	
 	for (int i = 0; i < triangles->size(); i++)
 	{
@@ -471,69 +557,76 @@ void Renderer::DrawTriangles(vector<Triangle>* triangles,vector<Normal>* vertice
 		yMin = min(yMin, triangle->yMin);
 		triangle->Rasterize();
 		shapesSet.insert(triangle);
-	}
 
-	if ((verticesNormals != NULL) && (isShowVerticsNormals))
-	{
-		//curColor = red;
-		// iterate over all vertices to draw vertices normals
-		for (int i = 0; i < verticesNormals->size(); i++)
+		if (isShowFacesNormals)
 		{
-				normal = &(verticesNormals->at(i));
-				normal->UpdateShape();
-				yMax = max(yMax, normal->yMax);
-				yMin = min(yMin, normal->yMin);
-				normal->Rasterize();
-				shapesSet.insert(normal);
-		}	
-	}
+			if (triangle->normal.should_draw)
+			{
+				yMax = max(yMax, triangle->normal.yMax);
+				yMin = min(yMin, triangle->normal.yMin);
+				triangle->normal.Rasterize();
+				shapesSet.insert(&(triangle->normal));
+			}
+		}
 
-	if ((facesNormals != NULL)  && (isShowFacesNormals))
-	{
-		//curColor = red;
-		// iterate over all faces to draw faces normals
-		for (int i = 0; i < facesNormals->size(); i++)
+		if (isShowFacesNormals)
 		{
-			normal = &(facesNormals->at(i));
-			normal->UpdateShape();
-			yMax = max(yMax, normal->yMax);
-			yMin = min(yMin, normal->yMin);
-			normal->Rasterize();
-			shapesSet.insert(normal);
+			if (triangle->normal.should_draw)
+			{
+				yMax = max(yMax, triangle->normal.yMax);
+				yMin = min(yMin, triangle->normal.yMin);
+				triangle->normal.Rasterize();
+				shapesSet.insert(&(triangle->normal));
+			}
+		}
+
+		if (isShowVerticsNormals)
+		{
+			if (triangle->p1_normal.should_draw)
+			{
+				yMax = max(yMax, triangle->p1_normal.yMax);
+				yMin = min(yMin, triangle->p1_normal.yMin);
+				triangle->p1_normal.Rasterize();
+				shapesSet.insert(&(triangle->p1_normal));
+			}
+			if (triangle->p2_normal.should_draw)
+			{
+				yMax = max(yMax, triangle->p2_normal.yMax);
+				yMin = min(yMin, triangle->p2_normal.yMin);
+				triangle->p2_normal.Rasterize();
+				shapesSet.insert(&(triangle->p2_normal));
+			}
+			if (triangle->p3_normal.should_draw)
+			{
+				yMax = max(yMax, triangle->p3_normal.yMax);
+				yMin = min(yMin, triangle->p3_normal.yMin);
+				triangle->p3_normal.Rasterize();
+				shapesSet.insert(&(triangle->p3_normal));
+			}
 		}
 	}
 
+	
+
 	if (isShowBoundBox)
 	{
-		DrawBoundingBox(boundBoxVertices);
+		DrawBoundingBox(boundBoxLines);
 	}
 }
 
-void Renderer::DrawBoundingBox(const vector<vec3>* vertices)
+void Renderer::DrawBoundingBox(vector<Line>* boundBoxLines)
 {
-	//vec2 rectangle[4];
-	//if (!shouldDrawModel(vertices))
-	//{
-	//	return;
-	//}
-	//// iterate over all vertices to draw rectangles
-	//for (auto it = vertices->begin(); it != vertices->end(); ++it)
-	//{
-	//	curColor = white;
-	//	rectangle[0] = vec3ToVec2(Transform(*it));
-	//	it++;
-	//	rectangle[1] = vec3ToVec2(Transform(*it));
-	//	it++;
-	//	rectangle[2] = vec3ToVec2(Transform(*it));
-	//	it++;
-	//	rectangle[3] = vec3ToVec2(Transform(*it));
-
-	//	RasterizeLine(rectangle[0], rectangle[1]);
-	//	RasterizeLine(rectangle[1], rectangle[2]);
-	//	RasterizeLine(rectangle[2], rectangle[3]);
-	//	RasterizeLine(rectangle[3], rectangle[0]);
-
-	//}
+	Line *line;
+	// iterate over all vertices to draw rectangles
+	for (int i = 0; i < boundBoxLines->size(); i++)
+	{
+		line = &(boundBoxLines->at(i));
+		line->UpdateShape();
+		yMax = max(yMax, line->yMax);
+		yMin = min(yMin, line->yMin);
+		line->Rasterize();
+		shapesSet.insert(line);
+	}
 }
 
 //check if part of the object is inside the camera view frame	
@@ -729,7 +822,7 @@ void Renderer::ZBufferScanConvert()
 {
 	//curColor = blue;
 	multiset<Shape*, CustomCompareYMax> A;
-	Normal* dummy = new Normal();
+	Line* dummy = new Line();
 	float z;
 	int minX, maxX;
 

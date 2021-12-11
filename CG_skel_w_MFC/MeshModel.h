@@ -26,11 +26,8 @@ protected :
 public:	
 
 	vector<Triangle>* triangles;
-	vector<Normal>* facesNormals;
-	vector<Normal>* verticesNormals;
+	vector<Line>* bound_box_vertices;
 
-
-	vector<vec3>* bound_box_vertices;
 	mat4 _model_transform;
 	mat4 _world_transform;
 
@@ -39,7 +36,7 @@ public:
 	void loadFile(string fileName);
 	void draw(Renderer* renderer);
 	vec3 CenteringTranslation(TransAxis axis);
-	vector<vec3>* CalcBounds();
+	vector<Line>* CalcBounds();
 	vec3 GetCenter();
 	GLfloat GetXBoundLength();
 	GLfloat GetYBoundLength();
