@@ -8,7 +8,7 @@
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 #define ZINDEX(width,x,y) (x+y*width)
-#define DRAW_OPEN_MODELS
+#define DRAW_OPEN_MODELS 1
 
 
 color white{1, 1, 1}, red{1, 0, 0}, green{0, 1, 0}, blue{0, 0, 1};
@@ -234,11 +234,13 @@ float Triangle::GetZ(int x, int y)
 bool Triangle::ShouldDrawShape()
 {
 	vec4 tmp[4];
-
-	if (dot(normal.C_p2_3d, -(normal.C_p1_3d) < 0))
+#if DRAW_OPEN_MODELS
+	if (dot(normal.C_p2_3d - normal.C_p1_3d, -(normal.C_p1_3d)) < 0)
 	{
 		return false;
 	}
+#endif // 3D
+
 	mat4 proj = renderer->GetProjection();
 
 	tmp[1] = proj * vec4(C_p1_3d);
@@ -288,7 +290,7 @@ void Triangle::UpdateShape()
 	yMax = max(max(p1.y, p2.y), p3.y);
 	yMin = min(min(p1.y, p2.y), p3.y);
 	renderer->yMin = min(yMin, renderer->yMin);
-	renderer->yMax = max(yMin, renderer->yMax);
+	renderer->yMax = max(yMax, renderer->yMax);
 	
 	if (normal.is_valid)
 	{

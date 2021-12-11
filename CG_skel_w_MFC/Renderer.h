@@ -11,11 +11,12 @@
 
 using namespace std;
 class Renderer;
-#define DEFAULT_NORMAL_SIZE 0.1
-#define WHITE						0
-#define RED							1
-#define GREEN						2
-#define BLUE						3
+#define DEFAULT_NORMAL_SIZE			0.1
+#define WHITE						vec3(1,1,1)
+#define RED							vec3(1,0,0)
+#define GREEN						vec3(0,1,0)
+#define BLUE						vec3(0,0,1)
+
 struct color {
 	int red, green, blue;
 };

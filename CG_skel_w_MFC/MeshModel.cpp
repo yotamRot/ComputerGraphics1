@@ -118,7 +118,7 @@ mat4 CreateNormalTransform(mat4& matrix, Transformation T)
 	return normalMatrix;
 }
 
-MeshModel::MeshModel(string fileName):mesh_color(1), ka(0.5), kd(0.8), ks(1.0), alpha(100.0)
+MeshModel::MeshModel(string fileName):mesh_color(BLUE), ka(0.5), kd(0.8), ks(1.0), alpha(100.0)
 {
 	loadFile(fileName);
 	bound_box_vertices = CalcBounds();
@@ -136,9 +136,10 @@ void MeshModel::loadFile(string fileName)
 	vector<FaceIdcs> faces;
 	vector<vec3> vertices;
 	vector<vec3> v_normals;
-	vec3 curVertex;
 	vec3 curCenter;
 	vec3 curNormalEnd;
+
+	vec3 p1, p2 , p3;
 
 
 	Triangle curTriangle;
@@ -189,8 +190,11 @@ void MeshModel::loadFile(string fileName)
 	for (vector<FaceIdcs>::iterator it = faces.begin(); it != faces.end(); ++it)
 	{
 		//Create Trignagle
-		curCenter = (curTriangle.p1_3d + curTriangle.p2_3d + curTriangle.p3_3d) / 3;
-		curNormalEnd = normalize(cross(curTriangle.p2_3d - curTriangle.p1_3d, curTriangle.p3_3d - curTriangle.p1_3d));
+		p1 = vertices.at(it->v[0] - 1);
+		p2 = vertices.at(it->v[1] - 1);
+		p3 = vertices.at(it->v[2] - 1);
+		curCenter = (p1 + p2 + p3) / 3;
+		curNormalEnd = normalize(cross(p2 - p1,p3 - p1));
 		curFaceNormal = Normal(curCenter, curNormalEnd, face_normal);
 
 		if (v_normals.size() != 0)
@@ -205,12 +209,12 @@ void MeshModel::loadFile(string fileName)
 			curNormalEnd = normalize(v_normals.at(it->vn[2] - 1) - curTriangle.p3_3d);
 			curVertex3Normal = Normal(curTriangle.p3_3d, curNormalEnd, vertix_normal);
 
-			curTriangle = Triangle(vertices.at(it->v[0] - 1), vertices.at(it->v[1] - 1), vertices.at(it->v[2] - 1) , mesh_color ,curFaceNormal, curVertex1Normal, curVertex2Normal, curVertex3Normal);
+			curTriangle = Triangle(p1, p2, p3, mesh_color ,curFaceNormal, curVertex1Normal, curVertex2Normal, curVertex3Normal);
 
 		}
 		else
 		{
-			curTriangle = Triangle(vertices.at(it->v[0] - 1), vertices.at(it->v[1] - 1), vertices.at(it->v[2] - 1), mesh_color, curFaceNormal);
+			curTriangle = Triangle(p1, p2, p3, mesh_color, curFaceNormal);
 		}
 
 
