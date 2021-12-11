@@ -4,6 +4,7 @@
 #include "InitShader.h"
 #include "GL\freeglut.h"
 #include <limits>
+#include <chrono>
 
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
@@ -15,7 +16,7 @@ color white{1, 1, 1}, red{1, 0, 0}, green{0, 1, 0}, blue{0, 0, 1};
 color colors[] = { white, red ,green ,blue };
 extern Renderer * renderer;
 
-Normal invlid_normal = Normal(vec3(0, 0), vec3(0, 0),vertix_normal, 0, false);
+Normal invalid_normal = Normal(vec3(0, 0), vec3(0, 0),vertix_normal, 0, false);
 
 Triangle::Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d, vec3 rgb, Normal& normal, Normal& p1_normal, Normal& p2_normal, Normal& p3_normal)
 	: p1_3d(p1_3d), p2_3d(p2_3d), p3_3d(p3_3d) , normal(normal), p1_normal(p1_normal), p2_normal(p2_normal) , p3_normal(p3_normal)
@@ -313,7 +314,6 @@ void Triangle::UpdateShape()
 	}
 
 	should_draw = ShouldDrawShape();
-
 }
 
 
@@ -532,66 +532,69 @@ bool CustomCompareYMax::operator()( Shape* shape1,  Shape* shape2) const
 
 void Renderer::DrawTriangles(vector<Triangle>* triangles,
 	vector<Line>* boundBoxLines, GLfloat proportionalValue)
-{
-	Triangle* triangle;
-	Normal* normal;
-	
-	for (int i = 0; i < triangles->size(); i++)
+{	
+	for (auto it = triangles->begin(); it != triangles->end(); ++it)
 	{
 
-		//curColor = white;
-
-		triangle = &(triangles->at(i));
-		triangle->UpdateShape();
-		yMax = max(yMax, triangle->yMax);
-		yMin = min(yMin, triangle->yMin);
-		triangle->Rasterize();
-		shapesSet.insert(triangle);
-
-		if (isShowFacesNormals)
+		auto start1 = chrono::high_resolution_clock::now();
+		it->UpdateShape();
+		auto stop1 = chrono::high_resolution_clock::now();
+		auto duration1 = chrono::duration_cast<chrono::microseconds>(stop1 - start1);
+		if(it->should_draw)
 		{
-			if (triangle->normal.should_draw)
-			{
-				yMax = max(yMax, triangle->normal.yMax);
-				yMin = min(yMin, triangle->normal.yMin);
-				triangle->normal.Rasterize();
-				shapesSet.insert(&(triangle->normal));
-			}
-		}
+			yMax = max(yMax, it->yMax);
+			yMin = min(yMin, it->yMin);
+			auto start2 = chrono::high_resolution_clock::now();
+			it->Rasterize();
+			auto stop2 = chrono::high_resolution_clock::now();
+			auto duration2 = chrono::duration_cast<chrono::microseconds>(stop2 - start2);
+			shapesSet.push_back(&(*it));
 
-		if (isShowFacesNormals)
-		{
-			if (triangle->normal.should_draw)
+			if (isShowFacesNormals)
 			{
-				yMax = max(yMax, triangle->normal.yMax);
-				yMin = min(yMin, triangle->normal.yMin);
-				triangle->normal.Rasterize();
-				shapesSet.insert(&(triangle->normal));
+				if (it->normal.should_draw)
+				{
+					yMax = max(yMax, it->normal.yMax);
+					yMin = min(yMin, it->normal.yMin);
+					it->normal.Rasterize();
+					shapesSet.push_back(&(it->normal));
+				}
 			}
-		}
 
-		if (isShowVerticsNormals)
-		{
-			if (triangle->p1_normal.should_draw)
+			if (isShowFacesNormals)
 			{
-				yMax = max(yMax, triangle->p1_normal.yMax);
-				yMin = min(yMin, triangle->p1_normal.yMin);
-				triangle->p1_normal.Rasterize();
-				shapesSet.insert(&(triangle->p1_normal));
+				if (it->normal.should_draw)
+				{
+					yMax = max(yMax, it->normal.yMax);
+					yMin = min(yMin, it->normal.yMin);
+					it->normal.Rasterize();
+					shapesSet.push_back(&(it->normal));
+				}
 			}
-			if (triangle->p2_normal.should_draw)
+
+			if (isShowVerticsNormals)
 			{
-				yMax = max(yMax, triangle->p2_normal.yMax);
-				yMin = min(yMin, triangle->p2_normal.yMin);
-				triangle->p2_normal.Rasterize();
-				shapesSet.insert(&(triangle->p2_normal));
-			}
-			if (triangle->p3_normal.should_draw)
-			{
-				yMax = max(yMax, triangle->p3_normal.yMax);
-				yMin = min(yMin, triangle->p3_normal.yMin);
-				triangle->p3_normal.Rasterize();
-				shapesSet.insert(&(triangle->p3_normal));
+				if (it->p1_normal.should_draw)
+				{
+					yMax = max(yMax, it->p1_normal.yMax);
+					yMin = min(yMin, it->p1_normal.yMin);
+					it->p1_normal.Rasterize();
+					shapesSet.push_back(&(it->p1_normal));
+				}
+				if (it->p2_normal.should_draw)
+				{
+					yMax = max(yMax, it->p2_normal.yMax);
+					yMin = min(yMin, it->p2_normal.yMin);
+					it->p2_normal.Rasterize();
+					shapesSet.push_back(&(it->p2_normal));
+				}
+				if (it->p3_normal.should_draw)
+				{
+					yMax = max(yMax, it->p3_normal.yMax);
+					yMin = min(yMin, it->p3_normal.yMin);
+					it->p3_normal.Rasterize();
+					shapesSet.push_back(&(it->p3_normal));
+				}
 			}
 		}
 	}
@@ -615,7 +618,7 @@ void Renderer::DrawBoundingBox(vector<Line>* boundBoxLines)
 		yMax = max(yMax, line->yMax);
 		yMin = min(yMin, line->yMin);
 		line->Rasterize();
-		shapesSet.insert(line);
+		shapesSet.push_back(line);
 	}
 }
 
@@ -767,7 +770,8 @@ void Renderer::ClearColorBuffer()
 
 void Renderer::ClearDepthBuffer()
 {
-	//memset(m_zbuffer, numeric_limits<float>::infinity(), (sizeof(float) * m_width ));
+	memset(m_zbuffer, 0, sizeof(float) * m_width * m_height); // max is zero because we are looking at -z
+
 }
 
 
@@ -793,60 +797,34 @@ void Renderer::SetObjectMatrices(const mat4& oTransform, const mat4& nTransform)
 void Renderer::ZBufferScanConvert()
 {
 
-	multiset<Shape*, CustomCompareYMax> A;
-	Line* dummy = new Line();
 	float z;
 	int minX, maxX;
-	float i;
-
-	//A.insert(shapesSet.begin(), shapesSet.end());
-
-	for (int x = 0; x < m_width; x++)
-	{
-		for (int y = 0; y < m_height; y++)
-		{
-			m_zbuffer[ZINDEX(m_width, x, y)] = numeric_limits<float>::infinity();
-		}
-
-	}
-
+	int counter = 0;
 	for (auto it = shapesSet.begin(); it != shapesSet.end(); ++it)
 	{
-		if ((*it)->should_draw == false)
-		{
-			continue;
-		}
 		yMin = max(0, (*it)->yMin);
 		yMax = min((*it)->yMax, m_height - 1);
-		for (int y = yMin; y < yMax; y++)
+		for (int y = (*it)->yMin; y < (*it)->yMax; y++)
 		{
-			
-	/*		dummy->yMin = y;
-			dummy->yMax = y;*/
-			//A.insert(shapesSet.begin(), shapesSet.upper_bound(dummy));
-			//A.erase(A.begin(), A.upper_bound(dummy));
-
-
-			
 			minX = max((*it)->Xranges[y].minX,0);
 			maxX = min((*it)->Xranges[y].maxX, m_width -1);
-			for (int i = minX; i <= maxX; i++)
+			for (int i = (*it)->Xranges[y].minX; i <= (*it)->Xranges[y].maxX; i++)
 			{
-				z = abs((*it)->GetZ(i, y));
+				counter++;
+				z =(*it)->GetZ(i, y);
 				if (z < m_zbuffer[ZINDEX(m_width, i, y)])
 				{
 					m_zbuffer[ZINDEX(m_width, i, y)] = z;
 					DrawPixel(i, y,(*it)->shape_color);
 
 				}
+				DrawPixel(i, y, (*it)->shape_color);
 			}
 
 
 		}
 	}
-
-	//curColor = red;
-
+	counter++;
 }
 
 void Shape::UpdateLimits(int x, int y)

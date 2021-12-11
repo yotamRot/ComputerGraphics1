@@ -3,6 +3,7 @@
 #include "MeshModel.h"
 #include <string>
 #include <math.h>
+#include <chrono>
 
 using namespace std;
 
@@ -229,6 +230,7 @@ void Scene::draw()
 	CameraModel* curCameraModel = (CameraModel*)(cameras[activeCamera]->model);
 	mat4 curCameraInv = curCameraModel->_w_TransformInv * curCameraModel->_m_TransformInv;
 	m_renderer->ClearColorBuffer();
+	m_renderer->ClearDepthBuffer();
 	m_renderer->ConfigureRenderer(curProjection, curCameraInv, isShowVerticsNormals, isShowFacesNormals, isDrawBoundBox);
 	MeshModel* curModel;
 
@@ -247,14 +249,13 @@ void Scene::draw()
 		else
 		{
 			(*it)->draw(m_renderer);// draw models
+	
 		}
 
 	}
-	m_renderer->ZBufferScanConvert();
 
+	m_renderer->ZBufferScanConvert();
 	m_renderer->SwapBuffers();
-	//m_renderer->ClearColorBuffer();
-	//m_renderer->ClearDepthBuffer();
 }
 
 void Scene::drawDemo()

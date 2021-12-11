@@ -109,7 +109,7 @@ public:
 	Normal(vec3& p1_3d, vec3& p2_3d, NormalKind normal_kind, float normal_size=DEFAULT_NORMAL_SIZE, bool is_valid =true);
 };
 
-extern Normal invlid_normal;
+extern Normal invalid_normal;
 
 class Triangle : public virtual Shape
 {
@@ -140,7 +140,7 @@ public:
 	bool  ShouldDrawShape() override;
 	void  UpdateShape() override;
 
-	Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d, vec3 rgb, Normal& normal, Normal& p1_normal=invlid_normal, Normal& p2_normal=invlid_normal, Normal& p3_normal=invlid_normal);
+	Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d, vec3 rgb, Normal& normal, Normal& p1_normal=invalid_normal, Normal& p2_normal=invalid_normal, Normal& p3_normal=invalid_normal);
 };
 
 struct CustomCompareYmin
@@ -167,7 +167,7 @@ class Renderer
 	bool isShowFacesNormals;
 	bool isShowBoundBox;
 
-	multiset<Shape*, CustomCompareYmin> shapesSet;
+	vector<Shape*> shapesSet;
 
 
 	void CreateBuffers(int width, int height);
