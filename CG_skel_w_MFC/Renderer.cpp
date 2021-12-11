@@ -14,11 +14,11 @@ color colors[] = { white, red ,green ,blue };
 extern Renderer * renderer;
 
 
-Triangle::Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d, int color_index)
-	: p1_3d(p1_3d), p2_3d(p2_3d), p3_3d(p3_3d), ka(0.5)
+Triangle::Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d, vec3 rgb)
+	: p1_3d(p1_3d), p2_3d(p2_3d), p3_3d(p3_3d)
 {
 	should_draw = true;
-	shapeColorIndex = color_index;
+	shape_color = rgb;
 }
 
 Normal::Normal(vec3& p1_3d, vec3& p2_3d) :p1_3d(p1_3d), p2_3d(p2_3d)
@@ -163,16 +163,16 @@ void Renderer::transformToScreen(vec2& vec)
 }
 
 
-void Renderer::DrawPixel(int x, int y, int colorIndex)
+void Renderer::DrawPixel(int x, int y, vec3& rgb)
 {
 	if (x < 1 || x >= m_width || y < 1 || y >= m_height)
 	{
 		return;
 	}
 
-	m_outBuffer[INDEX(m_width, x, y, 0)] = colors[colorIndex].red;
-	m_outBuffer[INDEX(m_width, x, y, 1)] = colors[colorIndex].green;
-	m_outBuffer[INDEX(m_width, x, y, 2)] = colors[colorIndex].blue;
+	m_outBuffer[INDEX(m_width, x, y, 0)] = rgb.x;//red
+	m_outBuffer[INDEX(m_width, x, y, 1)] = rgb.y;//green
+	m_outBuffer[INDEX(m_width, x, y, 2)] = rgb.z;//blue
 }
 
 void RasterizeArrangeVeritcs(vec2& ver1, vec2& ver2, bool byX = true)
@@ -700,12 +700,12 @@ void Renderer::SetObjectMatrices(const mat4& oTransform, const mat4& nTransform)
 
 void Renderer::ZBufferScanConvert()
 {
-	//curColor = blue;
+
 	multiset<Shape*, CustomCompareYMax> A;
 	Normal* dummy = new Normal();
 	float z;
 	int minX, maxX;
-
+	float i;
 
 	//A.insert(shapesSet.begin(), shapesSet.end());
 
@@ -744,7 +744,7 @@ void Renderer::ZBufferScanConvert()
 				if (z < m_zbuffer[ZINDEX(m_width, i, y)])
 				{
 					m_zbuffer[ZINDEX(m_width, i, y)] = z;
-					DrawPixel(i, y,(*it)->shapeColorIndex);
+					DrawPixel(i, y,(*it)->shape_color);
 
 				}
 			}

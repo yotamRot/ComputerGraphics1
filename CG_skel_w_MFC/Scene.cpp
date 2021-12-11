@@ -396,10 +396,10 @@ void Scene::MaintingCamerasRatios(int oldWidth, int oldHeight, int newWidth, int
 	}
 }
 
-void Scene::ChangeModelColorIndex(int color_index)
+void Scene::ChangeModelColorIndex(vec3 rgb)
 {
 	MeshModel* cur_model = (MeshModel*)models.at(activeModel);
-	cur_model->mesh_color_index = color_index;
+	cur_model->mesh_color = rgb;
 	cur_model->UpdateTriangleColor();
 }
 

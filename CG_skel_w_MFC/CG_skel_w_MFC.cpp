@@ -40,6 +40,7 @@
 #define SHOW_VERTICES_NORMAL		1
 #define SHOW_FACES_NORMAL			2
 #define SHOW_BOUNDING_BOX			3
+#define CHANGE_COLOR				4
 
 #define ORTHOGRPHIC_PARAMETERS		1
 #define PRESPECTIVE_PARAMETERS		2
@@ -87,7 +88,7 @@ int menuSwitchToCameraId;
 int menuSwitchToLightId;
 int menuLookAtCameraId;
 int menuLookAtLightId;
-int menuChangeColor;
+//int menuChangeColor;
 int menuLights;
 Transformation curTramsformation = MOVE;
 Projection curProjection = PERSPECTIVE;
@@ -278,12 +279,6 @@ void lookAtLightMenu(int id)
 	scene->draw();
 }
 
-void changeColorMenu(int color_index)
-{
-	scene->ChangeModelColorIndex(color_index);
-	scene->draw();
-}
-
 void fileMenu(int id)
 {
 	int newModelId;
@@ -359,6 +354,13 @@ void featuresMenu(int id)
 			else
 			{
 				glutChangeToMenuEntry(3, "Show Bounding Box", SHOW_BOUNDING_BOX);
+			}
+			break;
+		case CHANGE_COLOR:
+			ColorDialog dlg;
+			if (dlg.DoModal() == IDOK) {
+				vec3 rgb = dlg.GetRGB();
+				scene->ChangeModelColorIndex(rgb);
 			}
 			break;
 	}
@@ -482,17 +484,17 @@ void initMenu()
 	glutAddSubMenu("Look At Light", menuLookAtLightId);
 	glutAddSubMenu("Select Light", menuSwitchToLightId);
 
-	menuChangeColor = glutCreateMenu(changeColorMenu);
+	//menuChangeColor = glutCreateMenu(changeColorMenu);
 	int menuFeatures = glutCreateMenu(featuresMenu);
 	glutAddMenuEntry("Show Vertices Normal", SHOW_VERTICES_NORMAL);
 	glutAddMenuEntry("Show Faces Normal", SHOW_FACES_NORMAL);
 	glutAddMenuEntry("Show Bounding Box", SHOW_BOUNDING_BOX);
-	glutAddSubMenu("Change Color", menuChangeColor);
-	glutSetMenu(menuChangeColor);
-	glutAddMenuEntry("White", WHITE);
-	glutAddMenuEntry("Red", RED);
-	glutAddMenuEntry("Green", GREEN);
-	glutAddMenuEntry("Blue", BLUE);
+	glutAddMenuEntry("Change Color", CHANGE_COLOR);
+	//glutSetMenu(menuChangeColor);
+	//glutAddMenuEntry("White", WHITE);
+	//glutAddMenuEntry("Red", RED);
+	//glutAddMenuEntry("Green", GREEN);
+	//glutAddMenuEntry("Blue", BLUE);
 
 	int menuProjections = glutCreateMenu(projectionMenu);
 	glutAddMenuEntry("Orthographic", ORTHOGRAPHIC);

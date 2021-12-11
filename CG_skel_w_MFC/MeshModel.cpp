@@ -121,9 +121,8 @@ mat4 CreateNormalTransform(mat4& matrix, Transformation T)
 	return normalMatrix;
 }
 
-MeshModel::MeshModel(string fileName)
+MeshModel::MeshModel(string fileName):mesh_color(1), ka(0.5), kd(0.8), ks(1.0), alpha(100.0)
 {
-	mesh_color_index = 1;
 	loadFile(fileName);
 	bound_box_vertices = CalcBounds();
 	_world_transform[2][3] = -5;
@@ -203,7 +202,7 @@ void MeshModel::loadFile(string fileName)
 	for (vector<FaceIdcs>::iterator it = faces.begin(); it != faces.end(); ++it)
 	{
 		//Create Trignagle
-		curTriangle = Triangle(vertices.at(it->v[0] - 1), vertices.at(it->v[1] - 1), vertices.at(it->v[2] - 1), mesh_color_index);
+		curTriangle = Triangle(vertices.at(it->v[0] - 1), vertices.at(it->v[1] - 1), vertices.at(it->v[2] - 1), mesh_color);
 
 		if (v_normals.size() != 0)
 		{
@@ -349,7 +348,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p1 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // bottom left
 	p2 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top left
 	p3 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color_index);
+	curTriangle = Triangle(p1, p2, p3, mesh_color);
 	triangles->push_back(curTriangle);
 	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 0, 1));
 	facesNormals->push_back(curFaceNormal);
@@ -357,7 +356,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p1 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // bottom left
 	p2 = vec3(posX + halfX, posY + halfY, posZ + halfZ); // top left
 	p3 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color_index);
+	curTriangle = Triangle(p1, p2, p3, mesh_color);
 	triangles->push_back(curTriangle);
 	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 0, 1));
 	facesNormals->push_back(curFaceNormal);
@@ -366,7 +365,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p1 = vec3(posX - halfX, posY - halfY, posZ - halfZ); // bottom left
 	p2 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
 	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color_index);
+	curTriangle = Triangle(p1, p2, p3, mesh_color);
 	triangles->push_back(curTriangle);
 	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 0, -1));
 	facesNormals->push_back(curFaceNormal);
@@ -374,7 +373,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p1 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
 	p2 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // top right
 	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color_index);
+	curTriangle = Triangle(p1, p2, p3, mesh_color);
 	triangles->push_back(curTriangle);
 	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 0, -1));
 	facesNormals->push_back(curFaceNormal);
@@ -383,7 +382,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p1 = vec3(posX - halfX, posY - halfY, posZ - halfZ); // bottom left
 	p2 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
 	p3 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color_index);
+	curTriangle = Triangle(p1, p2, p3, mesh_color);
 	triangles->push_back(curTriangle);
 	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(-1, 0, 0));
 	facesNormals->push_back(curFaceNormal);
@@ -391,7 +390,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p1 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
 	p2 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top right
 	p3 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color_index);
+	curTriangle = Triangle(p1, p2, p3, mesh_color);
 	triangles->push_back(curTriangle);
 	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(-1, 0, 0));
 	facesNormals->push_back(curFaceNormal);
@@ -401,7 +400,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p1 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom left
 	p2 = vec3(posX + halfX, posY + halfY, posZ + halfZ); // top left
 	p3 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // top right
-	curTriangle = Triangle(p1, p2, p3, mesh_color_index);
+	curTriangle = Triangle(p1, p2, p3, mesh_color);
 	triangles->push_back(curTriangle);
 	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(1, 0, 0));
 	facesNormals->push_back(curFaceNormal);
@@ -410,7 +409,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p1 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom left
 	p2 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // top right
 	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color_index);
+	curTriangle = Triangle(p1, p2, p3, mesh_color);
 	triangles->push_back(curTriangle);
 	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(1, 0, 0));
 	facesNormals->push_back(curFaceNormal);
@@ -420,7 +419,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p1 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // bottom left
 	p2 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top left
 	p3 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color_index);
+	curTriangle = Triangle(p1, p2, p3, mesh_color);
 	triangles->push_back(curTriangle);
 	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 1, 0));
 	facesNormals->push_back(curFaceNormal);
@@ -428,7 +427,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p1 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top left
 	p2 = vec3(posX + halfX, posY + halfY, posZ + halfZ); // top right
 	p3 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color_index);
+	curTriangle = Triangle(p1, p2, p3, mesh_color);
 	triangles->push_back(curTriangle);
 	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 1, 0));
 	facesNormals->push_back(curFaceNormal);
@@ -437,7 +436,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p1 = vec3(posX - halfX, posY - halfY, posZ - halfZ); // bottom left
 	p2 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // top left
 	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color_index);
+	curTriangle = Triangle(p1, p2, p3, mesh_color);
 	triangles->push_back(curTriangle);
 	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, -1, 0));
 	facesNormals->push_back(curFaceNormal);
@@ -445,7 +444,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p1 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // top left
 	p2 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // top right
 	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color_index);
+	curTriangle = Triangle(p1, p2, p3, mesh_color);
 	triangles->push_back(curTriangle);
 	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, -1, 0));
 	facesNormals->push_back(curFaceNormal);
@@ -469,14 +468,14 @@ CameraModel::CameraModel(int cameraIndex) : cameraIndex(cameraIndex)
 	p1 = vec3(0.1, 0, 0); // bottom left
 	p2 = vec3(-0.1, 0, 0); // top left
 	p3 = vec3(0, 0, -0.5); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color_index);
+	curTriangle = Triangle(p1, p2, p3, mesh_color);
 	triangles->push_back(curTriangle);
 
 	// second triangle
 	p1 = vec3(0, 0.1, 0); // bottom left
 	p2 = vec3(0, -0.1, 0); // top left
 	p3 = vec3(0, 0, -0.5); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color_index);
+	curTriangle = Triangle(p1, p2, p3, mesh_color);
 	triangles->push_back(curTriangle);
 	
 	bound_box_vertices = CalcBounds();
@@ -498,14 +497,14 @@ LightModel::LightModel(int lightIndex) : lightIndex(lightIndex)
 	p1 = vec3(0.1, 0, 0); // bottom left
 	p2 = vec3(-0.1, 0, 0); // top left
 	p3 = vec3(0, 0, -0.5); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color_index);
+	curTriangle = Triangle(p1, p2, p3, mesh_color);
 	triangles->push_back(curTriangle);
 
 	// second triangle
 	p1 = vec3(0, 0.1, 0); // bottom left
 	p2 = vec3(0, -0.1, 0); // top left
 	p3 = vec3(0, 0, -0.5); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color_index);
+	curTriangle = Triangle(p1, p2, p3, mesh_color);
 	triangles->push_back(curTriangle);
 
 	bound_box_vertices = CalcBounds();
@@ -704,7 +703,7 @@ void MeshModel::UpdateTriangleColor()
 {
 	for (auto it = triangles->begin(); it != triangles->end(); ++it)
 	{
-		(*it).shapeColorIndex = mesh_color_index;
+		(*it).shape_color = mesh_color;
 	}
 }
 

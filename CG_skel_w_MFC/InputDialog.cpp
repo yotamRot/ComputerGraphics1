@@ -10,31 +10,46 @@
 #define IDC_Z_EDIT 203
 
 
-#define IDC_R_EDIT 204
-#define IDC_L_EDIT 205
-#define IDC_T_EDIT 206
-#define IDC_B_EDIT 207
-#define IDC_F_EDIT 208
-#define IDC_N_EDIT 209
-#define IDC_FOVY_EDIT 210
-#define IDC_ASPECT_EDIT 211
+#define IDC_R_EDIT                  204
+#define IDC_L_EDIT                  205
+#define IDC_T_EDIT                  206
+#define IDC_B_EDIT                  207
+#define IDC_F_EDIT                  208
+#define IDC_N_EDIT                  209
+#define IDC_FOVY_EDIT               210
+#define IDC_ASPECT_EDIT             211
+
+
+#define IDC_K_A_EDIT                212
+#define IDC_K_D_EDIT                213
+#define IDC_K_S_EDIT                214
+#define IDC_RED_EDIT                215
+#define IDC_GREEN_EDIT              216
+#define IDC_BLUE_EDIT               217
 
 
 
-#define CMD_EDIT_TITLE "Command"
-#define X_EDIT_TITLE "X ="
-#define Y_EDIT_TITLE "Y ="
-#define Z_EDIT_TITLE "Z ="
+#define CMD_EDIT_TITLE              "Command"
+#define X_EDIT_TITLE                "X ="
+#define Y_EDIT_TITLE                "Y ="
+#define Z_EDIT_TITLE                "Z ="
 
 
-#define R_EDIT_TITLE "Right ="
-#define T_EDIT_TITLE "Top ="
-#define F_EDIT_TITLE "Far ="
-#define L_EDIT_TITLE "Left ="
-#define B_EDIT_TITLE "Bottom ="
-#define N_EDIT_TITLE "Near ="
-#define FOVY_EDIT_TITLE "Fovy ="
-#define ASPECT_EDIT_TITLE "Aspect ="
+#define R_EDIT_TITLE                "Right ="
+#define T_EDIT_TITLE                "Top ="
+#define F_EDIT_TITLE                "Far ="
+#define L_EDIT_TITLE                "Left ="
+#define B_EDIT_TITLE                "Bottom ="
+#define N_EDIT_TITLE                "Near ="
+#define FOVY_EDIT_TITLE             "Fovy ="
+#define ASPECT_EDIT_TITLE           "Aspect ="
+
+#define RED_EDIT_TITLE              "Red ="
+#define GREEN_EDIT_TITLE            "Green ="
+#define BLUE_EDIT_TITLE             "Blue ="
+#define K_A_EDIT_TITLE              "Ka ="
+#define K_D_EDIT_TITLE              "Kd ="
+#define K_S_EDIT_TITLE              "Ks ="
 
 
 vec3 rtf;
@@ -422,3 +437,92 @@ void CPerspDialog::OnPaint()
 
     mFovyEdit.SetFocus();
 }
+
+
+// ----------------------
+//    Class ColorDialog
+// ----------------------
+
+ColorDialog::ColorDialog(CString title)
+    : CInputDialog(title), mKa(0.0), mKd(0.0), mKs(0.0), mRed(0.0), mGreen(0.0), mBlue(0.0)
+{ }
+
+ColorDialog::~ColorDialog()
+{ }
+
+vec3 ColorDialog::GetK()
+{
+    return vec3(mKa, mKd, mKs);
+}
+
+vec3 ColorDialog::GetRGB()
+{
+    return vec3(mRed, mGreen, mBlue);
+}
+
+void ColorDialog::DoDataExchange(CDataExchange* pDX)
+{
+    CInputDialog::DoDataExchange(pDX);
+    DDX_Text(pDX, IDC_K_A_EDIT, mKa);
+    DDX_Text(pDX, IDC_K_D_EDIT, mKd);
+    DDX_Text(pDX, IDC_K_S_EDIT, mKs);
+    DDX_Text(pDX, IDC_RED_EDIT, mRed);
+    DDX_Text(pDX, IDC_GREEN_EDIT, mGreen);
+    DDX_Text(pDX, IDC_BLUE_EDIT, mBlue);
+}
+
+// CXyzDialog message handlers
+BEGIN_MESSAGE_MAP(ColorDialog, CInputDialog)
+    ON_WM_CREATE()
+    ON_WM_PAINT()
+END_MESSAGE_MAP()
+
+int ColorDialog::OnCreate(LPCREATESTRUCT lpcs)
+{
+    mKaEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(160, 70, 200, 90), this, IDC_K_A_EDIT);
+
+    mKdEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(360, 70, 400, 90), this, IDC_K_D_EDIT);
+
+    mKsEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(560, 70, 600, 90), this, IDC_K_S_EDIT);
+
+    mRedEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(160, 170, 200, 190), this, IDC_RED_EDIT);
+
+    mGreenEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(360, 170, 400, 190), this, IDC_GREEN_EDIT);
+
+    mBlueEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(560, 170, 600, 190), this, IDC_BLUE_EDIT);
+
+    return 0;
+}
+
+void ColorDialog::OnPaint()
+{
+    CPaintDC dc(this);
+    dc.SetBkMode(TRANSPARENT);
+
+    CRect r_rect(100, 72, 200, 95);
+    dc.DrawText(CString(K_A_EDIT_TITLE), -1, &r_rect, DT_SINGLELINE);
+
+    CRect t_rect(250, 72, 400, 95);
+    dc.DrawText(CString(K_D_EDIT_TITLE), -1, &t_rect, DT_SINGLELINE);
+
+    CRect f_rect(500, 72, 600, 95);
+    dc.DrawText(CString(K_S_EDIT_TITLE), -1, &f_rect, DT_SINGLELINE);
+
+    CRect l_rect(100, 172, 200, 195);
+    dc.DrawText(CString(RED_EDIT_TITLE), -1, &l_rect, DT_SINGLELINE);
+
+    CRect b_rect(250, 172, 400, 195);
+    dc.DrawText(CString(GREEN_EDIT_TITLE), -1, &b_rect, DT_SINGLELINE);
+
+    CRect n_rect(500, 172, 600, 195);
+    dc.DrawText(CString(BLUE_EDIT_TITLE), -1, &n_rect, DT_SINGLELINE);
+
+    mKaEdit.SetFocus();
+}
+

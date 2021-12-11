@@ -24,12 +24,18 @@ protected :
 	vec3 center;
 
 public:	
+	float ka;// fraction of ambient light reflected from surface = 0.5;
+	float kd;// = 0.8;
+	float ks;// = 1.0;
+	float alpha;// = 100.0;
+	//vec4 Ls = vec4(1.0, 0.0, 1.0, 1.0);
+	//vec4 ambient = ka * vec4(tmpColor, 1.0);
 
 	vector<Triangle>* triangles;
 	vector<Normal>* facesNormals;
 	vector<Normal>* verticesNormals;
 
-	int mesh_color_index;
+	vec3 mesh_color;
 	vector<vec3>* bound_box_vertices;
 	mat4 _model_transform;
 	mat4 _world_transform;

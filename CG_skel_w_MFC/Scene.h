@@ -148,5 +148,6 @@ public:
 	vec3 Getlbn();
 	vec3 Getrtf();
 	void MaintingCamerasRatios(int oldWidth, int oldHeight, int newWidth, int newHeight);
-	void ChangeModelColorIndex(int color_index);
+	void ChangeModelColorIndex(vec3 rgb);
+	void ChangeModelIluminationParams(vec3 k);
 };

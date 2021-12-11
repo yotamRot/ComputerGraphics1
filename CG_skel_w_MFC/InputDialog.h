@@ -169,3 +169,35 @@ protected:
     afx_msg void OnPaint();
     DECLARE_MESSAGE_MAP()
 };
+
+
+class ColorDialog : public CInputDialog
+{
+public:
+    ColorDialog(CString title = "Input Dialog");
+    virtual ~ColorDialog();
+
+    vec3 GetK();  //Ka Kd Ks
+    vec3 GetRGB();  //R G B
+
+protected:
+    float mKa;// mRight;
+    float mKd;// mLeft;
+    float mKs;// mTop;
+    float mRed;// mBottom;
+    float mGreen;// mFar;
+    float mBlue;// mNear;
+    CEdit mKaEdit;
+    CEdit mKdEdit;
+    CEdit mKsEdit;
+    CEdit mRedEdit;
+    CEdit mGreenEdit;
+    CEdit mBlueEdit;
+
+
+    virtual void DoDataExchange(CDataExchange* pDX);
+
+    afx_msg int OnCreate(LPCREATESTRUCT lpcs);
+    afx_msg void OnPaint();
+    DECLARE_MESSAGE_MAP()
+};
