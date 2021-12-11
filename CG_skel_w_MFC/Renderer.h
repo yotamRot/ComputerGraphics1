@@ -63,7 +63,8 @@ public:
 	float kd; 
 	float ks; 
 	bool should_draw;
-	map<int, Range> Xranges;
+	int* x_min;
+	int* x_max;
 	void UpdateLimits(int x, int y);
 
 };

@@ -9,7 +9,7 @@
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 #define ZINDEX(width,x,y) (x+y*width)
-#define DRAW_OPEN_MODELS 1
+#define DRAW_OPEN_MODELS 0
 
 
 color white{1, 1, 1}, red{1, 0, 0}, green{0, 1, 0}, blue{0, 0, 1};
@@ -23,18 +23,24 @@ Triangle::Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d, vec3 rgb, Normal& norm
 {
 	should_draw = true;
 	shape_color = rgb;
+	x_max = NULL;
+	x_min = NULL;
 }
 
 Line::Line(vec3& p1_3d, vec3& p2_3d) :p1_3d(p1_3d), p2_3d(p2_3d)
 {
 	shape_color = BLUE;
 	should_draw = true;
+	x_max = NULL;
+	x_min = NULL;
 	//shapeColorIndex = BLUE;
 }
 
 Normal::Normal(vec3& p1_3d, vec3& p2_3d,NormalKind normal_kind, float normal_size, bool is_valid) : Line(p1_3d, p2_3d),normal_kind(normal_kind), normal_size(normal_size), is_valid(is_valid)
 {
 	shape_color = RED;
+	x_max = NULL;
+	x_min = NULL;
 }
 
 // gives the maximum in array
@@ -281,7 +287,6 @@ bool Line::ShouldDrawShape()
 
 void Triangle::UpdateShape()
 {
-	Xranges.clear();
 	C_p1_3d = renderer->Transform(p1_3d);
 	C_p2_3d = renderer->Transform(p2_3d);
 	C_p3_3d = renderer->Transform(p3_3d);
@@ -301,19 +306,29 @@ void Triangle::UpdateShape()
 	if (p1_normal.is_valid)
 	{
 		p1_normal.UpdateShape();
-	}
-
-	if (p2_normal.is_valid)
-	{
 		p2_normal.UpdateShape();
-	}
-
-	if (p3_normal.is_valid)
-	{
 		p3_normal.UpdateShape();
+
 	}
 
 	should_draw = ShouldDrawShape();
+
+	if (should_draw)
+	{
+		if (x_min != NULL)
+		{
+			delete x_min;
+		}
+		if (x_max != NULL)
+		{
+			delete x_max;
+		}
+	
+		
+		x_max = new int[yMax - yMin + 1]();
+		x_min = new int[yMax - yMin + 1]();
+
+	}
 }
 
 
@@ -326,7 +341,6 @@ float Line::GetZ(int x, int y)
 
 void Line::UpdateShape()
 {
-	Xranges.clear();
 
 	C_p1_3d = renderer->Transform(p1_3d);
 	C_p2_3d = renderer->Transform(p2_3d);
@@ -340,11 +354,24 @@ void Line::UpdateShape()
 	renderer->yMax = max(yMin, renderer->yMax);
 
 	should_draw = ShouldDrawShape();
+	if (should_draw)
+	{
+		if (x_min != NULL)
+		{
+			delete x_min;
+		}
+		if (x_max != NULL)
+		{
+			delete x_max;
+		}
+
+		x_max = new int[yMax - yMin + 1]();
+		x_min = new int[yMax - yMin + 1]();
+	}
 }
 
 void Normal::UpdateShape()
 {
-	Xranges.clear();
 
 	C_p1_3d = renderer->Transform(p1_3d);
 	C_p2_3d = C_p1_3d + normal_size * (renderer->NormTransform(p2_3d));
@@ -353,7 +380,22 @@ void Normal::UpdateShape()
 	yMax = max(p1.y, p2.y);
 	yMin = min(p1.y, p2.y);
 
+
 	should_draw = ShouldDrawShape();
+	if (should_draw)
+	{
+		if (x_min != NULL)
+		{
+			delete x_min;
+		}
+		if (x_max != NULL)
+		{
+			delete x_max;
+		}
+
+		x_max = new int[yMax - yMin + 1]();
+		x_min = new int[yMax - yMin + 1]();
+	}
 }
 
 void Shape::RasterizeLine(vec2 ver1, vec2 ver2)
@@ -535,19 +577,13 @@ void Renderer::DrawTriangles(vector<Triangle>* triangles,
 {	
 	for (auto it = triangles->begin(); it != triangles->end(); ++it)
 	{
-
-		auto start1 = chrono::high_resolution_clock::now();
 		it->UpdateShape();
-		auto stop1 = chrono::high_resolution_clock::now();
-		auto duration1 = chrono::duration_cast<chrono::microseconds>(stop1 - start1);
 		if(it->should_draw)
 		{
 			yMax = max(yMax, it->yMax);
 			yMin = min(yMin, it->yMin);
-			auto start2 = chrono::high_resolution_clock::now();
 			it->Rasterize();
-			auto stop2 = chrono::high_resolution_clock::now();
-			auto duration2 = chrono::duration_cast<chrono::microseconds>(stop2 - start2);
+
 			shapesSet.push_back(&(*it));
 
 			if (isShowFacesNormals)
@@ -799,18 +835,21 @@ void Renderer::ZBufferScanConvert()
 
 	float z;
 	int minX, maxX;
-	int counter = 0;
+	float i;
+	int fixed_y;
+
 	for (auto it = shapesSet.begin(); it != shapesSet.end(); ++it)
 	{
 		yMin = max(0, (*it)->yMin);
 		yMax = min((*it)->yMax, m_height - 1);
-		for (int y = (*it)->yMin; y < (*it)->yMax; y++)
+		for (int y = yMin; y < yMax; y++)
 		{
-			minX = max((*it)->Xranges[y].minX,0);
-			maxX = min((*it)->Xranges[y].maxX, m_width -1);
-			for (int i = (*it)->Xranges[y].minX; i <= (*it)->Xranges[y].maxX; i++)
+			fixed_y = y - yMin;
+			//A.erase(A.begin(), A.upper_bound(dummy));
+			minX = max((*it)->x_min[fixed_y],0);
+			maxX = min((*it)->x_max[fixed_y], m_width -1);
+			for (int i = minX; i <= maxX; i++)
 			{
-				counter++;
 				z =(*it)->GetZ(i, y);
 				if (z < m_zbuffer[ZINDEX(m_width, i, y)])
 				{
@@ -818,27 +857,27 @@ void Renderer::ZBufferScanConvert()
 					DrawPixel(i, y,(*it)->shape_color);
 
 				}
-				DrawPixel(i, y, (*it)->shape_color);
 			}
 
 
 		}
 	}
-	counter++;
 }
 
 void Shape::UpdateLimits(int x, int y)
 {
-	if ((Xranges.find(y)) == Xranges.end()) // x values starts from 1
+	int fixed_y = y - yMin;
+	if (x_min[fixed_y] == 0) // x values starts from 1
 	{
-		Xranges[y] = Range(x, x);
+		x_min[fixed_y] = x;
+		x_max[fixed_y] = x;
 	}
-	else if (x < Xranges[y].minX)
+	else if (x < x_min[fixed_y])
 	{
-		Xranges[y].minX = x;
+		x_min[fixed_y] = x;
 	}
-	else if (x > Xranges[y].maxX)
+	if (x > x_max[fixed_y])
 	{
-		Xranges[y].maxX = x;
+		x_max[fixed_y] = x;
 	}
 }
