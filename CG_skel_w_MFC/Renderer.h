@@ -12,6 +12,10 @@
 using namespace std;
 class Renderer;
 #define DEFAULT_NORMAL_SIZE 0.1
+#define WHITE						0
+#define RED							1
+#define GREEN						2
+#define BLUE						3
 struct color {
 	int red, green, blue;
 };

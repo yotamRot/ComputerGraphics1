@@ -59,10 +59,10 @@
 #define WHEEL_SCROLL_DOWN			4
 
 //color
-#define WHITE						0
-#define RED							1
-#define GREEN						2
-#define BLUE						3
+//#define WHITE						0
+//#define RED							1
+//#define GREEN						2
+//#define BLUE						3
 
 #define LEFT						97
 #define RIGHT						100

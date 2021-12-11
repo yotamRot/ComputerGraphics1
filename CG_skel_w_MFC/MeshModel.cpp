@@ -205,12 +205,12 @@ void MeshModel::loadFile(string fileName)
 			curNormalEnd = normalize(v_normals.at(it->vn[2] - 1) - curTriangle.p3_3d);
 			curVertex3Normal = Normal(curTriangle.p3_3d, curNormalEnd, vertix_normal);
 
-			curTriangle = Triangle(vertices.at(it->v[0] - 1), vertices.at(it->v[1] - 1), vertices.at(it->v[2] - 1), curFaceNormal, curVertex1Normal, curVertex2Normal, curVertex3Normal);
+			curTriangle = Triangle(vertices.at(it->v[0] - 1), vertices.at(it->v[1] - 1), vertices.at(it->v[2] - 1) , mesh_color ,curFaceNormal, curVertex1Normal, curVertex2Normal, curVertex3Normal);
 
 		}
 		else
 		{
-			curTriangle = Triangle(vertices.at(it->v[0] - 1), vertices.at(it->v[1] - 1), vertices.at(it->v[2] - 1), curFaceNormal);
+			curTriangle = Triangle(vertices.at(it->v[0] - 1), vertices.at(it->v[1] - 1), vertices.at(it->v[2] - 1), mesh_color, curFaceNormal);
 		}
 
 

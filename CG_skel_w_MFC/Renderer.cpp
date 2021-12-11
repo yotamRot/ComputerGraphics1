@@ -26,14 +26,14 @@ Triangle::Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d, vec3 rgb, Normal& norm
 
 Line::Line(vec3& p1_3d, vec3& p2_3d) :p1_3d(p1_3d), p2_3d(p2_3d)
 {
-	shapeColorIndex = BLUE;
+	shape_color = BLUE;
 	should_draw = true;
 	//shapeColorIndex = BLUE;
 }
 
 Normal::Normal(vec3& p1_3d, vec3& p2_3d,NormalKind normal_kind, float normal_size, bool is_valid) : Line(p1_3d, p2_3d),normal_kind(normal_kind), normal_size(normal_size), is_valid(is_valid)
 {
-	shapeColorIndex = RED;
+	shape_color = RED;
 }
 
 // gives the maximum in array
@@ -310,8 +310,6 @@ void Triangle::UpdateShape()
 		p3_normal.UpdateShape();
 	}
 
-	colorIndex = (colorIndex + 1) % 4;
-	shapeColorIndex = colorIndex;
 	should_draw = ShouldDrawShape();
 
 }
