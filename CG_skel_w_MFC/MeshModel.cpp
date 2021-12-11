@@ -46,50 +46,47 @@ struct FaceIdcs
 	}
 };
 
-vector<vec3>* SetRectangleVertices(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat lenX, GLfloat lenY, GLfloat lenZ)
+vector<Line>* SetRectangleVertices(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat lenX, GLfloat lenY, GLfloat lenZ)
 {
-	vector<vec3>* vertices = new vector<vec3>;
+	vector<Line>* lines = new vector<Line>;
 	GLfloat halfX = lenX * 0.5f;
 	GLfloat halfY = lenY * 0.5f;
 	GLfloat halfZ = lenZ * 0.5f;
 
-	// front face triangels
-	vertices->push_back(vec3(posX - halfX, posY + halfY, posZ + halfZ)); // top left
-	vertices->push_back(vec3(posX + halfX, posY + halfY, posZ + halfZ)); // top right
-	vertices->push_back(vec3(posX + halfX, posY - halfY, posZ + halfZ)); // bottom right
-	vertices->push_back(vec3(posX - halfX, posY - halfY, posZ + halfZ)); // bottom left
+	// front face points
+	vec3 frontTopLeft = vec3(posX - halfX, posY + halfY, posZ + halfZ);
+	vec3 frontTopRight = vec3(posX + halfX, posY + halfY, posZ + halfZ);
+	vec3 frontBottomLeft = vec3(posX + halfX, posY - halfY, posZ + halfZ);
+	vec3 frontBottomRight = vec3(posX - halfX, posY - halfY, posZ + halfZ);
 
-	// back face
-	vertices->push_back(vec3(posX - halfX, posY + halfY, posZ - halfZ)); // top left
-	vertices->push_back(vec3(posX + halfX, posY + halfY, posZ - halfZ)); // top right
-	vertices->push_back(vec3(posX + halfX, posY - halfY, posZ - halfZ)); // bottom right
-	vertices->push_back(vec3(posX - halfX, posY - halfY, posZ - halfZ)); // bottom left
+	// back face points
+	vec3 backTopLeft = vec3(posX - halfX, posY + halfY, posZ - halfZ);
+	vec3 backTopRight = vec3(posX + halfX, posY + halfY, posZ - halfZ);
+	vec3 backBottomLeft = vec3(posX + halfX, posY - halfY, posZ - halfZ);
+	vec3 backBottomRight = vec3(posX - halfX, posY - halfY, posZ - halfZ);
 
-	// left face
-	vertices->push_back(vec3(posX - halfX, posY + halfY, posZ + halfZ)); // top left
-	vertices->push_back(vec3(posX - halfX, posY + halfY, posZ - halfZ)); // top right
-	vertices->push_back(vec3(posX - halfX, posY - halfY, posZ - halfZ)); // bottom right
-	vertices->push_back(vec3(posX - halfX, posY - halfY, posZ + halfZ)); // bottom left
 
-	// right face
-	vertices->push_back(vec3(posX + halfX, posY + halfY, posZ + halfZ)); // top left
-	vertices->push_back(vec3(posX + halfX, posY + halfY, posZ - halfZ)); // top right
-	vertices->push_back(vec3(posX + halfX, posY - halfY, posZ - halfZ)); // bottom right
-	vertices->push_back(vec3(posX + halfX, posY - halfY, posZ + halfZ)); // bottom left
+	//lines
+	lines->push_back(Line(frontTopLeft, frontTopRight));
+	lines->push_back(Line(frontTopLeft, frontBottomLeft));
+	lines->push_back(Line(frontTopLeft, backTopLeft));
 
-	// top face
-	vertices->push_back(vec3(posX - halfX, posY + halfY, posZ + halfZ)); // top left
-	vertices->push_back(vec3(posX - halfX, posY + halfY, posZ - halfZ)); // top right
-	vertices->push_back(vec3(posX + halfX, posY + halfY, posZ - halfZ)); // bottom right
-	vertices->push_back(vec3(posX + halfX, posY + halfY, posZ + halfZ)); // bottom left
+	lines->push_back(Line(backTopRight, backTopLeft));
+	lines->push_back(Line(backTopRight, backBottomRight));
+	lines->push_back(Line(backTopRight, frontTopRight));
 
-	// down face
-	vertices->push_back(vec3(posX - halfX, posY - halfY, posZ + halfZ)); // top left
-	vertices->push_back(vec3(posX - halfX, posY - halfY, posZ - halfZ)); // top right
-	vertices->push_back(vec3(posX + halfX, posY - halfY, posZ - halfZ)); // bottom right 
-	vertices->push_back(vec3(posX + halfX, posY - halfY, posZ + halfZ)); // bottom left
+	lines->push_back(Line(backBottomLeft, backTopLeft));
+	lines->push_back(Line(backBottomLeft, backBottomRight));
+	lines->push_back(Line(backBottomLeft, frontBottomLeft));
 
-	return vertices;
+	lines->push_back(Line(frontBottomLeft, frontBottomRight));
+	lines->push_back(Line(frontBottomLeft, frontTopLeft));
+	lines->push_back(Line(frontBottomLeft, backBottomLeft));
+
+
+
+
+	return lines;
 }
 
 
@@ -145,7 +142,9 @@ void MeshModel::loadFile(string fileName)
 
 
 	Triangle curTriangle;
-	Normal curVertexNormal;
+	Normal curVertex1Normal;
+	Normal curVertex2Normal;
+	Normal curVertex3Normal;
 	Normal curFaceNormal;
 
 	// while not end of file
@@ -185,51 +184,42 @@ void MeshModel::loadFile(string fileName)
 	//vertex_positions={v1,v2,v3,v1,v3,v4}
 	
 	triangles = new vector<Triangle>;
-	facesNormals = new vector<Normal>;
-
-	if (v_normals.size() != 0)
-	{
-		verticesNormals = new vector<Normal>;
-
-	}
-	else
-	{
-		verticesNormals = NULL;
-
-	}
 
 	// iterate through all stored faces and create triangles
 	for (vector<FaceIdcs>::iterator it = faces.begin(); it != faces.end(); ++it)
 	{
 		//Create Trignagle
-		curTriangle = Triangle(vertices.at(it->v[0] - 1), vertices.at(it->v[1] - 1), vertices.at(it->v[2] - 1), mesh_color);
+		curCenter = (curTriangle.p1_3d + curTriangle.p2_3d + curTriangle.p3_3d) / 3;
+		curNormalEnd = normalize(cross(curTriangle.p2_3d - curTriangle.p1_3d, curTriangle.p3_3d - curTriangle.p1_3d));
+		curFaceNormal = Normal(curCenter, curNormalEnd, face_normal);
 
 		if (v_normals.size() != 0)
 		{
 			//Create Normals
 			curNormalEnd = normalize(v_normals.at(it->vn[0] - 1) - curTriangle.p1_3d);
-			curVertexNormal = Normal(curTriangle.p1_3d, curNormalEnd);
-			verticesNormals->push_back(curVertexNormal);
+			curVertex1Normal = Normal(curTriangle.p1_3d, curNormalEnd, vertix_normal);
 
 			curNormalEnd = normalize(v_normals.at(it->vn[1] - 1) - curTriangle.p2_3d);
-			curVertexNormal = Normal(curTriangle.p2_3d, curNormalEnd);
-			verticesNormals->push_back(curVertexNormal);
+			curVertex2Normal = Normal(curTriangle.p2_3d, curNormalEnd, vertix_normal);
 
 			curNormalEnd = normalize(v_normals.at(it->vn[2] - 1) - curTriangle.p3_3d);
-			curVertexNormal = Normal(curTriangle.p3_3d, curNormalEnd);
-			verticesNormals->push_back(curVertexNormal);
+			curVertex3Normal = Normal(curTriangle.p3_3d, curNormalEnd, vertix_normal);
+
+			curTriangle = Triangle(vertices.at(it->v[0] - 1), vertices.at(it->v[1] - 1), vertices.at(it->v[2] - 1), curFaceNormal, curVertex1Normal, curVertex2Normal, curVertex3Normal);
+
+		}
+		else
+		{
+			curTriangle = Triangle(vertices.at(it->v[0] - 1), vertices.at(it->v[1] - 1), vertices.at(it->v[2] - 1), curFaceNormal);
 		}
 
-		curCenter = (curTriangle.p1_3d + curTriangle.p2_3d + curTriangle.p3_3d) / 3;
-		curNormalEnd = normalize(cross(curTriangle.p2_3d - curTriangle.p1_3d, curTriangle.p3_3d - curTriangle.p1_3d));
-		curFaceNormal = Normal(curCenter, curNormalEnd);
-		facesNormals->push_back(curFaceNormal);
+
 		triangles->push_back(curTriangle);
 
 	}
 }
 
-vector<vec3>* MeshModel::CalcBounds()
+vector<Line>* MeshModel::CalcBounds()
 {
 	int size = triangles->size();
 	vec3 min_bound, max_bound;
@@ -305,7 +295,7 @@ vec3 MeshModel::GetBoundsLength()
 
 void MeshModel::draw(Renderer* renderer)
 {	
-	renderer->DrawTriangles(triangles, verticesNormals, facesNormals, bound_box_vertices, GetProportionalValue());
+	renderer->DrawTriangles(triangles, bound_box_vertices, GetProportionalValue());
 }
 
 vec3 MeshModel::CenteringTranslation(TransAxis axis)
@@ -330,8 +320,6 @@ vec3 MeshModel::CenteringTranslation(TransAxis axis)
 PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat lenX, GLfloat lenY, GLfloat lenZ) :posX(posX), posY(posY), posZ(posZ), lenX(lenX), lenY(lenY), lenZ(lenZ)
 {
 	triangles = new vector<Triangle>;
-	facesNormals = new vector<Normal>;
-	verticesNormals = new vector<Normal>;
 	vec3 p1, p2, p3;
 	//faces_normal_end_positions = new vector<vec3>;
 
@@ -348,106 +336,96 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p1 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // bottom left
 	p2 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top left
 	p3 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color);
+	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 0, 1), face_normal);
+	curTriangle = Triangle(p1, p2, p3, mesh_color, curFaceNormal);
 	triangles->push_back(curTriangle);
-	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 0, 1));
-	facesNormals->push_back(curFaceNormal);
+
+
 
 	p1 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // bottom left
 	p2 = vec3(posX + halfX, posY + halfY, posZ + halfZ); // top left
 	p3 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color);
+	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 0, 1), face_normal);
+	curTriangle = Triangle(p1, p2, p3, mesh_color, curFaceNormal);
 	triangles->push_back(curTriangle);
-	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 0, 1));
-	facesNormals->push_back(curFaceNormal);
 
 	// back face triangels
 	p1 = vec3(posX - halfX, posY - halfY, posZ - halfZ); // bottom left
 	p2 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
-	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color);
+	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // b,ottom right
+	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 0, -1), face_normal);
+	curTriangle = Triangle(p1, p2, p3, mesh_color, curFaceNormal);
 	triangles->push_back(curTriangle);
-	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 0, -1));
-	facesNormals->push_back(curFaceNormal);
 
 	p1 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
 	p2 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // top right
 	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color);
+	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 0, -1), face_normal);
+	curTriangle = Triangle(p1, p2, p3 , mesh_color, curFaceNormal);
 	triangles->push_back(curTriangle);
-	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 0, -1));
-	facesNormals->push_back(curFaceNormal);
 
 	// left face triangels
 	p1 = vec3(posX - halfX, posY - halfY, posZ - halfZ); // bottom left
 	p2 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
 	p3 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color);
-	triangles->push_back(curTriangle);
-	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(-1, 0, 0));
-	facesNormals->push_back(curFaceNormal);
+	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(-1, 0, 0), face_normal);
+	curTriangle = Triangle(p1, p2, p3, mesh_color, curFaceNormal);
 
 	p1 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
 	p2 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top right
 	p3 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color);
+	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(-1, 0, 0), face_normal);
+	curTriangle = Triangle(p1, p2, p3, mesh_color, curFaceNormal);
 	triangles->push_back(curTriangle);
-	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(-1, 0, 0));
-	facesNormals->push_back(curFaceNormal);
 
 	// right face triangels
 	//high triangle
 	p1 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom left
 	p2 = vec3(posX + halfX, posY + halfY, posZ + halfZ); // top left
 	p3 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // top right
-	curTriangle = Triangle(p1, p2, p3, mesh_color);
+	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(1, 0, 0), face_normal);
+	curTriangle = Triangle(p1, p2, p3, mesh_color, curFaceNormal);
 	triangles->push_back(curTriangle);
-	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(1, 0, 0));
-	facesNormals->push_back(curFaceNormal);
+
 
 	//low triangle
 	p1 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom left
 	p2 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // top right
 	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color);
+	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(1, 0, 0), face_normal);
+	curTriangle = Triangle(p1, p2, p3, mesh_color, curFaceNormal);
 	triangles->push_back(curTriangle);
-	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(1, 0, 0));
-	facesNormals->push_back(curFaceNormal);
 
 
 	// top face triangels
 	p1 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // bottom left
 	p2 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top left
 	p3 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color);
+	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 1, 0), face_normal);
+	curTriangle = Triangle(p1, p2, p3, mesh_color, curFaceNormal);
 	triangles->push_back(curTriangle);
-	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 1, 0));
-	facesNormals->push_back(curFaceNormal);
 
 	p1 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top left
 	p2 = vec3(posX + halfX, posY + halfY, posZ + halfZ); // top right
 	p3 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color);
+	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 1, 0), face_normal);
+	curTriangle = Triangle(p1, p2, p3, mesh_color, curFaceNormal);
 	triangles->push_back(curTriangle);
-	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 1, 0));
-	facesNormals->push_back(curFaceNormal);
 	
 	// down face triangels
 	p1 = vec3(posX - halfX, posY - halfY, posZ - halfZ); // bottom left
 	p2 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // top left
 	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color);
+	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, -1, 0), face_normal);
+	curTriangle = Triangle(p1, p2, p3, mesh_color, curFaceNormal);
 	triangles->push_back(curTriangle);
-	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, -1, 0));
-	facesNormals->push_back(curFaceNormal);
 
 	p1 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // top left
 	p2 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // top right
 	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color);
+	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, -1, 0), face_normal);
+	curTriangle = Triangle(p1, p2, p3, mesh_color, curFaceNormal);
 	triangles->push_back(curTriangle);
-	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, -1, 0));
-	facesNormals->push_back(curFaceNormal);
  
 	bound_box_vertices = CalcBounds();
 }
@@ -455,8 +433,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 CameraModel::CameraModel(int cameraIndex) : cameraIndex(cameraIndex)
 {
 	triangles = new vector<Triangle>;
-	verticesNormals = NULL; //unused
-	facesNormals = NULL;  //unused
+	Normal curFaceNormal;
 	vec3 p1, p2, p3;
 	//faces_normal_end_positions = new vector<vec3>;
 
@@ -468,14 +445,16 @@ CameraModel::CameraModel(int cameraIndex) : cameraIndex(cameraIndex)
 	p1 = vec3(0.1, 0, 0); // bottom left
 	p2 = vec3(-0.1, 0, 0); // top left
 	p3 = vec3(0, 0, -0.5); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color);
+	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 1, 0), face_normal);
+	curTriangle = Triangle(p1, p2, p3, mesh_color, curFaceNormal);
 	triangles->push_back(curTriangle);
 
 	// second triangle
 	p1 = vec3(0, 0.1, 0); // bottom left
 	p2 = vec3(0, -0.1, 0); // top left
 	p3 = vec3(0, 0, -0.5); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color);
+	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(1, 0, 0), face_normal);
+	curTriangle = Triangle(p1, p2, p3, mesh_color, curFaceNormal);
 	triangles->push_back(curTriangle);
 	
 	bound_box_vertices = CalcBounds();
@@ -483,9 +462,9 @@ CameraModel::CameraModel(int cameraIndex) : cameraIndex(cameraIndex)
 
 LightModel::LightModel(int lightIndex) : lightIndex(lightIndex)
 {
+
 	triangles = new vector<Triangle>;
-	verticesNormals = NULL; //unused
-	facesNormals = NULL;  //unused
+	Normal curFaceNormal;
 	vec3 p1, p2, p3;
 	//faces_normal_end_positions = new vector<vec3>;
 
@@ -497,14 +476,16 @@ LightModel::LightModel(int lightIndex) : lightIndex(lightIndex)
 	p1 = vec3(0.1, 0, 0); // bottom left
 	p2 = vec3(-0.1, 0, 0); // top left
 	p3 = vec3(0, 0, -0.5); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color);
+	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 1, 0), face_normal);
+	curTriangle = Triangle(p1, p2, p3, mesh_color, curFaceNormal);
 	triangles->push_back(curTriangle);
 
 	// second triangle
 	p1 = vec3(0, 0.1, 0); // bottom left
 	p2 = vec3(0, -0.1, 0); // top left
 	p3 = vec3(0, 0, -0.5); // bottom right
-	curTriangle = Triangle(p1, p2, p3, mesh_color);
+	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(1, 0, 0), face_normal);
+	curTriangle = Triangle(p1, p2, p3, mesh_color, curFaceNormal);
 	triangles->push_back(curTriangle);
 
 	bound_box_vertices = CalcBounds();
@@ -533,7 +514,6 @@ mat4 matrixInverse(mat4& mat , Transformation T)
 	}
 	return InverseMat;
 }
-
 
 mat4 MeshModel::moveModel(TransformationDirection direction, TransAxis axis)
 {

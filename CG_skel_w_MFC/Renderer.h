@@ -11,12 +11,16 @@
 
 using namespace std;
 class Renderer;
-
+#define DEFAULT_NORMAL_SIZE 0.1
 struct color {
 	int red, green, blue;
 };
 
-
+enum NormalKind
+{
+	face_normal,
+	vertix_normal
+};
 
 class Range
 {
@@ -45,6 +49,7 @@ public:
 	virtual float  GetZ(int x, int y) =0;
 	virtual void  Rasterize() =0;
 	virtual void  UpdateShape() = 0;
+	virtual bool  ShouldDrawShape() = 0;
 
 	int yMin;
 	int yMax;
@@ -56,12 +61,12 @@ public:
 };
 
 
-class Normal : public virtual Shape
+class Line : public virtual Shape
 {
 public:
-	Normal() = default;
+	Line() = default;
 
-	 ~Normal()=default;
+	 ~Line()=default;
 	
 	vec3 p1_3d;
 	vec3 p2_3d;
@@ -71,13 +76,32 @@ public:
 	vec3 C_p1_3d;
 	vec3 C_p2_3d;
 
-	void Rasterize() override;
+	void  Rasterize() override;
 	float GetZ(int x, int y) override;
+	bool  ShouldDrawShape() override;
+	void UpdateShape() override;
+
+
+	Line(vec3& p1_3d, vec3& p2_3d);
+};
+
+class Normal : public Line
+{
+public:
+	Normal() = default;
+
+	~Normal() = default;
+
+
+	float normal_size;
+	bool is_valid;
+	NormalKind normal_kind;
 	void  UpdateShape() override;
 
-
-	Normal(vec3& p1_3d, vec3& p2_3d);
+	Normal(vec3& p1_3d, vec3& p2_3d, NormalKind normal_kind, float normal_size=DEFAULT_NORMAL_SIZE, bool is_valid =true);
 };
+
+extern Normal invlid_normal;
 
 class Triangle : public virtual Shape
 {
@@ -92,17 +116,23 @@ public:
 	vec3 C_p1_3d;
 	vec3 C_p2_3d;
 	vec3 C_p3_3d;
+	
 	vec2 p1;
 	vec2 p2;
 	vec2 p3;
+	
+	Normal p1_normal;
+	Normal p2_normal;
+	Normal p3_normal;
 
-
+	Normal normal;
 
 	void Rasterize() override;
 	float GetZ(int x, int y) override ;
+	bool  ShouldDrawShape() override;
 	void  UpdateShape() override;
 
-	Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d, vec3 rgb);
+	Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d, vec3 rgb, Normal& normal, Normal& p1_normal=invlid_normal, Normal& p2_normal=invlid_normal, Normal& p3_normal=invlid_normal);
 };
 
 struct CustomCompareYmin
@@ -153,10 +183,9 @@ public:
 	Renderer(int width, int height);
 	~Renderer(void);
 	void Init();
-	void Renderer::DrawTriangles(vector<Triangle>* triangles, vector<Normal>* verticesNormals,
-		vector<Normal>* facesNormals,
-		vector<vec3>* boundBoxVertices, GLfloat proportionalValue);
-	void DrawBoundingBox(const vector<vec3>* vertices);
+	void Renderer::DrawTriangles(vector<Triangle>* triangles,
+		vector<Line>* boundBoxLines, GLfloat proportionalValue);
+	void DrawBoundingBox(vector<Line>* lines);
 	void DrawPixel(int x, int y, vec3& rgb);
 	void ConfigureRenderer(const mat4& projection, const mat4& cTransform ,
 		bool isDrawVertexNormal, bool isDrawFaceNormal, bool isDrawBoundBox);
