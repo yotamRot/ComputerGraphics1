@@ -55,6 +55,7 @@ public:
 	mat4 GetNormalMatrix();
 	GLfloat GetProportionalValue();
 	void UpdateTriangleColor();
+	void UpdateTriangleIlluminationParams();
 };
 
 class PrimMeshModel : public MeshModel

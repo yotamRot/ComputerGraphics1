@@ -58,6 +58,9 @@ public:
 	int yMin;
 	int yMax;
 	vec3 shape_color;
+	float ka; 
+	float kd; 
+	float ks; 
 	bool should_draw;
 	map<int, Range> Xranges;
 	void UpdateLimits(int x, int y);

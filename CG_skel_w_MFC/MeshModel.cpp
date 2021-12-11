@@ -687,6 +687,16 @@ void MeshModel::UpdateTriangleColor()
 	}
 }
 
+void MeshModel::UpdateTriangleIlluminationParams()
+{
+	for (auto it = triangles->begin(); it != triangles->end(); ++it)
+	{
+		(*it).ka = ka;
+		(*it).kd = kd;
+		(*it).ks = ks;
+	}
+}
+
 
 
 mat4 MeshModel::manipulateModel(Transformation T, TransformationDirection direction,

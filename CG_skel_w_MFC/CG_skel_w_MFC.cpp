@@ -361,6 +361,7 @@ void featuresMenu(int id)
 			if (dlg.DoModal() == IDOK) {
 				vec3 rgb = dlg.GetRGB();
 				scene->ChangeModelColorIndex(rgb);
+
 			}
 			break;
 	}

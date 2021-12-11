@@ -246,7 +246,7 @@ void Scene::draw()
 		}
 		else
 		{
-			(*it)->draw(m_renderer);
+			(*it)->draw(m_renderer);// draw models
 		}
 
 	}
@@ -401,6 +401,16 @@ void Scene::ChangeModelColorIndex(vec3 rgb)
 	MeshModel* cur_model = (MeshModel*)models.at(activeModel);
 	cur_model->mesh_color = rgb;
 	cur_model->UpdateTriangleColor();
+}
+
+
+void Scene::ChangeModelIlluminationParams(vec3 k)
+{
+	MeshModel* cur_model = (MeshModel*)models.at(activeModel);
+	cur_model->ka = k.x;
+	cur_model->kd = k.y;
+	cur_model->ks = k.z;
+	//cur_model->UpdateTriangleColor();
 }
 
 void Camera::MaintainRatio(float widthRatio, float heightRatio, Projection proj)
