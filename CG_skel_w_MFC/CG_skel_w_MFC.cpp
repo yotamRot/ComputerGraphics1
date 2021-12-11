@@ -45,10 +45,14 @@
 #define PRESPECTIVE_PARAMETERS 2
 #define FRUSTUM_PARAMETERS 3
 
-//camers menu
+//cameras menu
 #define ADD_CAMERA 1
 #define RENDER_CAMERAS 2
 #define CONTROL_ACTIVE_CAMERA 3
+
+//lights menu
+#define ADD_LIGHT 1
+#define CONTROL_ACTIVE_LIGHT 2
 
 #define WHEEL_SCROLL_UP 3
 #define WHEEL_SCROLL_DOWN 4
@@ -69,11 +73,15 @@ int oldWidth,oldHeight;
 bool newRotate = false;
 
 std::string cameraPrefix = "Camera ";
+std::string lightPrefix = "Light Source ";
  
 int mainMenuId;
 int menuObjectsId;
 int menuSwitchToCameraId;
+int menuSwitchToLightId;
 int menuLookAtCameraId;
+int menuLookAtLightId;
+int menuLights;
 Transformation curTramsformation = MOVE;
 Projection curProjection = PERSPECTIVE;
 bool lb_down,rb_down,mb_down;
@@ -190,7 +198,7 @@ void objectsMenu(int id)
 	scene->draw();
 }
 
-void camersMenu(int id)
+void camerasMenu(int id)
 {
 	int newCameraId;
 	switch (id)
@@ -219,15 +227,47 @@ void camersMenu(int id)
 	scene->draw();
 }
 
-void lookAtCameraMenu(int id)
+
+void lightsMenu(int id)
 {
-	scene->lookAtCamera(id);
+	int newLightId;
+	switch (id)
+	{
+	case ADD_LIGHT:
+		newLightId = scene->addLight();
+		glutSetMenu(menuLookAtLightId);
+		glutAddMenuEntry((lightPrefix + std::to_string(newLightId)).c_str(), newLightId);
+		glutSetMenu(menuSwitchToLightId);
+		glutAddMenuEntry((lightPrefix + std::to_string(newLightId)).c_str(), newLightId);
+		break;
+	case CONTROL_ACTIVE_LIGHT:
+		scene->ControlActiveLight();
+		break;
+	}
 	scene->draw();
 }
 
 void switchToCameraMenu(int id)
 {
 	scene->switchToCamera(id);
+	scene->draw();
+}
+
+void lookAtCameraMenu(int id)
+{
+	scene->lookAtCamera(id);
+	scene->draw();
+}
+
+void switchToLightMenu(int id)
+{
+	scene->controlLight(id);
+	scene->draw();
+}
+
+void lookAtLightMenu(int id)
+{
+	scene->lookAtLight(id);
 	scene->draw();
 }
 
@@ -383,6 +423,13 @@ void mainMenu(int id)
 			glutRemoveMenuItem(1);
 		}
 		glutAddMenuEntry((cameraPrefix + "0").c_str(), 0);
+		glutSetMenu(menuLookAtLightId);
+		tmp = glutGet(GLUT_MENU_NUM_ITEMS);
+		for (int i = 1; i <= tmp; i++)
+		{
+
+			glutRemoveMenuItem(1);
+		}
 		scene->ClearScene();
 		scene->draw();
 		break;
@@ -407,12 +454,22 @@ void initMenu()
 	glutAddMenuEntry((cameraPrefix + "0").c_str(), 0);
 	menuSwitchToCameraId = glutCreateMenu(switchToCameraMenu);
 	glutAddMenuEntry((cameraPrefix + "0").c_str(), 0);
-	int menuCameras = glutCreateMenu(camersMenu);
+	int menuCameras = glutCreateMenu(camerasMenu);
 	glutAddMenuEntry("Add Camera", ADD_CAMERA);
 	glutAddMenuEntry("Render Cameras", RENDER_CAMERAS);
 	glutAddMenuEntry("Control Active Camera", CONTROL_ACTIVE_CAMERA);
 	glutAddSubMenu("Look At Camera", menuLookAtCameraId);
 	glutAddSubMenu("Select Camera", menuSwitchToCameraId);
+
+	menuLookAtLightId = glutCreateMenu(lookAtLightMenu);
+	menuSwitchToLightId = glutCreateMenu(switchToLightMenu);
+	menuLights = glutCreateMenu(lightsMenu);
+	glutAddMenuEntry("Add Light", ADD_LIGHT);
+	glutAddMenuEntry("Control Active Light", CONTROL_ACTIVE_LIGHT);
+	glutAddSubMenu("Look At Light", menuLookAtLightId);
+	glutAddSubMenu("Select Light", menuSwitchToLightId);
+
+
 	
 	int menuFeatures = glutCreateMenu(featuresMenu);
 	glutAddMenuEntry("Show Vertices Normal", SHOW_VERTICES_NORMAL);
@@ -444,6 +501,7 @@ void initMenu()
 	glutAddMenuEntry("Clear Screen", CLEAR);
 	glutAddMenuEntry("About", MAIN_ABOUT);
 	glutAddSubMenu("Cameras", menuCameras);
+	glutAddSubMenu("Light Sources", menuLights);
 
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 }

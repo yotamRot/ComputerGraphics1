@@ -281,7 +281,7 @@ vector<vec3>* MeshModel::CalcBounds()
 
 vec3 MeshModel::GetCenter()
 {
-	return vec3(center);
+	return center;
 }
 
 GLfloat MeshModel::GetZBoundLength()
@@ -477,6 +477,35 @@ CameraModel::CameraModel(int cameraIndex) : cameraIndex(cameraIndex)
 	curTriangle = Triangle(p1, p2, p3);
 	triangles->push_back(curTriangle);
 	
+	bound_box_vertices = CalcBounds();
+}
+
+LightModel::LightModel(int lightIndex) : lightIndex(lightIndex)
+{
+	triangles = new vector<Triangle>;
+	verticesNormals = NULL; //unused
+	facesNormals = NULL;  //unused
+	vec3 p1, p2, p3;
+	//faces_normal_end_positions = new vector<vec3>;
+
+	Triangle curTriangle;
+	_world_transform[2][3] = 2; //initialized same as camera regarding location
+
+
+	// first triangle
+	p1 = vec3(0.1, 0, 0); // bottom left
+	p2 = vec3(-0.1, 0, 0); // top left
+	p3 = vec3(0, 0, -0.5); // bottom right
+	curTriangle = Triangle(p1, p2, p3);
+	triangles->push_back(curTriangle);
+
+	// second triangle
+	p1 = vec3(0, 0.1, 0); // bottom left
+	p2 = vec3(0, -0.1, 0); // top left
+	p3 = vec3(0, 0, -0.5); // bottom right
+	curTriangle = Triangle(p1, p2, p3);
+	triangles->push_back(curTriangle);
+
 	bound_box_vertices = CalcBounds();
 }
 

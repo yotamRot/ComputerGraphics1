@@ -45,6 +45,11 @@ enum TransAxis
 	WORLD
 };
 
+enum LightType
+{
+	POINT_SOURCE,
+	PARALLEL_SOURCE
+};
 
 class Model { 
 public:
@@ -56,6 +61,11 @@ protected:
 
 
 class Light {
+public:
+	Light(int modelId, Model* model);
+	int modelId;
+	Model* model;
+	LightType Type;
 };
 
 class Camera {
@@ -109,9 +119,13 @@ public:
 	void lookAtModel(int modelId);
 	int addCamera();
 	void lookAtCamera(int cameraId);
+	void lookAtLight(int lightId);
 	void switchToCamera(int cameraId);
+	void controlLight(int lightId);
+	int addLight();
 	void ClearScene();
 	void ControlActiveCamera();
+	void ControlActiveLight();
 	void manipulateActiveModel(Transformation T,TransformationDirection direction,
 								TransAxis axis, float power);
 	void setActiveCameraProjection(Projection proj);

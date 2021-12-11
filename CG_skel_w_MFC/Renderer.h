@@ -43,6 +43,7 @@ public:
 	int yMin;
 	int yMax;
 	int shapeColorIndex;
+	bool should_draw;
 	map<int, Range> Xranges;
 	void UpdateLimits(int x, int y);
 
@@ -88,6 +89,8 @@ public:
 	vec2 p1;
 	vec2 p2;
 	vec2 p3;
+
+	
 
 	void Rasterize() override;
 	float GetZ(int x, int y) override ;
@@ -162,6 +165,7 @@ public:
 	vec2 vec3ToVec2(const vec3& ver);
 	vec3 Transform(const vec3& ver);
 	vec3 NormTransform(const vec3& ver);
+	mat4 GetProjection();
 	int yMin;
 	int yMax;
 

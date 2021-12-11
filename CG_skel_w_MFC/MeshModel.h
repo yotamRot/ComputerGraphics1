@@ -74,4 +74,13 @@ class CameraModel : public MeshModel
 		CameraModel(int cameraIndex);
 };
 
+class LightModel : public MeshModel
+{
+	public:
+		int lightIndex;
+		mat4 _w_TransformInv;
+		mat4 _m_TransformInv;
+		LightModel(int lightIndex);
+};
+
 mat4 matrixInverse(mat4& mat, Transformation T);

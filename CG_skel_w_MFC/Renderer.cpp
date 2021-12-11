@@ -21,10 +21,126 @@ extern Renderer * renderer;
 
 Triangle::Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d) : p1_3d(p1_3d), p2_3d(p2_3d), p3_3d(p3_3d)
 {
+	should_draw = true;
 }
 
 Normal::Normal(vec3& p1_3d, vec3& p2_3d) :p1_3d(p1_3d), p2_3d(p2_3d)
 {
+
+}
+
+// gives the maximum in array
+float maxi(float arr[], int n) {
+	float m = 0;
+	for (int i = 0; i < n; ++i)
+		if (m < arr[i])
+		{
+			m = arr[i];
+		}
+	return m;
+}
+
+// gives the minimum in array
+float mini(float arr[], int n) {
+	float m = 1;
+	for (int i = 0; i < n; ++i)
+		if (m > arr[i])
+		{
+			m = arr[i];
+		}
+			
+	return m;
+}
+
+bool LiangBarskyClipping(vec3 point1, vec3 point2, vec3 max, vec3 min)
+{
+	// defining variables
+	float p[7];
+	p[2] = -(point2.x - point1.x);
+	p[4] = (point2.x - point1.x);
+	p[1] = -(point2.y - point1.y);
+	p[3] = (point2.y - point1.y);
+	p[5] = -(point2.z - point1.z);
+	p[6] = (point2.z - point1.z);
+
+	float q[7];
+	q[2] = point1.x - min.x;
+	q[4] = max.x - point1.x;
+	q[1] = point1.y - min.y;
+	q[3] = max.y - point1.y;
+	q[5] = point1.z - min.z;
+	q[6] = max.z - point1.z;
+
+	//check for parallel lines
+	if ((p[1] == 0 && q[1] < 0) || (p[2] == 0 && q[2] < 0) ||
+		(p[3] == 0 && q[3] < 0) || (p[4] == 0 && q[4] < 0) ||
+		(p[5] == 0 && q[5] < 0) || (p[6] == 0 && q[6] < 0))
+	{
+		//lines are outside of the clipping box
+		return false;
+	}
+
+	float positive[7], negative[7];
+	int pos_i = 1, neg_i = 1;
+	positive[0] = 1;
+	negative[0] = 0;
+
+	float r[7];
+	if (p[2] != 0) {
+		r[2] = q[2] / p[2];
+		r[4] = q[4] / p[4];
+		if (p[2] < 0) {
+			negative[neg_i++] = r[2]; // for negative p2, add it to negative array
+			positive[pos_i++] = r[4]; // and add p4 to positive array
+		}
+		else {
+			negative[neg_i++] = r[4]; // for negative p4, add it to negative array
+			positive[pos_i++] = r[2]; // and add p2 to positive array
+		}
+	}
+	if (p[1] != 0) {
+		r[1] = q[1] / p[1];
+		r[3] = q[3] / p[3];
+		if (p[1] < 0) {
+			negative[neg_i++] = r[1]; // for negative p1, add it to negative array
+			positive[pos_i++] = r[3]; // and add p3 to positive array
+		}
+		else {
+			negative[neg_i++] = r[3]; // for negative p3, add it to negative array
+			positive[pos_i++] = r[1]; // and add p1 to positive array
+		}
+	}
+	if (p[5] != 0) {
+		r[5] = q[5] / p[5];
+		r[6] = q[6] / p[6];
+		if (p[5] < 0) {
+			negative[neg_i++] = r[5]; // for negative p1, add it to negative array
+			positive[pos_i++] = r[6]; // and add p3 to positive array
+		}
+		else {
+			negative[neg_i++] = r[6]; // for negative p3, add it to negative array
+			positive[pos_i++] = r[5]; // and add p1 to positive array
+		}
+	}
+
+	vec3 out1, out2;
+	float u1, u2;
+	u1 = maxi(negative, neg_i); // maximum of negative array
+	u2 = mini(positive, pos_i); // minimum of positive array
+
+	if (u1 > u2) { // reject
+		// Line is outside the clipping window
+		return false;
+	}
+
+	return true;
+
+	//// computing new points
+	//out1.x = point1.x + p[4] * u1;
+	//out1.y = point1.y + p[3] * u1;
+
+	//out2.x = point1.x + p[4] * u2;
+	//out2.y = point1.y + p[3] * u2;
 
 }
 
@@ -118,6 +234,22 @@ void Triangle::UpdateShape()
 	yMin = min(min(p1.y, p2.y), p3.y);
 	colorIndex = (colorIndex + 1) % 4;
 	shapeColorIndex = colorIndex;
+	vec4 tmp[4];
+	mat4 proj = renderer->GetProjection();
+	tmp[1] = proj * vec4(C_p1_3d);
+	tmp[2] = proj * vec4(C_p2_3d);
+	tmp[3] = proj * vec4(C_p3_3d);
+
+	if (!LiangBarskyClipping(vec3(tmp[1].x, tmp[1].y, tmp[1].z), vec3(tmp[2].x, tmp[2].y, tmp[2].z), vec3(tmp[1].w), vec3(-tmp[1].w)) ||
+		!LiangBarskyClipping(vec3(tmp[1].x, tmp[1].y, tmp[1].z), vec3(tmp[3].x, tmp[3].y, tmp[3].z), vec3(tmp[1].w), vec3(-tmp[1].w)) ||
+		!LiangBarskyClipping(vec3(tmp[3].x, tmp[3].y, tmp[3].z), vec3(tmp[2].x, tmp[2].y, tmp[2].z), vec3(tmp[2].w), vec3(-tmp[2].w)))
+	{
+		this->should_draw = false;
+	}
+	else
+	{
+		this->should_draw = true;
+	}
 }
 
 
@@ -326,9 +458,11 @@ void Renderer::DrawTriangles(vector<Triangle>* triangles,vector<Normal>* vertice
 {
 	Triangle* triangle;
 	Normal* normal;
-
+	vec4 tmp[4];
+	
 	for (int i = 0; i < triangles->size(); i++)
 	{
+
 		//curColor = white;
 
 		triangle = &(triangles->at(i));
@@ -401,6 +535,8 @@ void Renderer::DrawBoundingBox(const vector<vec3>* vertices)
 
 	//}
 }
+
+//check if part of the object is inside the camera view frame	
 bool Renderer::shouldDrawModel(const vector<vec3>* boundingBox)
 {
 	vec4 maxBounds = cProjection * cTransform * vec4(Transform(vec3(boundingBox->at(1).x, boundingBox->at(0).y, boundingBox->at(0).z)));
@@ -427,6 +563,11 @@ vec2 Renderer::vec3ToVec2(const vec3& ver)
 	vec2 point = vec2(tempVec.x / tempVec.w, tempVec.y / tempVec.w);
 	transformToScreen(point);
 	return point;
+}
+
+mat4 Renderer::GetProjection()
+{
+	return cProjection;
 }
 
 vec3 Renderer::Transform(const vec3& ver)
@@ -567,7 +708,14 @@ void Renderer::SetObjectMatrices(const mat4& oTransform, const mat4& nTransform)
 
 void Renderer::ScanConvert()
 {
-	/*curColor = blue;
+	/*vec3 tmpColor = vec3(1, 1, 0);
+	float ka = 0.5;
+	float kd = 0.8;
+	float ks = 1.0;
+	float alpha = 100.0;
+	vec4 Ls = vec4(1.0, 0.0, 1.0, 1.0);
+	vec4 ambient = ka * vec4(tmpColor, 1.0);
+	curColor = blue;
 	for (int y = 0; y < m_height; y++)
 	{
 		for (int i = x_min[y]; i < x_max[y]; i++)
@@ -599,6 +747,10 @@ void Renderer::ZBufferScanConvert()
 
 	for (auto it = shapesSet.begin(); it != shapesSet.end(); ++it)
 	{
+		if ((*it)->should_draw == false)
+		{
+			continue;
+		}
 		curColor = colors[(*it)->shapeColorIndex];
 		yMin = max(0, (*it)->yMin);
 		yMax = min((*it)->yMax, m_height - 1);

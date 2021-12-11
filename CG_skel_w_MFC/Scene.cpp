@@ -89,24 +89,6 @@ void Scene::Zoom(ZoomDirection direction)
 	}
 }
 
-//void Scene::lookAtModel(int modelId)
-//{
-//	activeModel = modelId;
-//	MeshModel* curModel = (MeshModel*)models.at(activeModel);
-//	Camera* curCamera = cameras.at(activeCamera
-//	CameraModel* cameraModel =(CameraModel *) curCamera->model;
-//	float maxModelAxisSize = max(max(curModel->GetZBoundLength(), curModel->GetXBoundLength()), curModel->GetYBoundLength());
-//	// model in camera cord
-//	vec3 m_modelCenter = curModel->GetCenter();
-//	vec4 c_atCenter = cameraModel->_m_TransformInv * cameraModel->_w_TransformInv * curModel->_world_transform * curModel->_model_transform * m_modelCenter;
-//	vec4 c_from = Translate(0, 0, 3 * maxModelAxisSize) * Translate(c_atCenter) * vec4(vec3());
-//	vec4 c_atDirection = normalize(c_atCenter/ c_atCenter.w - c_from / c_from.w);
-//
-//	mat4 c_w_InvMatrix = curCamera->LookAt(c_from, c_from + c_atDirection,	 curCamera->up);
-//	mat4 c_w_Matrix = Translate(0, 0, 3 * curModel->GetZBoundLength()) * curModel->_world_transform * curModel->_model_transform;
-//	curCamera->setTransformation(c_w_InvMatrix, c_w_Matrix);
-//	ResetZoom();
-//}
 
 
 void Scene::lookAtModel(int modelId)
@@ -163,6 +145,11 @@ void Scene::ClearScene()
 void Scene::ControlActiveCamera()
 {
 	activeModel = cameras.at(activeCamera)->modelId;
+}
+
+void Scene::ControlActiveLight()
+{
+	activeModel = lights.at(activeLight)->modelId;
 }
 
 void Scene::setActiveCameraProjection(Projection proj)
@@ -395,6 +382,10 @@ Camera::Camera(vec3 lbn, vec3 rtf, int modelId, Model* model) :lbn(lbn), rtf(rtf
 	//set camera world view aligned with world asix with offset in z
 }
 
+Light::Light(int modelId, Model* model) : modelId(modelId), model(model)
+{
+}
+
 void Scene::MaintingCamerasRatios(int oldWidth, int oldHeight, int newWidth, int newHeight)
 {
 	float widthRatio = (float)newWidth / (float)oldWidth;
@@ -469,3 +460,27 @@ vec3 Scene::Getrtf()
 	return activeCamera->Getrtf();
 }
 
+
+int Scene::addLight()
+{
+	int newLightIndex = lights.size();
+	activeLight = newLightIndex;
+	LightModel* lightModel = new LightModel(newLightIndex);
+	Light* newLight = new Light(models.size(), lightModel);
+	lights.push_back(newLight);
+	models.push_back(lightModel);
+	return newLightIndex;
+}
+
+void Scene::controlLight(int lightId)
+{
+	activeLight = lightId;
+	Light* activeLight = lights.at(lightId);
+	ControlActiveLight();
+}
+
+void Scene::lookAtLight(int lightId)
+{
+	Light* lightToLookAt = lights.at(lightId);
+	lookAtModel(lightToLookAt->modelId);
+}
