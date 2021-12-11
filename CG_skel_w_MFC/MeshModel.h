@@ -11,7 +11,7 @@ using namespace std;
 class MeshModel : public Model
 {
 protected :
-	MeshModel() {}
+	MeshModel() = default;
 	mat4 moveModel(TransformationDirection direction, TransAxis axis);
 	mat4 scaleModel(TransformationDirection direction, TransAxis axis);
 	mat4 rotateModel(TransformationDirection direction, int angle, TransAxis axis);
@@ -29,7 +29,7 @@ public:
 	vector<Normal>* facesNormals;
 	vector<Normal>* verticesNormals;
 
-
+	int mesh_color_index;
 	vector<vec3>* bound_box_vertices;
 	mat4 _model_transform;
 	mat4 _world_transform;
@@ -50,6 +50,7 @@ public:
 	mat4 GetObjectMatrix();
 	mat4 GetNormalMatrix();
 	GLfloat GetProportionalValue();
+	void UpdateTriangleColor();
 };
 
 class PrimMeshModel : public MeshModel

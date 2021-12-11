@@ -12,6 +12,12 @@
 using namespace std;
 class Renderer;
 
+struct color {
+	int red, green, blue;
+};
+
+
+
 class Range
 {
 public:
@@ -90,13 +96,18 @@ public:
 	vec2 p2;
 	vec2 p3;
 
-	
+	float ka;// = 0.5;
+	float kd;// = 0.8;
+	float ks;// = 1.0;
+	float alpha;// = 100.0;
+	//vec4 Ls = vec4(1.0, 0.0, 1.0, 1.0);
+	//vec4 ambient = ka * vec4(tmpColor, 1.0);
 
 	void Rasterize() override;
 	float GetZ(int x, int y) override ;
 	void  UpdateShape() override;
 
-	Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d);
+	Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d, int color_index);
 };
 
 struct CustomCompareYmin
@@ -151,7 +162,7 @@ public:
 		vector<Normal>* facesNormals,
 		vector<vec3>* boundBoxVertices, GLfloat proportionalValue);
 	void DrawBoundingBox(const vector<vec3>* vertices);
-	void DrawPixel(int x, int y);
+	void DrawPixel(int x, int y, int curColor);
 	void ConfigureRenderer(const mat4& projection, const mat4& cTransform ,
 		bool isDrawVertexNormal, bool isDrawFaceNormal, bool isDrawBoundBox);
 	void SetObjectMatrices(const mat4& oTransform, const mat4& nTransform);
@@ -160,7 +171,6 @@ public:
 	void ClearDepthBuffer();
 	void SetDemoBuffer();
 	void ResizeBuffers(int width, int height);
-	void ScanConvert();
 	void ZBufferScanConvert();
 	vec2 vec3ToVec2(const vec3& ver);
 	vec3 Transform(const vec3& ver);

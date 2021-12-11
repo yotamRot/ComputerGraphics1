@@ -396,6 +396,13 @@ void Scene::MaintingCamerasRatios(int oldWidth, int oldHeight, int newWidth, int
 	}
 }
 
+void Scene::ChangeModelColorIndex(int color_index)
+{
+	MeshModel* cur_model = (MeshModel*)models.at(activeModel);
+	cur_model->mesh_color_index = color_index;
+	cur_model->UpdateTriangleColor();
+}
+
 void Camera::MaintainRatio(float widthRatio, float heightRatio, Projection proj)
 {
 	lbn.x = lbn.x * widthRatio;

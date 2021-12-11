@@ -25,44 +25,50 @@
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 
 // file menu defines
-#define FILE_OPEN 1
-#define ADD_CUBE 2
+#define FILE_OPEN					1
+#define ADD_CUBE					2
 
 
-#define MAIN_DEMO 1
-#define MAIN_ABOUT 2
-#define OBJECTS 4
-#define FEATURES 5
-#define CLEAR 6
-#define CAMERAS 7
+#define MAIN_DEMO					1
+#define MAIN_ABOUT					2
+#define OBJECTS						4
+#define FEATURES					5
+#define CLEAR						6
+#define CAMERAS						7
 
 // features menu
-#define SHOW_VERTICES_NORMAL 1
-#define SHOW_FACES_NORMAL 2
-#define SHOW_BOUNDING_BOX 3
+#define SHOW_VERTICES_NORMAL		1
+#define SHOW_FACES_NORMAL			2
+#define SHOW_BOUNDING_BOX			3
 
-#define ORTHOGRPHIC_PARAMETERS 1
-#define PRESPECTIVE_PARAMETERS 2
-#define FRUSTUM_PARAMETERS 3
+#define ORTHOGRPHIC_PARAMETERS		1
+#define PRESPECTIVE_PARAMETERS		2
+#define FRUSTUM_PARAMETERS			3
 
 //cameras menu
-#define ADD_CAMERA 1
-#define RENDER_CAMERAS 2
-#define CONTROL_ACTIVE_CAMERA 3
+#define ADD_CAMERA					1
+#define RENDER_CAMERAS				2
+#define CONTROL_ACTIVE_CAMERA		3
 
 //lights menu
-#define ADD_LIGHT 1
-#define CONTROL_ACTIVE_LIGHT 2
+#define ADD_LIGHT					1
+#define CONTROL_ACTIVE_LIGHT		2
 
-#define WHEEL_SCROLL_UP 3
-#define WHEEL_SCROLL_DOWN 4
+#define WHEEL_SCROLL_UP				3
+#define WHEEL_SCROLL_DOWN			4
 
-#define LEFT 97
-#define RIGHT 100
-#define UP 119
-#define DOWN 115
-#define IN 113
-#define OUT 101
+//color
+#define WHITE						0
+#define RED							1
+#define GREEN						2
+#define BLUE						3
+
+#define LEFT						97
+#define RIGHT						100
+#define UP							119
+#define DOWN						115
+#define IN							113
+#define OUT							101
 
 
 Scene *scene;
@@ -81,6 +87,7 @@ int menuSwitchToCameraId;
 int menuSwitchToLightId;
 int menuLookAtCameraId;
 int menuLookAtLightId;
+int menuChangeColor;
 int menuLights;
 Transformation curTramsformation = MOVE;
 Projection curProjection = PERSPECTIVE;
@@ -268,6 +275,12 @@ void switchToLightMenu(int id)
 void lookAtLightMenu(int id)
 {
 	scene->lookAtLight(id);
+	scene->draw();
+}
+
+void changeColorMenu(int color_index)
+{
+	scene->ChangeModelColorIndex(color_index);
 	scene->draw();
 }
 
@@ -469,12 +482,17 @@ void initMenu()
 	glutAddSubMenu("Look At Light", menuLookAtLightId);
 	glutAddSubMenu("Select Light", menuSwitchToLightId);
 
-
-	
+	menuChangeColor = glutCreateMenu(changeColorMenu);
 	int menuFeatures = glutCreateMenu(featuresMenu);
 	glutAddMenuEntry("Show Vertices Normal", SHOW_VERTICES_NORMAL);
 	glutAddMenuEntry("Show Faces Normal", SHOW_FACES_NORMAL);
 	glutAddMenuEntry("Show Bounding Box", SHOW_BOUNDING_BOX);
+	glutAddSubMenu("Change Color", menuChangeColor);
+	glutSetMenu(menuChangeColor);
+	glutAddMenuEntry("White", WHITE);
+	glutAddMenuEntry("Red", RED);
+	glutAddMenuEntry("Green", GREEN);
+	glutAddMenuEntry("Blue", BLUE);
 
 	int menuProjections = glutCreateMenu(projectionMenu);
 	glutAddMenuEntry("Orthographic", ORTHOGRAPHIC);

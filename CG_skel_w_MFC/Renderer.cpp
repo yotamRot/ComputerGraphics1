@@ -9,19 +9,16 @@
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 #define ZINDEX(width,x,y) (x+y*width)
 
-struct color{
-	int red, green, blue;
-} white{ 1,1,1 }, red{ 1,0,0 }, green{ 0, 1, 0 }, blue{ 0,0,1 };
-
-color curColor = red;
+color white{1, 1, 1}, red{1, 0, 0}, green{0, 1, 0}, blue{0, 0, 1};
 color colors[] = { white, red ,green ,blue };
-int colorIndex = 0;
 extern Renderer * renderer;
 
 
-Triangle::Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d) : p1_3d(p1_3d), p2_3d(p2_3d), p3_3d(p3_3d)
+Triangle::Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d, int color_index)
+	: p1_3d(p1_3d), p2_3d(p2_3d), p3_3d(p3_3d), ka(0.5)
 {
 	should_draw = true;
+	shapeColorIndex = color_index;
 }
 
 Normal::Normal(vec3& p1_3d, vec3& p2_3d) :p1_3d(p1_3d), p2_3d(p2_3d)
@@ -166,13 +163,16 @@ void Renderer::transformToScreen(vec2& vec)
 }
 
 
-void Renderer::DrawPixel(int x, int y)
+void Renderer::DrawPixel(int x, int y, int colorIndex)
 {
 	if (x < 1 || x >= m_width || y < 1 || y >= m_height)
 	{
 		return;
 	}
-	m_outBuffer[INDEX(m_width, x, y, 0)] = curColor.red;	m_outBuffer[INDEX(m_width, x, y, 1)] = curColor.green;	m_outBuffer[INDEX(m_width, x, y, 2)] = curColor.blue;
+
+	m_outBuffer[INDEX(m_width, x, y, 0)] = colors[colorIndex].red;
+	m_outBuffer[INDEX(m_width, x, y, 1)] = colors[colorIndex].green;
+	m_outBuffer[INDEX(m_width, x, y, 2)] = colors[colorIndex].blue;
 }
 
 void RasterizeArrangeVeritcs(vec2& ver1, vec2& ver2, bool byX = true)
@@ -232,8 +232,7 @@ void Triangle::UpdateShape()
 	p3 = renderer->vec3ToVec2(C_p3_3d);
 	yMax = max(max(p1.y, p2.y), p3.y);
 	yMin = min(min(p1.y, p2.y), p3.y);
-	colorIndex = (colorIndex + 1) % 4;
-	shapeColorIndex = colorIndex;
+
 	vec4 tmp[4];
 	mat4 proj = renderer->GetProjection();
 	tmp[1] = proj * vec4(C_p1_3d);
@@ -310,7 +309,6 @@ void Shape::RasterizeRegular(vec2& ver1, vec2& ver2)
 	int d = 2*dY - dX;
 	int dE = 2*dY;
 	int dNE = 2 * dY - 2 * dX;
-	//renderer->DrawPixel(x, y);
 	UpdateLimits(x, y);
 	for (int i = x; i < (int)ver2.x; i++)
 	{
@@ -323,7 +321,6 @@ void Shape::RasterizeRegular(vec2& ver1, vec2& ver2)
 			y++;
 			d += dNE;
 		}
-		//renderer->DrawPixel(i, y);
 		UpdateLimits(i, y);
 	}
 }
@@ -338,7 +335,6 @@ void Shape::RasterizeBig(vec2& ver1, vec2& ver2)
 	int d = 2 * dY - dX;
 	int dE = 2 * dY;
 	int dNE = 2 * dY - 2 * dX;
-	//renderer->DrawPixel(y, x);
 	UpdateLimits(y, x);
 	for (int i = x; i < (int)ver2.y; i++)
 	{
@@ -351,7 +347,6 @@ void Shape::RasterizeBig(vec2& ver1, vec2& ver2)
 			y++;
 			d += dNE;
 		}
-		//renderer->DrawPixel(y, i);
 		UpdateLimits(y, i);
 	}
 }
@@ -367,7 +362,6 @@ void Shape::RasterizeRegularNegetive(vec2& ver1, vec2& ver2)
 	int d = 2 * dY - dX;
 	int dE = 2 * dY;
 	int dNE = 2 * dY - 2 * dX;
-	//renderer->DrawPixel(x, -y);
 	UpdateLimits(x, -y);
 	for (int i = x; i < (int)ver2.x; i++)
 	{
@@ -380,7 +374,6 @@ void Shape::RasterizeRegularNegetive(vec2& ver1, vec2& ver2)
 			y++;
 			d += dNE;
 		}
-		//renderer->DrawPixel(i, -y);
 		UpdateLimits(i, -y);
 	}
 }
@@ -396,7 +389,6 @@ void Shape::RasterizeBigNegetive(vec2& ver1, vec2& ver2)
 	int d = 2 * dY - dX;
 	int dE = 2 * dY;
 	int dNE = 2 * dY - 2 * dX;
-	//renderer->DrawPixel(-y, x);
 	UpdateLimits(-y, x);
 	for (int i = x; i < (int)ver2.y; i++)
 	{
@@ -409,7 +401,6 @@ void Shape::RasterizeBigNegetive(vec2& ver1, vec2& ver2)
 			y++;
 			d += dNE;
 		}
-		//renderer->DrawPixel(-y, i);
 		UpdateLimits(-y, i);
 	}
 }
@@ -595,7 +586,7 @@ void Renderer::ConfigureRenderer(const mat4& projection, const mat4& transform, 
 	yMin = m_height;
 	yMax = 0;
 	shapesSet.clear();
-	colorIndex = 0;
+
 }	
 
 
@@ -706,24 +697,6 @@ void Renderer::SetObjectMatrices(const mat4& oTransform, const mat4& nTransform)
 	this->nTransform = nTransform;
 }
 
-void Renderer::ScanConvert()
-{
-	/*vec3 tmpColor = vec3(1, 1, 0);
-	float ka = 0.5;
-	float kd = 0.8;
-	float ks = 1.0;
-	float alpha = 100.0;
-	vec4 Ls = vec4(1.0, 0.0, 1.0, 1.0);
-	vec4 ambient = ka * vec4(tmpColor, 1.0);
-	curColor = blue;
-	for (int y = 0; y < m_height; y++)
-	{
-		for (int i = x_min[y]; i < x_max[y]; i++)
-		{
-			DrawPixel(i, y);
-		}
-	}*/
-}
 
 void Renderer::ZBufferScanConvert()
 {
@@ -751,7 +724,6 @@ void Renderer::ZBufferScanConvert()
 		{
 			continue;
 		}
-		curColor = colors[(*it)->shapeColorIndex];
 		yMin = max(0, (*it)->yMin);
 		yMax = min((*it)->yMax, m_height - 1);
 		for (int y = yMin; y < yMax; y++)
@@ -772,7 +744,7 @@ void Renderer::ZBufferScanConvert()
 				if (z < m_zbuffer[ZINDEX(m_width, i, y)])
 				{
 					m_zbuffer[ZINDEX(m_width, i, y)] = z;
-					DrawPixel(i, y);
+					DrawPixel(i, y,(*it)->shapeColorIndex);
 
 				}
 			}
