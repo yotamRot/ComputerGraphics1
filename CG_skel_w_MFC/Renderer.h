@@ -174,12 +174,17 @@ public:
 	float kd;
 	float ks;
 
+	float p1_illumination;
+	float p2_illumination;
+	float p3_illumination;
 
 	void Rasterize() override;
 	float GetZ(int x, int y) override ;
 	bool  ShouldDrawShape() override;
 	void  UpdateShape() override;
 	float GetColor(int x, int y, int z, vector<Light*> lights, Shadow shadow) override;
+	float GetGouruad(int x, int y);
+	vec3 GetPhong(int x, int y);
 
 	Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d, vec3 rgb, Normal& normal, Normal& p1_normal=invalid_normal, Normal& p2_normal=invalid_normal, Normal& p3_normal=invalid_normal);
 };
@@ -209,7 +214,7 @@ class Renderer
 	bool isShowBoundBox;
 
 	vector<Shape*> shapesSet;
-	vector<Light*> lights;
+
 	Shadow shadow;
 
 	void CreateBuffers(int width, int height);
@@ -253,5 +258,6 @@ public:
 	mat4 GetProjection();
 	int yMin;
 	int yMax;
-
+	vector<Light*> lights;
+	vector<Light*> GetLights();
 };

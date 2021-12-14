@@ -40,12 +40,6 @@ enum ZoomDirection
 };
 
 
-enum Shadow
-{
-	FLAT,
-	GOURAUD,
-	PHONG
-};
 
 
 

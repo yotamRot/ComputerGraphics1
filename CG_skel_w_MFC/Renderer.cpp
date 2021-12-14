@@ -248,6 +248,34 @@ float Triangle::GetZ(int x, int y)
 	return (A1 * C_p1_3d.z + A2 * C_p2_3d.z + A3 * C_p3_3d.z) / normalFactor;
 }
 
+float Triangle::GetGouruad(int x, int y)
+{
+	float A1, A2, A3;
+	vec2 cord = vec2(x, y);
+	vec3 vec0 = vec3(p1 - cord, 0);
+	vec3 vec1 = vec3(p2 - cord, 0);
+	vec3 vec2 = vec3(p3 - cord, 0);
+	A1 = length(cross(vec1, vec2));
+	A2 = length(cross(vec2, vec0));
+	A3 = length(cross(vec0, vec1));
+	float normalFactor = A1 + A2 + A3;
+	return ((A1 * p1_illumination + A2 * p2_illumination + A3 * p3_illumination) / normalFactor);
+}
+
+vec3 Triangle::GetPhong(int x, int y)
+{
+	float A1, A2, A3;
+	vec2 cord = vec2(x, y);
+	vec3 vec0 = vec3(p1 - cord, 0);
+	vec3 vec1 = vec3(p2 - cord, 0);
+	vec3 vec2 = vec3(p3 - cord, 0);
+	A1 = length(cross(vec1, vec2));
+	A2 = length(cross(vec2, vec0));
+	A3 = length(cross(vec0, vec1));
+	float normalFactor = A1 + A2 + A3;
+	return ((A1 * p1_normal.normal_direction + A2 * p2_normal.normal_direction + A3 * p3_normal.normal_direction) / normalFactor);
+}
+
 bool Triangle::ShouldDrawShape()
 {
 	vec4 tmp[4];
@@ -307,7 +335,33 @@ void Triangle::UpdateShape()
 	yMin = min(min(p1.y, p2.y), p3.y);
 	renderer->yMin = min(yMin, renderer->yMin);
 	renderer->yMax = max(yMax, renderer->yMax);
-	
+	vec3 p1_light_direction, p2_light_direction, p3_light_direction;
+	vec3 p1_camera_direction, p2_camera_direction, p3_camera_direction;
+	vec3 p1_reflect_direction, p2_reflect_direction, p3_reflect_direction ;
+	float i, ia, id, is;
+	p1_illumination = p2_illumination = p3_illumination = 0;
+	for (auto it = renderer->lights.begin(); it != renderer->lights.end(); ++it)
+	{
+		p1_light_direction = normalize((*it)->c_light_position - C_p1_3d);
+		p2_light_direction = normalize((*it)->c_light_position - C_p2_3d);
+		p3_light_direction = normalize((*it)->c_light_position - C_p3_3d);
+		p1_camera_direction = normalize(vec3(0) - C_p1_3d);
+		p2_camera_direction = normalize(vec3(0) - C_p2_3d);
+		p3_camera_direction = normalize(vec3(0) - C_p3_3d);
+		p1_reflect_direction = normalize(-p1_light_direction - 2 * (dot(-p1_light_direction, p1_normal.normal_direction)) * p1_normal.normal_direction);
+		p2_reflect_direction = normalize(-p2_light_direction - 2 * (dot(-p2_light_direction, p2_normal.normal_direction)) * p2_normal.normal_direction);
+		p3_reflect_direction = normalize(-p3_light_direction - 2 * (dot(-p3_light_direction, p3_normal.normal_direction)) * p3_normal.normal_direction);
+		p1_illumination += /*ia*/ka * (*it)->La + 
+						   /*id*/kd * dot(p1_light_direction, p1_normal.normal_direction) * (*it)->Ld +
+						   /*is*/ks * pow(dot(p1_reflect_direction, p1_camera_direction), ALPHA) * (*it)->Ls;
+		p2_illumination += /*ia*/ka * (*it)->La + 
+						   /*id*/kd * dot(p2_light_direction, p2_normal.normal_direction) * (*it)->Ld +
+						   /*is*/ks * pow(dot(p2_reflect_direction, p2_camera_direction), ALPHA) * (*it)->Ls;
+		p3_illumination += /*ia*/ka * (*it)->La + 
+						   /*id*/kd * dot(p3_light_direction, p3_normal.normal_direction) * (*it)->Ld +
+						   /*is*/ks * pow(dot(p3_reflect_direction, p3_camera_direction), ALPHA) * (*it)->Ls;
+	}
+
 	if (normal.is_valid)
 	{
 		normal.UpdateShape();
@@ -348,22 +402,18 @@ float Triangle::GetColor(int x, int y, int z, vector<Light*> lights, Shadow shad
 	vec3 camera_direction;
 	vec3 reflect_direction;
 	vec3 normal;
+	i = 0;
 	switch (shadow)
 	{
 		case FLAT:
 			normal = this->normal.normal_direction;
 			break;
 		case GOURAUD:
-			for (auto it = lights.begin(); it != lights.end(); ++it)
-			{
-				light_direction = normalize((*it)->c_light_position - vec3(x, y, z));
-				camera_direction = normalize(vec3(0) - vec3(x, y, z));
-				reflect_direction = normalize(-light_direction - 2 * (dot(-light_direction, normal)) * normal);
-				ia = ka * (*it)->La;
-				id = kd * dot(light_direction, normal) * (*it)->Ld;
-				is = ks * pow(dot(reflect_direction, camera_direction), ALPHA) * (*it)->Ls;
-				i = ia + id + is;
-			}
+			i = GetGouruad(x, y);
+			return i;
+		case PHONG:
+			normal = GetPhong(x, y);
+			break;
 	}
 	for (auto it = lights.begin(); it != lights.end(); ++it)
 	{
@@ -373,7 +423,7 @@ float Triangle::GetColor(int x, int y, int z, vector<Light*> lights, Shadow shad
 		ia = ka * (*it)->La;
 		id = kd * dot(light_direction, normal) * (*it)->Ld;
 		is = ks * pow(dot(reflect_direction, camera_direction),ALPHA) * (*it)->Ls;
-		i = ia + id + is;
+		i += ia + id + is;
 	}
 	return i;
 }
@@ -740,6 +790,11 @@ vec2 Renderer::vec3ToVec2(const vec3& ver)
 	return point;
 }
 
+vector<Light*> Renderer::GetLights()
+{
+	return lights;
+}
+
 mat4 Renderer::GetProjection()
 {
 	return cProjection;
@@ -888,13 +943,11 @@ void Renderer::SetObjectMatrices(const mat4& oTransform, const mat4& nTransform)
 }
 
 
-void Renderer::ZBufferScanConvert(vector<Light*> lights, Shadow shadow)
+void Renderer::ZBufferScanConvert()
 {
-
 	float z;
 	int minX, maxX;
 	int fixed_y;
-	Triangle* cur_triangle;
 	float illumination;
 	float min_illumination = std::numeric_limits<float>::infinity(); 
 	float max_illumination = -std::numeric_limits<float>::infinity();
@@ -930,7 +983,6 @@ void Renderer::ZBufferScanConvert(vector<Light*> lights, Shadow shadow)
 					{
 						DrawPixel(i, y, (*it)->shape_color);
 					}
-
 				}
 			}
 		}

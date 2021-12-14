@@ -56,6 +56,11 @@
 #define CONTROL_ACTIVE_LIGHT		2
 #define CHANGE_PARAMETERS			3
 
+//shadow menu
+#define FLAT_SHADOW					1
+#define GOURAUD_SHADOW				2
+#define PHONG_SHADOW				3
+
 #define WHEEL_SCROLL_UP				3
 #define WHEEL_SCROLL_DOWN			4
 
@@ -91,6 +96,7 @@ int menuLookAtCameraId;
 int menuLookAtLightId;
 //int menuChangeColor;
 int menuLights;
+int menuShadow;
 Transformation curTramsformation = MOVE;
 Projection curProjection = PERSPECTIVE;
 bool lb_down,rb_down,mb_down;
@@ -260,6 +266,23 @@ void lightsMenu(int id)
 				scene->ChangeActiveLightL(l_params);
 			}
 			break;
+	}
+	scene->draw();
+}
+
+void shadowMenu(int id)
+{
+	switch (id)
+	{
+	case FLAT_SHADOW:
+		scene->ChangeShadow(FLAT);
+		break;
+	case GOURAUD_SHADOW:
+		scene->ChangeShadow(GOURAUD);
+		break;
+	case PHONG_SHADOW:
+		scene->ChangeShadow(PHONG);
+		break;
 	}
 	scene->draw();
 }
@@ -497,6 +520,13 @@ void initMenu()
 	glutAddSubMenu("Select Light", menuSwitchToLightId);
 	glutAddMenuEntry("Change Active Light L Parameters", CHANGE_PARAMETERS);
 
+
+	menuShadow = glutCreateMenu(shadowMenu);
+	glutAddMenuEntry("Flat Shadow", FLAT_SHADOW);
+	glutAddMenuEntry("Gouruad Shadow", GOURAUD_SHADOW);
+	glutAddMenuEntry("Phong Shadow", PHONG_SHADOW);
+
+
 	//menuChangeColor = glutCreateMenu(changeColorMenu);
 	int menuFeatures = glutCreateMenu(featuresMenu);
 	glutAddMenuEntry("Show Vertices Normal", SHOW_VERTICES_NORMAL);
@@ -535,6 +565,7 @@ void initMenu()
 	glutAddMenuEntry("About", MAIN_ABOUT);
 	glutAddSubMenu("Cameras", menuCameras);
 	glutAddSubMenu("Light Sources", menuLights);
+	glutAddSubMenu("Shadow", menuShadow);
 
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 }

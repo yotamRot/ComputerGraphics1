@@ -261,7 +261,7 @@ void Scene::draw()
 	mat4 curCameraInv = curCameraModel->_w_TransformInv * curCameraModel->_m_TransformInv;
 	m_renderer->ClearColorBuffer();
 	m_renderer->ClearDepthBuffer();
-	m_renderer->ConfigureRenderer(curProjection, curCameraInv, isShowVerticsNormals, isShowFacesNormals, isDrawBoundBox);
+	m_renderer->ConfigureRenderer(curProjection, curCameraInv, isShowVerticsNormals, isShowFacesNormals, isDrawBoundBox, lights, current_shadow);
 	MeshModel* curModel;
 
 	for (vector<Model*>::iterator it = models.begin(); it != models.end(); ++it)
@@ -287,7 +287,7 @@ void Scene::draw()
 	{
 		(*it)->c_light_position = LightPosition(m_renderer->GetProjection(), (*it)->model->_world_transform, (*it)->model->_world_transform);
 	}
-	m_renderer->ZBufferScanConvert(lights);
+	m_renderer->ZBufferScanConvert();
 	m_renderer->SwapBuffers();
 }
 
