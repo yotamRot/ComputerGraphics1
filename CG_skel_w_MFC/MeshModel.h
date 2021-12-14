@@ -33,8 +33,7 @@ public:
 	vector<Line>* bound_box_vertices;
 
 	vec3 mesh_color;
-	mat4 _model_transform;
-	mat4 _world_transform;
+
 
 	MeshModel(string fileName);
 	~MeshModel(void);

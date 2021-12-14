@@ -54,6 +54,7 @@
 //lights menu
 #define ADD_LIGHT					1
 #define CONTROL_ACTIVE_LIGHT		2
+#define CHANGE_PARAMETERS			3
 
 #define WHEEL_SCROLL_UP				3
 #define WHEEL_SCROLL_DOWN			4
@@ -241,16 +242,24 @@ void lightsMenu(int id)
 	int newLightId;
 	switch (id)
 	{
-	case ADD_LIGHT:
-		newLightId = scene->addLight();
-		glutSetMenu(menuLookAtLightId);
-		glutAddMenuEntry((lightPrefix + std::to_string(newLightId)).c_str(), newLightId);
-		glutSetMenu(menuSwitchToLightId);
-		glutAddMenuEntry((lightPrefix + std::to_string(newLightId)).c_str(), newLightId);
-		break;
-	case CONTROL_ACTIVE_LIGHT:
-		scene->ControlActiveLight();
-		break;
+		case ADD_LIGHT:
+			newLightId = scene->addLight();
+			glutSetMenu(menuLookAtLightId);
+			glutAddMenuEntry((lightPrefix + std::to_string(newLightId)).c_str(), newLightId);
+			glutSetMenu(menuSwitchToLightId);
+			glutAddMenuEntry((lightPrefix + std::to_string(newLightId)).c_str(), newLightId);
+			break;
+		case CONTROL_ACTIVE_LIGHT:
+			scene->ControlActiveLight();
+			break;
+		case CHANGE_PARAMETERS:
+			SetLightL(scene->GetActiveLight()->GetL());
+			LDialog dlg;
+			if (dlg.DoModal() == IDOK) {
+				vec3 l_params = dlg.GetL();
+				scene->ChangeActiveLightL(l_params);
+			}
+			break;
 	}
 	scene->draw();
 }
@@ -357,11 +366,13 @@ void featuresMenu(int id)
 			}
 			break;
 		case CHANGE_COLOR:
+			SetColorParam(scene->GetModelRGB(), scene->GetModelK());
 			ColorDialog dlg;
 			if (dlg.DoModal() == IDOK) {
 				vec3 rgb = dlg.GetRGB();
 				scene->ChangeModelColorIndex(rgb);
-
+				vec3 k = dlg.GetK();
+				scene->ChangeModelIlluminationParams(k);
 			}
 			break;
 	}
@@ -376,7 +387,7 @@ void projectionMenu(int id)
 
 void ProjParameresMenu(int id)
 {
-	setLbnRtf(scene->Getlbn(), scene->Getrtf());
+	SetLbnRtf(scene->Getlbn(), scene->Getrtf());
 	if (id == PRESPECTIVE_PARAMETERS)
 	{
 		CPerspDialog dlg;
@@ -484,6 +495,7 @@ void initMenu()
 	glutAddMenuEntry("Control Active Light", CONTROL_ACTIVE_LIGHT);
 	glutAddSubMenu("Look At Light", menuLookAtLightId);
 	glutAddSubMenu("Select Light", menuSwitchToLightId);
+	glutAddMenuEntry("Change Active Light L Parameters", CHANGE_PARAMETERS);
 
 	//menuChangeColor = glutCreateMenu(changeColorMenu);
 	int menuFeatures = glutCreateMenu(featuresMenu);

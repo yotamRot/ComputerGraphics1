@@ -10,7 +10,7 @@
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 #define ZINDEX(width,x,y) (x+y*width)
 #define DRAW_OPEN_MODELS 0
-
+#define ALPHA 2
 
 color white{1, 1, 1}, red{1, 0, 0}, green{0, 1, 0}, blue{0, 0, 1};
 color colors[] = { white, red ,green ,blue };
@@ -40,6 +40,15 @@ Normal::Normal(vec3& p1_3d, vec3& p2_3d,NormalKind normal_kind, float normal_siz
 	shape_color = RED;
 	x_max = NULL;
 	x_min = NULL;
+}
+
+Light::Light(int modelId, Model* model) : modelId(modelId), model(model), La(0.5), Ld(0.5), Ls(0.5)
+{
+}
+
+vec3 Light::GetL()
+{
+	return vec3(La, Ld, Ls);
 }
 
 // gives the maximum in array
@@ -156,6 +165,8 @@ bool LiangBarskyClipping(vec3& point1, vec3& point2, vec3& max, vec3& min)
 	//out2.y = point1.y + p[3] * u2;
 
 }
+
+
 
 Renderer::Renderer() :m_width(512), m_height(512)
 {
@@ -330,6 +341,43 @@ void Triangle::UpdateShape()
 	}
 }
 
+float Triangle::GetColor(int x, int y, int z, vector<Light*> lights, Shadow shadow)
+{
+	float i, ia, id, is;
+	vec3 light_direction;
+	vec3 camera_direction;
+	vec3 reflect_direction;
+	vec3 normal;
+	switch (shadow)
+	{
+		case FLAT:
+			normal = this->normal.normal_direction;
+			break;
+		case GOURAUD:
+			for (auto it = lights.begin(); it != lights.end(); ++it)
+			{
+				light_direction = normalize((*it)->c_light_position - vec3(x, y, z));
+				camera_direction = normalize(vec3(0) - vec3(x, y, z));
+				reflect_direction = normalize(-light_direction - 2 * (dot(-light_direction, normal)) * normal);
+				ia = ka * (*it)->La;
+				id = kd * dot(light_direction, normal) * (*it)->Ld;
+				is = ks * pow(dot(reflect_direction, camera_direction), ALPHA) * (*it)->Ls;
+				i = ia + id + is;
+			}
+	}
+	for (auto it = lights.begin(); it != lights.end(); ++it)
+	{
+		light_direction = normalize((*it)->c_light_position - vec3(x,y,z));
+		camera_direction = normalize(vec3(0) - vec3(x, y, z));
+		reflect_direction = normalize(-light_direction - 2 * (dot(-light_direction, normal)) * normal);
+		ia = ka * (*it)->La;
+		id = kd * dot(light_direction, normal) * (*it)->Ld;
+		is = ks * pow(dot(reflect_direction, camera_direction),ALPHA) * (*it)->Ls;
+		i = ia + id + is;
+	}
+	return i;
+}
+
 
 float Line::GetZ(int x, int y)
 {
@@ -369,16 +417,22 @@ void Line::UpdateShape()
 	}
 }
 
+float Line::GetColor(int x, int y, int z, vector<Light*> lights, Shadow shadow)
+{
+	return 0.0f;
+}
+
 void Normal::UpdateShape()
 {
 
 	C_p1_3d = renderer->Transform(p1_3d);
-	C_p2_3d = C_p1_3d + normal_size * (renderer->NormTransform(p2_3d));
+	normal_direction = normalize(renderer->NormTransform(p2_3d));
+	C_p2_3d = C_p1_3d + normal_size * normal_direction;
 	p1 = renderer->vec3ToVec2(C_p1_3d);
 	p2 = renderer->vec3ToVec2(C_p2_3d);
 	yMax = max(p1.y, p2.y);
 	yMin = min(p1.y, p2.y);
-
+	
 
 	should_draw = ShouldDrawShape();
 	if (should_draw)
@@ -705,7 +759,10 @@ vec3 Renderer::NormTransform(const vec3& ver)
 	return normalize(vec3(tempVec.x, tempVec.y, tempVec.z));
 }
 
-void Renderer::ConfigureRenderer(const mat4& projection, const mat4& transform, bool isDrawVertexNormal, bool isDrawFaceNormal, bool isDrawBoundBox)
+void Renderer::ConfigureRenderer(const mat4& projection, const mat4& transform,
+								bool isDrawVertexNormal, bool isDrawFaceNormal,
+								bool isDrawBoundBox, vector<Light*> scene_lights,
+								Shadow scene_shadow)
 {
 	cTransform = mat4(transform);
 	cProjection = mat4(projection);
@@ -715,6 +772,8 @@ void Renderer::ConfigureRenderer(const mat4& projection, const mat4& transform, 
 	renderer = this;
 	yMin = m_height;
 	yMax = 0;
+	lights = scene_lights;
+	shadow = scene_shadow;
 	shapesSet.clear();
 
 }	
@@ -829,22 +888,23 @@ void Renderer::SetObjectMatrices(const mat4& oTransform, const mat4& nTransform)
 }
 
 
-void Renderer::ZBufferScanConvert()
+void Renderer::ZBufferScanConvert(vector<Light*> lights, Shadow shadow)
 {
 
 	float z;
 	int minX, maxX;
-	float i;
 	int fixed_y;
-
+	Triangle* cur_triangle;
+	float illumination;
+	float min_illumination = std::numeric_limits<float>::infinity(); 
+	float max_illumination = -std::numeric_limits<float>::infinity();
 	for (auto it = shapesSet.begin(); it != shapesSet.end(); ++it)
 	{
 		yMin = max(0, (*it)->yMin);
 		yMax = min((*it)->yMax, m_height - 1);
-		for (int y = yMin; y < yMax; y++)
+		for (int y = yMin; y <= yMax; y++)
 		{
 			fixed_y = y - yMin;
-			//A.erase(A.begin(), A.upper_bound(dummy));
 			minX = max((*it)->x_min[fixed_y],0);
 			maxX = min((*it)->x_max[fixed_y], m_width -1);
 			for (int i = minX; i <= maxX; i++)
@@ -853,12 +913,26 @@ void Renderer::ZBufferScanConvert()
 				if (z < m_zbuffer[ZINDEX(m_width, i, y)])
 				{
 					m_zbuffer[ZINDEX(m_width, i, y)] = z;
-					DrawPixel(i, y,(*it)->shape_color);
+					if (lights.size() > 0)
+					{
+						illumination = (*it)->GetColor(i, y, z, lights,shadow);
+						if (illumination > max_illumination)
+						{
+							max_illumination = illumination;
+						}
+						else if (illumination > min_illumination)
+						{
+							min_illumination = illumination;
+						}
+						DrawPixel(i, y, illumination * (*it)->shape_color);
+					}
+					else
+					{
+						DrawPixel(i, y, (*it)->shape_color);
+					}
 
 				}
 			}
-
-
 		}
 	}
 }

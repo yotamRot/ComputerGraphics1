@@ -10,6 +10,7 @@
 #define IDC_Z_EDIT 203
 
 
+
 #define IDC_R_EDIT                  204
 #define IDC_L_EDIT                  205
 #define IDC_T_EDIT                  206
@@ -27,12 +28,17 @@
 #define IDC_GREEN_EDIT              216
 #define IDC_BLUE_EDIT               217
 
-
+#define IDC_L_A_EDIT                218
+#define IDC_L_D_EDIT                219
+#define IDC_L_S_EDIT                220
 
 #define CMD_EDIT_TITLE              "Command"
 #define X_EDIT_TITLE                "X ="
 #define Y_EDIT_TITLE                "Y ="
 #define Z_EDIT_TITLE                "Z ="
+#define L_A_EDIT_TITLE              "La ="
+#define L_D_EDIT_TITLE              "Ld ="
+#define L_S_EDIT_TITLE              "Ls ="
 
 
 #define R_EDIT_TITLE                "Right ="
@@ -54,8 +60,11 @@
 
 vec3 rtf;
 vec3 lbn;
+vec3 l;
+vec3 RGB;
+vec3 k;
 
-void setLbnRtf(vec3 Ilbn, vec3 Irtf)
+void SetLbnRtf(vec3 Ilbn, vec3 Irtf)
 {
     Ilbn = Ilbn * 100;
     Irtf = Irtf * 100;
@@ -68,6 +77,16 @@ void setLbnRtf(vec3 Ilbn, vec3 Irtf)
     lbn.z = float(round(Ilbn.z) / 100);
 }
 
+void SetLightL(vec3 l_params)
+{
+    l = l_params;
+}
+
+void SetColorParam(vec3 colors, vec3 k_params)
+{
+    RGB = colors;
+    k = k_params;
+}
 // ------------------------
 //    Class CInputDialog
 // ------------------------
@@ -444,7 +463,7 @@ void CPerspDialog::OnPaint()
 // ----------------------
 
 ColorDialog::ColorDialog(CString title)
-    : CInputDialog(title), mKa(0.0), mKd(0.0), mKs(0.0), mRed(0.0), mGreen(0.0), mBlue(0.0)
+    : CInputDialog(title), mKa(k.x), mKd(k.y), mKs(k.z), mRed(RGB.x), mGreen(RGB.y), mBlue(RGB.z)
 { }
 
 ColorDialog::~ColorDialog()
@@ -526,3 +545,63 @@ void ColorDialog::OnPaint()
     mKaEdit.SetFocus();
 }
 
+// ----------------------
+//    Class LDialog
+// ----------------------
+
+LDialog::LDialog(CString title)
+    : CInputDialog(title), mLa(l.x), mLd(l.y), mLs(l.z)
+{ }
+
+LDialog::~LDialog()
+{ }
+
+vec3 LDialog::GetL()
+{
+    return vec3(mLa, mLd, mLs);
+}
+
+void LDialog::DoDataExchange(CDataExchange* pDX)
+{
+    CInputDialog::DoDataExchange(pDX);
+    DDX_Text(pDX, IDC_L_A_EDIT, mLa);
+    DDX_Text(pDX, IDC_L_D_EDIT, mLd);
+    DDX_Text(pDX, IDC_L_S_EDIT, mLs);
+}
+
+// LDialog message handlers
+BEGIN_MESSAGE_MAP(LDialog, CInputDialog)
+    ON_WM_CREATE()
+    ON_WM_PAINT()
+END_MESSAGE_MAP()
+
+int LDialog::OnCreate(LPCREATESTRUCT lpcs)
+{
+    mLaEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(130, 70, 340, 90), this, IDC_L_A_EDIT);
+
+    mLdEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(130, 140, 340, 160), this, IDC_L_D_EDIT);
+
+    mLsEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(130, 210, 340, 230), this, IDC_L_S_EDIT);
+
+    return 0;
+}
+
+void LDialog::OnPaint()
+{
+    CPaintDC dc(this);
+    dc.SetBkMode(TRANSPARENT);
+
+    CRect x_rect(100, 72, 450, 90);
+    dc.DrawText(CString(L_A_EDIT_TITLE), -1, &x_rect, DT_SINGLELINE);
+
+    CRect y_rect(100, 142, 450, 160);
+    dc.DrawText(CString(L_D_EDIT_TITLE), -1, &y_rect, DT_SINGLELINE);
+
+    CRect z_rect(100, 212, 450, 230);
+    dc.DrawText(CString(L_S_EDIT_TITLE), -1, &z_rect, DT_SINGLELINE);
+
+    mLaEdit.SetFocus();
+}

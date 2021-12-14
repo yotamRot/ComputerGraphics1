@@ -9,6 +9,8 @@
 #include "mat.h"
 #include "GL/glew.h"
 
+
+
 using namespace std;
 class Renderer;
 #define DEFAULT_NORMAL_SIZE			0.1
@@ -27,19 +29,51 @@ enum NormalKind
 	vertix_normal
 };
 
-class Range
+enum TransAxis
 {
-public:
-	int minX;
-	int maxX;
-
-	Range() = default;
-	Range(int  minX, int maxX) :minX(minX), maxX(maxX) {};
-	~Range() = default;
-
-private:
-
+	MODEL,
+	WORLD
 };
+
+enum LightType
+{
+	POINT_SOURCE,
+	PARALLEL_SOURCE
+};
+
+enum Shadow
+{
+	FLAT,
+	GOURAUD,
+	PHONG
+};
+
+
+
+
+class Model {
+public:
+	mat4 _model_transform;
+	mat4 _world_transform;
+	void virtual draw(Renderer* renderer) = 0;
+	vec3 virtual CenteringTranslation(TransAxis axis) = 0;
+protected:
+	virtual ~Model() {}
+};
+
+class Light {
+public:
+	Light(int modelId, Model* model);
+	int modelId;
+	Model* model;
+	LightType Type;
+	vec3 c_light_position;
+	float La;
+	float Ld;
+	float Ls;
+	vec3 GetL();
+};
+
 
 class Shape
 {
@@ -55,13 +89,11 @@ public:
 	virtual void  Rasterize() =0;
 	virtual void  UpdateShape() = 0;
 	virtual bool  ShouldDrawShape() = 0;
+	virtual float GetColor(int x, int y, int z, vector<Light*> lights, Shadow shadow) = 0;
 
 	int yMin;
 	int yMax;
 	vec3 shape_color;
-	float ka; 
-	float kd; 
-	float ks; 
 	bool should_draw;
 	int* x_min;
 	int* x_max;
@@ -89,6 +121,8 @@ public:
 	float GetZ(int x, int y) override;
 	bool  ShouldDrawShape() override;
 	void UpdateShape() override;
+	float GetColor(int x, int y, int z, vector<Light*> lights, Shadow shadow) override;
+
 
 
 	Line(vec3& p1_3d, vec3& p2_3d);
@@ -101,7 +135,7 @@ public:
 
 	~Normal() = default;
 
-
+	vec3 normal_direction;
 	float normal_size;
 	bool is_valid;
 	NormalKind normal_kind;
@@ -136,10 +170,16 @@ public:
 
 	Normal normal;
 
+	float ka;
+	float kd;
+	float ks;
+
+
 	void Rasterize() override;
 	float GetZ(int x, int y) override ;
 	bool  ShouldDrawShape() override;
 	void  UpdateShape() override;
+	float GetColor(int x, int y, int z, vector<Light*> lights, Shadow shadow) override;
 
 	Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d, vec3 rgb, Normal& normal, Normal& p1_normal=invalid_normal, Normal& p2_normal=invalid_normal, Normal& p3_normal=invalid_normal);
 };
@@ -169,7 +209,8 @@ class Renderer
 	bool isShowBoundBox;
 
 	vector<Shape*> shapesSet;
-
+	vector<Light*> lights;
+	Shadow shadow;
 
 	void CreateBuffers(int width, int height);
 	void CreateLocalBuffer();
@@ -197,7 +238,8 @@ public:
 	void DrawBoundingBox(vector<Line>* lines);
 	void DrawPixel(int x, int y, vec3& rgb);
 	void ConfigureRenderer(const mat4& projection, const mat4& cTransform ,
-		bool isDrawVertexNormal, bool isDrawFaceNormal, bool isDrawBoundBox);
+		bool isDrawVertexNormal, bool isDrawFaceNormal, bool isDrawBoundBox,
+		vector<Light*> scene_lights, Shadow scene_shadow);
 	void SetObjectMatrices(const mat4& oTransform, const mat4& nTransform);
 	void SwapBuffers();
 	void ClearColorBuffer();

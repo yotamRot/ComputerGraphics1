@@ -7,6 +7,12 @@
 
 using namespace std;
 
+vec3 LightPosition(mat4& c_transform, mat4& w_transform, mat4& m_transform)
+{
+	vec4 tempVec = c_transform * w_transform * m_transform * vec4(vec3(0));
+	return vec3(tempVec.x / tempVec.w, tempVec.y / tempVec.w, tempVec.z / tempVec.w);
+}
+
 int Scene::loadOBJModel(string fileName)
 {
 	MeshModel *model = new MeshModel(fileName);
@@ -33,6 +39,30 @@ int Scene::modelMenuIdToVectorId(int menuId)
 Camera* Scene::GetActiveCamera() 
 {
 	return cameras.at(activeCamera);
+}
+
+Light* Scene::GetActiveLight()
+{
+	return lights.at(activeCamera);
+}
+
+vec3 Scene::GetModelRGB()
+{
+	MeshModel* curModel = (MeshModel*)models.at(activeModel);
+	return curModel->mesh_color;
+}
+
+vec3 Scene::GetModelK()
+{
+	MeshModel* curModel = (MeshModel*)models.at(activeModel);
+	return vec3(curModel->ka, curModel->kd, curModel->ks) ;
+}
+
+void Scene::ChangeActiveLightL(vec3 l_params)
+{
+	lights.at(activeCamera)->La = l_params.x;
+	lights.at(activeCamera)->Ld = l_params.y;
+	lights.at(activeCamera)->Ls = l_params.z;
 }
 
 void Scene::Zoom(ZoomDirection direction)
@@ -253,8 +283,11 @@ void Scene::draw()
 		}
 
 	}
-
-	m_renderer->ZBufferScanConvert();
+	for (auto it = lights.begin(); it != lights.end(); ++it)
+	{
+		(*it)->c_light_position = LightPosition(m_renderer->GetProjection(), (*it)->model->_world_transform, (*it)->model->_world_transform);
+	}
+	m_renderer->ZBufferScanConvert(lights);
 	m_renderer->SwapBuffers();
 }
 
@@ -264,7 +297,7 @@ void Scene::drawDemo()
 	m_renderer->SwapBuffers();
 }
 
-Scene::Scene(Renderer *renderer) : m_renderer(renderer) 
+Scene::Scene(Renderer *renderer) : m_renderer(renderer), current_shadow(FLAT)
 {	
 	InitScene();
 }
@@ -383,9 +416,7 @@ Camera::Camera(vec3 lbn, vec3 rtf, int modelId, Model* model) :lbn(lbn), rtf(rtf
 	//set camera world view aligned with world asix with offset in z
 }
 
-Light::Light(int modelId, Model* model) : modelId(modelId), model(model)
-{
-}
+
 
 void Scene::MaintingCamerasRatios(int oldWidth, int oldHeight, int newWidth, int newHeight)
 {
@@ -411,7 +442,12 @@ void Scene::ChangeModelIlluminationParams(vec3 k)
 	cur_model->ka = k.x;
 	cur_model->kd = k.y;
 	cur_model->ks = k.z;
-	//cur_model->UpdateTriangleColor();
+	cur_model->UpdateTriangleIlluminationParams();
+}
+
+void Scene::ChangeShadow(Shadow s)
+{
+	current_shadow = s;
 }
 
 void Camera::MaintainRatio(float widthRatio, float heightRatio, Projection proj)

@@ -6,7 +6,9 @@ using std::string;
 
 #include "vec.h"
 
-void setLbnRtf(vec3 Ilbn, vec3 Irtf);
+void SetLbnRtf(vec3 Ilbn, vec3 Irtf);
+void SetLightL(vec3 l_params);
+void SetColorParam(vec3 colors, vec3 k_params);
 // ------------------------
 //    Class CInputDialog
 // ------------------------
@@ -194,6 +196,35 @@ protected:
     CEdit mGreenEdit;
     CEdit mBlueEdit;
 
+
+    virtual void DoDataExchange(CDataExchange* pDX);
+
+    afx_msg int OnCreate(LPCREATESTRUCT lpcs);
+    afx_msg void OnPaint();
+    DECLARE_MESSAGE_MAP()
+};
+
+
+
+// ----------------------
+//    Class LDialog
+// ----------------------
+
+class LDialog : public CInputDialog
+{
+public:
+    LDialog(CString title = "Input Dialog");
+    virtual ~LDialog();
+
+    vec3 GetL();
+
+protected:
+    float mLa;
+    float mLd;
+    float mLs;
+    CEdit mLaEdit;
+    CEdit mLdEdit;
+    CEdit mLsEdit;
 
     virtual void DoDataExchange(CDataExchange* pDX);
 

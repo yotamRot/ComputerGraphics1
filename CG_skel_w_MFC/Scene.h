@@ -39,37 +39,18 @@ enum ZoomDirection
 	ZOOM_OUT
 };
 
-enum TransAxis
+
+enum Shadow
 {
-	MODEL,
-	WORLD
-};
-
-enum LightType
-{
-	POINT_SOURCE,
-	PARALLEL_SOURCE
-};
-
-class Model { 
-public:
-	void virtual draw(Renderer* renderer) = 0;
-	vec3 virtual CenteringTranslation(TransAxis axis) = 0;
-protected:
-	virtual ~Model() {}
+	FLAT,
+	GOURAUD,
+	PHONG
 };
 
 
-class Light {
-public:
-	Light(int modelId, Model* model);
-	int modelId;
-	Model* model;
-	LightType Type;
-	float ka;// fraction of ambient light reflected from surface = 0.5;
-	float kd;// = 0.8;
-	float ks;// = 1.0;
-};
+
+
+
 
 class Camera {
 	vec3 lbn;  // left, bottom, near
@@ -95,8 +76,6 @@ public:
 	void MaintainRatio(float widthFactor, float heightFactor, Projection proj);
 	vec3 Getlbn();
 	vec3 Getrtf();
-
-
 };
 
 class Scene {
@@ -110,6 +89,7 @@ class Scene {
 	bool isDrawBoundBox;
 	Renderer* m_renderer;
 	TransAxis axis;
+	Shadow current_shadow;
 	void ResetZoom();
 public:
 	vector<int> modelToVectorId;
@@ -141,6 +121,10 @@ public:
 	void drawDemo();
 	int modelMenuIdToVectorId(int menuId);
 	Camera* GetActiveCamera();
+	Light* GetActiveLight();
+	vec3 GetModelRGB();
+	vec3 GetModelK();
+	void ChangeActiveLightL(vec3 l_params);
 	void Zoom(ZoomDirection direction);
 	int activeModel;
 	int activeLight;
@@ -153,4 +137,5 @@ public:
 	void MaintingCamerasRatios(int oldWidth, int oldHeight, int newWidth, int newHeight);
 	void ChangeModelColorIndex(vec3 rgb);
 	void ChangeModelIlluminationParams(vec3 k);
+	void ChangeShadow(Shadow s);
 };
