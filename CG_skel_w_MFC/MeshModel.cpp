@@ -333,6 +333,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	GLfloat halfX = lenX * 0.5f;
 	GLfloat halfY = lenY * 0.5f;
 	GLfloat halfZ = lenZ * 0.5f;
+	mesh_color = RED;
 
 
 
@@ -439,6 +440,7 @@ CameraModel::CameraModel(int cameraIndex) : cameraIndex(cameraIndex)
 	triangles = new vector<Triangle>;
 	Normal curFaceNormal;
 	vec3 p1, p2, p3;
+	mesh_color = GREEN;
 	//faces_normal_end_positions = new vector<vec3>;
 
 	Triangle curTriangle;
@@ -466,7 +468,7 @@ CameraModel::CameraModel(int cameraIndex) : cameraIndex(cameraIndex)
 
 LightModel::LightModel(int lightIndex) : lightIndex(lightIndex)
 {
-
+	mesh_color = WHITE;
 	triangles = new vector<Triangle>;
 	Normal curFaceNormal;
 	vec3 p1, p2, p3;

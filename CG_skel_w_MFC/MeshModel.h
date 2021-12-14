@@ -28,8 +28,6 @@ public:
 	float kd;// = 0.8;
 	float ks;// = 1.0;
 	float alpha;// = 100.0;
-	//vec4 Ls = vec4(1.0, 0.0, 1.0, 1.0);
-	//vec4 ambient = ka * vec4(tmpColor, 1.0);
 
 	vector<Triangle>* triangles;
 	vector<Line>* bound_box_vertices;

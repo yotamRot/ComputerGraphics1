@@ -33,7 +33,6 @@ Line::Line(vec3& p1_3d, vec3& p2_3d) :p1_3d(p1_3d), p2_3d(p2_3d)
 	should_draw = true;
 	x_max = NULL;
 	x_min = NULL;
-	//shapeColorIndex = BLUE;
 }
 
 Normal::Normal(vec3& p1_3d, vec3& p2_3d,NormalKind normal_kind, float normal_size, bool is_valid) : Line(p1_3d, p2_3d),normal_kind(normal_kind), normal_size(normal_size), is_valid(is_valid)
@@ -311,7 +310,7 @@ void Triangle::UpdateShape()
 
 	}
 
-	should_draw = ShouldDrawShape();
+	//should_draw = ShouldDrawShape();
 
 	if (should_draw)
 	{

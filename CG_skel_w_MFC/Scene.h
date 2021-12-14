@@ -66,6 +66,9 @@ public:
 	int modelId;
 	Model* model;
 	LightType Type;
+	float ka;// fraction of ambient light reflected from surface = 0.5;
+	float kd;// = 0.8;
+	float ks;// = 1.0;
 };
 
 class Camera {
