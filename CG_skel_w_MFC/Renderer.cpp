@@ -245,6 +245,11 @@ float Triangle::GetZ(int x, int y)
 	A2 = length(cross(vec2, vec0));
 	A3 = length(cross(vec0, vec1));
 	float normalFactor = A1 + A2 + A3;
+	if (normalFactor == 0)
+	{
+		const float t = length(cord - p1) / length(p2 - p1);
+		return C_p1_3d.z * t + (1 - t) * C_p2_3d.z;
+	}
 	return (A1 * C_p1_3d.z + A2 * C_p2_3d.z + A3 * C_p3_3d.z) / normalFactor;
 }
 
@@ -963,7 +968,7 @@ void Renderer::ZBufferScanConvert()
 			for (int i = minX; i <= maxX; i++)
 			{
 				z =(*it)->GetZ(i, y);
-				if (z < m_zbuffer[ZINDEX(m_width, i, y)])
+				if (z <= m_zbuffer[ZINDEX(m_width, i, y)])
 				{
 					m_zbuffer[ZINDEX(m_width, i, y)] = z;
 					if (lights.size() > 0)

@@ -221,6 +221,7 @@ void MeshModel::loadFile(string fileName)
 		triangles->push_back(curTriangle);
 
 	}
+	UpdateTriangleIlluminationParams();
 }
 
 vector<Line>* MeshModel::CalcBounds()
@@ -321,8 +322,11 @@ vec3 MeshModel::CenteringTranslation(TransAxis axis)
 }
 
 
-PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat lenX, GLfloat lenY, GLfloat lenZ) :posX(posX), posY(posY), posZ(posZ), lenX(lenX), lenY(lenY), lenZ(lenZ)
+PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat lenX, GLfloat lenY, GLfloat lenZ) : posX(posX), posY(posY), posZ(posZ), lenX(lenX), lenY(lenY), lenZ(lenZ)
 {
+	ka = 0.5;
+	kd = 0.8;
+	ks = 1.0;
 	triangles = new vector<Triangle>;
 	vec3 p1, p2, p3;
 	//faces_normal_end_positions = new vector<vec3>;
@@ -433,10 +437,14 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	triangles->push_back(curTriangle);
  
 	bound_box_vertices = CalcBounds();
+	UpdateTriangleIlluminationParams();
 }
 
 CameraModel::CameraModel(int cameraIndex) : cameraIndex(cameraIndex)
 {
+	ka = 0.5;
+	kd = 0.8;
+	ks = 1.0;
 	triangles = new vector<Triangle>;
 	Normal curFaceNormal;
 	vec3 p1, p2, p3;
@@ -464,10 +472,14 @@ CameraModel::CameraModel(int cameraIndex) : cameraIndex(cameraIndex)
 	triangles->push_back(curTriangle);
 	
 	bound_box_vertices = CalcBounds();
+	UpdateTriangleIlluminationParams();
 }
 
 LightModel::LightModel(int lightIndex) : lightIndex(lightIndex)
 {
+	ka = 0.5;
+	kd = 0.8;
+	ks = 1.0;
 	mesh_color = WHITE;
 	triangles = new vector<Triangle>;
 	Normal curFaceNormal;
@@ -495,6 +507,7 @@ LightModel::LightModel(int lightIndex) : lightIndex(lightIndex)
 	triangles->push_back(curTriangle);
 
 	bound_box_vertices = CalcBounds();
+	UpdateTriangleIlluminationParams();
 }
 
 mat4 matrixInverse(mat4& mat , Transformation T)
