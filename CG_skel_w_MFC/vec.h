@@ -442,4 +442,10 @@ vec3 cross(const vec4& a, const vec4& b )
 		 a.x * b.y - a.y * b.x );
 }
 
+inline
+vec3 getXYZ(const vec4& a)
+{
+    return vec3(a.x / a.w, a.y / a.w, a.z / a.w);
+}
+
 //----------------------------------------------------------------------------
