@@ -227,7 +227,6 @@ vector<Line>* MeshModel::CalcBounds()
 {
 	int size = triangles->size();
 	vec3 min_bound, max_bound;
-	Triangle curTriangle;
 	max_bound = min_bound = triangles->at(0).p1_3d;
 	float curMaxX, curMinX, curMaxY, curMinY, curMaxZ, curMinZ;
 	for (auto it = triangles->begin(); it != triangles->end(); ++ it)
@@ -328,7 +327,6 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	//faces_normal_end_positions = new vector<vec3>;
 
 	Triangle curTriangle;
-	Normal curVertexNormal;
 	Normal curFaceNormal;
 	GLfloat halfX = lenX * 0.5f;
 	GLfloat halfY = lenY * 0.5f;

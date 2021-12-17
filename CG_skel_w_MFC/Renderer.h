@@ -17,6 +17,16 @@ class Renderer;
 #define GREEN						vec3(0,1,0)
 #define BLUE						vec3(0,0,1)
 
+enum Face
+{
+	Up,
+	Down,
+	Left,
+	Right,
+	Near,
+	Far
+};
+
 struct color {
 	int red, green, blue;
 };
@@ -51,10 +61,10 @@ public:
 	void RasterizeRegularNegetive(vec2& ver1, vec2& ver2);
 	void RasterizeBig(vec2& ver1, vec2& ver2);
 	void RasterizeRegular(vec2& ver1, vec2& ver2);	
-	virtual float  GetZ(int x, int y) =0;
-	virtual void  Rasterize() =0;
-	virtual void  UpdateShape() = 0;
-	virtual bool  ShouldDrawShape() = 0;
+	virtual float GetZ(int x, int y) =0;
+	virtual void Rasterize() =0;
+	virtual void UpdateShape() = 0;
+	virtual bool ShouldDrawShape() = 0;
 
 	int yMin;
 	int yMax;
@@ -73,9 +83,9 @@ public:
 class Line : public virtual Shape
 {
 public:
-	Line() = default;
+	Line();
 
-	 ~Line()=default;
+	// ~Line();
 	
 	vec3 p1_3d;
 	vec3 p2_3d;
@@ -87,7 +97,7 @@ public:
 
 	void  Rasterize() override;
 	float GetZ(int x, int y) override;
-	bool  ShouldDrawShape() override;
+	bool ShouldDrawShape() override;
 	void UpdateShape() override;
 
 
@@ -97,9 +107,9 @@ public:
 class Normal : public Line
 {
 public:
-	Normal() = default;
+	Normal();
 
-	~Normal() = default;
+	//~Normal();
 
 
 	float normal_size;
@@ -116,8 +126,8 @@ class Triangle : public virtual Shape
 {
 	
 public:
-	Triangle() = default;
-	
+	Triangle();
+	//~Triangle();
 	vec3 p1_3d;
 	vec3 p2_3d;
 	vec3 p3_3d;
@@ -125,10 +135,14 @@ public:
 	vec3 C_p1_3d;
 	vec3 C_p2_3d;
 	vec3 C_p3_3d;
+
+	vec4 P_p1_4d;
+	vec4 P_p2_4d;
+	vec4 P_p3_4d;
 	
-	vec2 p1;
-	vec2 p2;
-	vec2 p3;
+	vec2 p1_2d;
+	vec2 p2_2d;
+	vec2 p3_2d;
 	
 	Normal p1_normal;
 	Normal p2_normal;
@@ -140,6 +154,11 @@ public:
 	float GetZ(int x, int y) override ;
 	bool  ShouldDrawShape() override;
 	void  UpdateShape() override;
+	void  Clipper();
+	void Clip();
+	int ClipFace(Triangle &triangle1, Triangle& triangle2, Face face);
+	void ClipLine(Face face);
+
 
 	Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d, vec3 rgb, Normal& normal, Normal& p1_normal=invalid_normal, Normal& p2_normal=invalid_normal, Normal& p3_normal=invalid_normal);
 };
@@ -211,5 +230,5 @@ public:
 	mat4 GetProjection();
 	int yMin;
 	int yMax;
-
+	vector<Triangle> triangulation_triangles;
 };
