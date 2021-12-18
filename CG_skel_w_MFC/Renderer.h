@@ -66,7 +66,7 @@ public:
 	Light(int modelId, Model* model);
 	int modelId;
 	Model* model;
-	LightType Type;
+	LightType type;
 	vec3 c_light_position;
 	float La;
 	float Ld;
@@ -91,6 +91,7 @@ public:
 	virtual bool  ShouldDrawShape() = 0;
 	virtual float GetColor(int x, int y, int z, vector<Light*> lights, Shadow shadow) = 0;
 
+	bool is_light;
 	int yMin;
 	int yMax;
 	vec3 shape_color;
@@ -125,7 +126,7 @@ public:
 
 
 
-	Line(vec3& p1_3d, vec3& p2_3d);
+	Line(vec3& p1_3d, vec3& p2_3d, bool is_light);
 };
 
 class Normal : public Line
@@ -141,7 +142,7 @@ public:
 	NormalKind normal_kind;
 	void  UpdateShape() override;
 
-	Normal(vec3& p1_3d, vec3& p2_3d, NormalKind normal_kind, float normal_size=DEFAULT_NORMAL_SIZE, bool is_valid =true);
+	Normal(vec3& p1_3d, vec3& p2_3d, bool is_light,  NormalKind normal_kind, float normal_size=DEFAULT_NORMAL_SIZE, bool is_valid =true);
 };
 
 extern Normal invalid_normal;
@@ -186,7 +187,9 @@ public:
 	float GetGouruad(int x, int y);
 	vec3 GetPhong(int x, int y);
 
-	Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d, vec3 rgb, Normal& normal, Normal& p1_normal=invalid_normal, Normal& p2_normal=invalid_normal, Normal& p3_normal=invalid_normal);
+	Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d, vec3 rgb, bool is_light, Normal& normal,
+		Normal& p1_normal=invalid_normal, Normal& p2_normal=invalid_normal,
+		Normal& p3_normal=invalid_normal);
 };
 
 struct CustomCompareYmin
@@ -213,7 +216,7 @@ class Renderer
 	bool isShowFacesNormals;
 	bool isShowBoundBox;
 
-	vector<Shape*> shapesSet;
+	vector<Shape*> shapes;
 
 	Shadow shadow;
 

@@ -81,8 +81,6 @@ class LightModel : public MeshModel
 {
 	public:
 		int lightIndex;
-		mat4 _w_TransformInv;
-		mat4 _m_TransformInv;
 		LightModel(int lightIndex);
 };
 

@@ -24,7 +24,7 @@ int Scene::loadOBJModel(string fileName)
 
 int Scene::loadCubeModel()
 {
-	PrimMeshModel* cube = new PrimMeshModel(0, 0, 0, 1 , 1, 1);
+	PrimMeshModel* cube = new PrimMeshModel(0, 0, -5, 1 , 1, 1);
 	activeModel = models.size();
 	modelToVectorId.push_back(activeModel);
 	models.push_back(cube);
@@ -166,6 +166,7 @@ void Scene::ClearScene()
 {
 	models.clear();
 	cameras.clear();
+	lights.clear();
 	InitScene();
 	ResetZoom();
 }
@@ -263,7 +264,10 @@ void Scene::draw()
 	m_renderer->ClearDepthBuffer();
 	m_renderer->ConfigureRenderer(curProjection, curCameraInv, isShowVerticsNormals, isShowFacesNormals, isDrawBoundBox, lights, current_shadow);
 	MeshModel* curModel;
-
+	for (auto it = lights.begin(); it != lights.end(); ++it)
+	{
+		(*it)->c_light_position = LightPosition(m_renderer->GetProjection(), (*it)->model->_world_transform, (*it)->model->_model_transform);
+	}
 	for (vector<Model*>::iterator it = models.begin(); it != models.end(); ++it)
 	{
 		curModel = (MeshModel*)(*it);
@@ -281,12 +285,8 @@ void Scene::draw()
 			(*it)->draw(m_renderer);// draw models
 	
 		}
+	}
 
-	}
-	for (auto it = lights.begin(); it != lights.end(); ++it)
-	{
-		(*it)->c_light_position = LightPosition(m_renderer->GetProjection(), (*it)->model->_world_transform, (*it)->model->_world_transform);
-	}
 	m_renderer->ZBufferScanConvert();
 	m_renderer->SwapBuffers();
 }
@@ -519,12 +519,22 @@ int Scene::addLight()
 {
 	int newLightIndex = lights.size();
 	activeLight = newLightIndex;
+	activeModel = models.size();
 	LightModel* lightModel = new LightModel(newLightIndex);
 	Light* newLight = new Light(models.size(), lightModel);
 	lights.push_back(newLight);
 	models.push_back(lightModel);
 	return newLightIndex;
 }
+
+//int Scene::loadOBJModel(string fileName)
+//{
+//	MeshModel* model = new MeshModel(fileName);
+//	activeModel = models.size();
+//	modelToVectorId.push_back(activeModel);
+//	models.push_back(model);
+//	return modelToVectorId.size() - 1; // new model index
+//}
 
 void Scene::controlLight(int lightId)
 {

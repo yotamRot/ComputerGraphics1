@@ -16,33 +16,38 @@ color white{1, 1, 1}, red{1, 0, 0}, green{0, 1, 0}, blue{0, 0, 1};
 color colors[] = { white, red ,green ,blue };
 extern Renderer * renderer;
 
-Normal invalid_normal = Normal(vec3(0, 0), vec3(0, 0),vertix_normal, 0, false);
+Normal invalid_normal = Normal(vec3(0, 0), vec3(0, 0), false, vertix_normal, 0, false);
 
-Triangle::Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d, vec3 rgb, Normal& normal, Normal& p1_normal, Normal& p2_normal, Normal& p3_normal)
-	: p1_3d(p1_3d), p2_3d(p2_3d), p3_3d(p3_3d) , normal(normal), p1_normal(p1_normal), p2_normal(p2_normal) , p3_normal(p3_normal)
+Triangle::Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d, vec3 rgb, bool is_light,
+	Normal& normal, Normal& p1_normal, Normal& p2_normal, Normal& p3_normal)
+	: p1_3d(p1_3d), p2_3d(p2_3d), p3_3d(p3_3d) ,normal(normal),
+	p1_normal(p1_normal), p2_normal(p2_normal) , p3_normal(p3_normal)
 {
 	should_draw = true;
 	shape_color = rgb;
+	this->is_light = is_light;
 	x_max = NULL;
 	x_min = NULL;
 }
 
-Line::Line(vec3& p1_3d, vec3& p2_3d) :p1_3d(p1_3d), p2_3d(p2_3d)
+Line::Line(vec3& p1_3d, vec3& p2_3d, bool is_light) :p1_3d(p1_3d), p2_3d(p2_3d)
 {
 	shape_color = BLUE;
 	should_draw = true;
+	this->is_light = is_light;
 	x_max = NULL;
 	x_min = NULL;
 }
 
-Normal::Normal(vec3& p1_3d, vec3& p2_3d,NormalKind normal_kind, float normal_size, bool is_valid) : Line(p1_3d, p2_3d),normal_kind(normal_kind), normal_size(normal_size), is_valid(is_valid)
+Normal::Normal(vec3& p1_3d, vec3& p2_3d, bool is_light, NormalKind normal_kind, float normal_size, bool is_valid)
+	: Line(p1_3d, p2_3d, is_light),normal_kind(normal_kind), normal_size(normal_size), is_valid(is_valid)
 {
 	shape_color = RED;
 	x_max = NULL;
 	x_min = NULL;
 }
 
-Light::Light(int modelId, Model* model) : modelId(modelId), model(model), La(0.5), Ld(0.5), Ls(0.5)
+Light::Light(int modelId, Model* model) : modelId(modelId), model(model), La(0.5), Ld(0.5), Ls(0.5), type(PARALLEL_SOURCE)
 {
 }
 
@@ -247,6 +252,10 @@ float Triangle::GetZ(int x, int y)
 	float normalFactor = A1 + A2 + A3;
 	if (normalFactor == 0)
 	{
+		if (length(p2 - p1) == 0)
+		{
+			return C_p1_3d.z;
+		}
 		const float t = length(cord - p1) / length(p2 - p1);
 		return C_p1_3d.z * t + (1 - t) * C_p2_3d.z;
 	}
@@ -347,9 +356,18 @@ void Triangle::UpdateShape()
 	p1_illumination = p2_illumination = p3_illumination = 0;
 	for (auto it = renderer->lights.begin(); it != renderer->lights.end(); ++it)
 	{
-		p1_light_direction = normalize((*it)->c_light_position - C_p1_3d);
-		p2_light_direction = normalize((*it)->c_light_position - C_p2_3d);
-		p3_light_direction = normalize((*it)->c_light_position - C_p3_3d);
+		if ((*it)->type == PARALLEL_SOURCE)
+		{
+			p1_light_direction = normalize((*it)->c_light_position);
+			p2_light_direction = normalize((*it)->c_light_position);
+			p3_light_direction = normalize((*it)->c_light_position);
+		}
+		else // Point source
+		{
+			p1_light_direction = normalize((*it)->c_light_position - C_p1_3d);
+			p2_light_direction = normalize((*it)->c_light_position - C_p2_3d);
+			p3_light_direction = normalize((*it)->c_light_position - C_p3_3d);
+		}
 		p1_camera_direction = normalize(vec3(0) - C_p1_3d);
 		p2_camera_direction = normalize(vec3(0) - C_p2_3d);
 		p3_camera_direction = normalize(vec3(0) - C_p3_3d);
@@ -366,6 +384,7 @@ void Triangle::UpdateShape()
 						   /*id*/kd * dot(p3_light_direction, p3_normal.normal_direction) * (*it)->Ld +
 						   /*is*/ks * pow(dot(p3_reflect_direction, p3_camera_direction), ALPHA) * (*it)->Ls;
 	}
+
 
 	if (normal.is_valid)
 	{
@@ -422,12 +441,19 @@ float Triangle::GetColor(int x, int y, int z, vector<Light*> lights, Shadow shad
 	}
 	for (auto it = lights.begin(); it != lights.end(); ++it)
 	{
-		light_direction = normalize((*it)->c_light_position - vec3(x,y,z));
+		if ((*it)->type == PARALLEL_SOURCE)
+		{
+			light_direction = normalize((*it)->c_light_position);
+		}
+		else // Point source
+		{
+			light_direction = normalize((*it)->c_light_position - vec3(x, y, z));
+		}
 		camera_direction = normalize(vec3(0) - vec3(x, y, z));
 		reflect_direction = normalize(-light_direction - 2 * (dot(-light_direction, normal)) * normal);
 		ia = ka * (*it)->La;
 		id = kd * dot(light_direction, normal) * (*it)->Ld;
-		is = ks * pow(dot(reflect_direction, camera_direction),ALPHA) * (*it)->Ls;
+		is = ks * pow(dot(reflect_direction, camera_direction),ALPHA) * (*it)->Ld;
 		i += ia + id + is;
 	}
 	return i;
@@ -479,7 +505,6 @@ float Line::GetColor(int x, int y, int z, vector<Light*> lights, Shadow shadow)
 
 void Normal::UpdateShape()
 {
-
 	C_p1_3d = renderer->Transform(p1_3d);
 	normal_direction = normalize(renderer->NormTransform(p2_3d));
 	C_p2_3d = C_p1_3d + normal_size * normal_direction;
@@ -692,7 +717,7 @@ void Renderer::DrawTriangles(vector<Triangle>* triangles,
 			yMin = min(yMin, it->yMin);
 			it->Rasterize();
 
-			shapesSet.push_back(&(*it));
+			shapes.push_back(&(*it));
 
 			if (isShowFacesNormals)
 			{
@@ -701,7 +726,7 @@ void Renderer::DrawTriangles(vector<Triangle>* triangles,
 					yMax = max(yMax, it->normal.yMax);
 					yMin = min(yMin, it->normal.yMin);
 					it->normal.Rasterize();
-					shapesSet.push_back(&(it->normal));
+					shapes.push_back(&(it->normal));
 				}
 			}
 
@@ -712,7 +737,7 @@ void Renderer::DrawTriangles(vector<Triangle>* triangles,
 					yMax = max(yMax, it->normal.yMax);
 					yMin = min(yMin, it->normal.yMin);
 					it->normal.Rasterize();
-					shapesSet.push_back(&(it->normal));
+					shapes.push_back(&(it->normal));
 				}
 			}
 
@@ -723,21 +748,21 @@ void Renderer::DrawTriangles(vector<Triangle>* triangles,
 					yMax = max(yMax, it->p1_normal.yMax);
 					yMin = min(yMin, it->p1_normal.yMin);
 					it->p1_normal.Rasterize();
-					shapesSet.push_back(&(it->p1_normal));
+					shapes.push_back(&(it->p1_normal));
 				}
 				if (it->p2_normal.should_draw)
 				{
 					yMax = max(yMax, it->p2_normal.yMax);
 					yMin = min(yMin, it->p2_normal.yMin);
 					it->p2_normal.Rasterize();
-					shapesSet.push_back(&(it->p2_normal));
+					shapes.push_back(&(it->p2_normal));
 				}
 				if (it->p3_normal.should_draw)
 				{
 					yMax = max(yMax, it->p3_normal.yMax);
 					yMin = min(yMin, it->p3_normal.yMin);
 					it->p3_normal.Rasterize();
-					shapesSet.push_back(&(it->p3_normal));
+					shapes.push_back(&(it->p3_normal));
 				}
 			}
 		}
@@ -762,7 +787,7 @@ void Renderer::DrawBoundingBox(vector<Line>* boundBoxLines)
 		yMax = max(yMax, line->yMax);
 		yMin = min(yMin, line->yMin);
 		line->Rasterize();
-		shapesSet.push_back(line);
+		shapes.push_back(line);
 	}
 }
 
@@ -834,7 +859,7 @@ void Renderer::ConfigureRenderer(const mat4& projection, const mat4& transform,
 	yMax = 0;
 	lights = scene_lights;
 	shadow = scene_shadow;
-	shapesSet.clear();
+	shapes.clear();
 
 }	
 
@@ -924,8 +949,7 @@ void Renderer::ClearColorBuffer()
 
 void Renderer::ClearDepthBuffer()
 {
-	memset(m_zbuffer, 0, sizeof(float) * m_width * m_height); // max is zero because we are looking at -z
-
+	std::fill(m_zbuffer, m_zbuffer + m_width * m_height, std::numeric_limits<float>::infinity());
 }
 
 
@@ -956,22 +980,27 @@ void Renderer::ZBufferScanConvert()
 	float illumination;
 	float min_illumination = std::numeric_limits<float>::infinity(); 
 	float max_illumination = -std::numeric_limits<float>::infinity();
-	for (auto it = shapesSet.begin(); it != shapesSet.end(); ++it)
+	for (auto it = shapes.begin(); it != shapes.end(); ++it)
 	{
 		yMin = max(0, (*it)->yMin);
 		yMax = min((*it)->yMax, m_height - 1);
 		for (int y = yMin; y <= yMax; y++)
 		{
+			if ((*it)->shape_color == vec3(1))
+			{
+				int tmp = 1;
+				tmp++;
+			}
 			fixed_y = y - yMin;
 			minX = max((*it)->x_min[fixed_y],0);
 			maxX = min((*it)->x_max[fixed_y], m_width -1);
 			for (int i = minX; i <= maxX; i++)
 			{
-				z =(*it)->GetZ(i, y);
+				z =abs((*it)->GetZ(i, y));
 				if (z <= m_zbuffer[ZINDEX(m_width, i, y)])
 				{
 					m_zbuffer[ZINDEX(m_width, i, y)] = z;
-					if (lights.size() > 0)
+					if ((lights.size() > 0) && ((*it)->is_light == false))
 					{
 						illumination = (*it)->GetColor(i, y, z, lights,shadow);
 						if (illumination > max_illumination)
