@@ -22,8 +22,6 @@ enum Axis
 	Z
 };
 
-color white{1, 1, 1}, red{1, 0, 0}, green{0, 1, 0}, blue{0, 0, 1};
-color colors[] = { white, red ,green ,blue };
 extern Renderer * renderer;
 
 Normal invalid_normal = Normal(vec3(0, 0), vec3(0, 0), false, vertix_normal, 0, false);
@@ -196,8 +194,8 @@ Renderer::~Renderer(void)
 
 void Renderer::transformToScreen(vec2& vec)
 {
-	vec.x = floorf((m_width / 4) * (vec.x + 1));
-	vec.y = floorf((m_height / 4) * (vec.y + 1));
+	vec.x = floorf((m_width / 2) * (vec.x + 1));
+	vec.y = floorf((m_height / 2) * (vec.y + 1));
 }
 
 
@@ -235,11 +233,107 @@ void RasterizeArrangeVeritcs(vec2& ver1, vec2& ver2, bool byX = true)
 
 void Line::Rasterize()
 {
+	p1 = renderer->vec3ToVec2(C_p1_3d);
+	p2 = renderer->vec3ToVec2(C_p2_3d);
+
+	yMax = max(p1.y, p2.y);
+	yMin = min(p1.y, p2.y);
+
+	renderer->yMin = min(yMin, renderer->yMin);
+	renderer->yMax = max(yMin, renderer->yMax);
+
+	should_draw = ShouldDrawShape();
+	if (should_draw)
+	{
+		if (x_min != NULL)
+		{
+			delete x_min;
+		}
+		if (x_max != NULL)
+		{
+			delete x_max;
+		}
+
+		x_max = new int[yMax - yMin + 1]();
+		x_min = new int[yMax - yMin + 1]();
+	}
+	std::fill_n(x_max, yMax - yMin + 1, -1);
+	std::fill_n(x_min, yMax - yMin + 1, -1);
 	RasterizeLine(p1, p2);
 }
 
 void Triangle::Rasterize()
 {
+	p1_2d = renderer->vec3ToVec2(C_p1_3d);
+	p2_2d = renderer->vec3ToVec2(C_p2_3d);
+	p3_2d = renderer->vec3ToVec2(C_p3_3d);
+	yMax = max(max(p1_2d.y, p2_2d.y), p3_2d.y);
+	yMin = min(min(p1_2d.y, p2_2d.y), p3_2d.y);
+	renderer->yMin = min(yMin, renderer->yMin);
+	renderer->yMax = max(yMax, renderer->yMax);
+	vec3 p1_light_direction, p2_light_direction, p3_light_direction;
+	vec3 p1_camera_direction, p2_camera_direction, p3_camera_direction;
+	vec3 p1_reflect_direction, p2_reflect_direction, p3_reflect_direction;
+	float i, ia, id, is;
+	p1_illumination = p2_illumination = p3_illumination = 0;
+	for (auto it = renderer->lights.begin(); it != renderer->lights.end(); ++it)
+	{
+		if ((*it)->type == PARALLEL_SOURCE)
+		{
+			p1_light_direction = normalize((*it)->c_light_position);
+			p2_light_direction = normalize((*it)->c_light_position);
+			p3_light_direction = normalize((*it)->c_light_position);
+		}
+		else // Point source
+		{
+			p1_light_direction = normalize((*it)->c_light_position - C_p1_3d);
+			p2_light_direction = normalize((*it)->c_light_position - C_p2_3d);
+			p3_light_direction = normalize((*it)->c_light_position - C_p3_3d);
+		}
+		p1_camera_direction = normalize(vec3(0) - C_p1_3d);
+		p2_camera_direction = normalize(vec3(0) - C_p2_3d);
+		p3_camera_direction = normalize(vec3(0) - C_p3_3d);
+		p1_reflect_direction = normalize(-p1_light_direction - 2 * (dot(-p1_light_direction, p1_normal.normal_direction)) * p1_normal.normal_direction);
+		p2_reflect_direction = normalize(-p2_light_direction - 2 * (dot(-p2_light_direction, p2_normal.normal_direction)) * p2_normal.normal_direction);
+		p3_reflect_direction = normalize(-p3_light_direction - 2 * (dot(-p3_light_direction, p3_normal.normal_direction)) * p3_normal.normal_direction);
+		p1_illumination += /*ia*/ka * (*it)->La +
+			/*id*/kd * dot(p1_light_direction, p1_normal.normal_direction) * (*it)->Ld +
+			/*is*/ks * pow(dot(p1_reflect_direction, p1_camera_direction), ALPHA) * (*it)->Ls;
+		p2_illumination += /*ia*/ka * (*it)->La +
+			/*id*/kd * dot(p2_light_direction, p2_normal.normal_direction) * (*it)->Ld +
+			/*is*/ks * pow(dot(p2_reflect_direction, p2_camera_direction), ALPHA) * (*it)->Ls;
+		p3_illumination += /*ia*/ka * (*it)->La +
+			/*id*/kd * dot(p3_light_direction, p3_normal.normal_direction) * (*it)->Ld +
+			/*is*/ks * pow(dot(p3_reflect_direction, p3_camera_direction), ALPHA) * (*it)->Ls;
+	}
+
+
+	if (normal.is_valid)
+	{
+		normal.UpdateShape();
+	}
+
+	if (p1_normal.is_valid)
+	{
+		p1_normal.UpdateShape();
+		p2_normal.UpdateShape();
+		p3_normal.UpdateShape();
+
+	}
+
+	if (x_min != NULL)
+	{
+		delete x_min;
+	}
+	if (x_max != NULL)
+	{
+		delete x_max;
+	}
+	x_max = new int[yMax - yMin + 1]();
+	x_min = new int[yMax - yMin + 1]();
+	std::fill_n(x_max, yMax - yMin + 1, -1);
+	std::fill_n(x_min, yMax - yMin + 1, -1);
+
 	RasterizeLine(p1_2d, p2_2d);
 	RasterizeLine(p2_2d, p3_2d);
 	RasterizeLine(p3_2d, p1_2d);
@@ -348,14 +442,6 @@ bool Line::ShouldDrawShape()
 
 void Triangle::Clipper()
 {
-	C_p1_3d = renderer->Transform(p1_3d);
-	C_p2_3d = renderer->Transform(p2_3d);
-	C_p3_3d = renderer->Transform(p3_3d);
-
-	P_p1_4d = renderer->GetProjection() * vec4(C_p1_3d);
-	P_p2_4d = renderer->GetProjection() * vec4(C_p2_3d);
-	P_p3_4d = renderer->GetProjection() * vec4(C_p3_3d);
-
 	should_draw = ShouldDrawShape();
 	if (should_draw)
 	{
@@ -365,116 +451,14 @@ void Triangle::Clipper()
 
 void Triangle::UpdateShape()
 {
-	p1_2d = renderer->vec3ToVec2(C_p1_3d);
-	p2_2d = renderer->vec3ToVec2(C_p2_3d);
-	p3_2d = renderer->vec3ToVec2(C_p3_3d);
-	yMax = max(max(p1_2d.y, p2_2d.y), p3_2d.y);
-	yMin = min(min(p1_2d.y, p2_2d.y), p3_2d.y);
-	renderer->yMin = min(yMin, renderer->yMin);
-	renderer->yMax = max(yMax, renderer->yMax);
-	vec3 p1_light_direction, p2_light_direction, p3_light_direction;
-	vec3 p1_camera_direction, p2_camera_direction, p3_camera_direction;
-	vec3 p1_reflect_direction, p2_reflect_direction, p3_reflect_direction ;
-	float i, ia, id, is;
-	p1_illumination = p2_illumination = p3_illumination = 0;
-	for (auto it = renderer->lights.begin(); it != renderer->lights.end(); ++it)
-	{
-		if ((*it)->type == PARALLEL_SOURCE)
-		{
-			p1_light_direction = normalize((*it)->c_light_position);
-			p2_light_direction = normalize((*it)->c_light_position);
-			p3_light_direction = normalize((*it)->c_light_position);
-		}
-		else // Point source
-		{
-			p1_light_direction = normalize((*it)->c_light_position - C_p1_3d);
-			p2_light_direction = normalize((*it)->c_light_position - C_p2_3d);
-			p3_light_direction = normalize((*it)->c_light_position - C_p3_3d);
-		}
-		p1_camera_direction = normalize(vec3(0) - C_p1_3d);
-		p2_camera_direction = normalize(vec3(0) - C_p2_3d);
-		p3_camera_direction = normalize(vec3(0) - C_p3_3d);
-		p1_reflect_direction = normalize(-p1_light_direction - 2 * (dot(-p1_light_direction, p1_normal.normal_direction)) * p1_normal.normal_direction);
-		p2_reflect_direction = normalize(-p2_light_direction - 2 * (dot(-p2_light_direction, p2_normal.normal_direction)) * p2_normal.normal_direction);
-		p3_reflect_direction = normalize(-p3_light_direction - 2 * (dot(-p3_light_direction, p3_normal.normal_direction)) * p3_normal.normal_direction);
-		p1_illumination += /*ia*/ka * (*it)->La + 
-						   /*id*/kd * dot(p1_light_direction, p1_normal.normal_direction) * (*it)->Ld +
-						   /*is*/ks * pow(dot(p1_reflect_direction, p1_camera_direction), ALPHA) * (*it)->Ls;
-		p2_illumination += /*ia*/ka * (*it)->La + 
-						   /*id*/kd * dot(p2_light_direction, p2_normal.normal_direction) * (*it)->Ld +
-						   /*is*/ks * pow(dot(p2_reflect_direction, p2_camera_direction), ALPHA) * (*it)->Ls;
-		p3_illumination += /*ia*/ka * (*it)->La + 
-						   /*id*/kd * dot(p3_light_direction, p3_normal.normal_direction) * (*it)->Ld +
-						   /*is*/ks * pow(dot(p3_reflect_direction, p3_camera_direction), ALPHA) * (*it)->Ls;
-	}
+	C_p1_3d = renderer->Transform(p1_3d);
+	C_p2_3d = renderer->Transform(p2_3d);
+	C_p3_3d = renderer->Transform(p3_3d);
 
-
-	if (normal.is_valid)
-	{
-		normal.UpdateShape();
-	}
-
-	if (p1_normal.is_valid)
-	{
-		p1_normal.UpdateShape();
-		p2_normal.UpdateShape();
-		p3_normal.UpdateShape();
-
-	}
-
-	if (x_min != NULL)
-	{
-		delete x_min;
-	}
-	if (x_max != NULL)
-	{
-		delete x_max;
-	}
-	x_max = new int[yMax - yMin + 1]();
-	x_min = new int[yMax - yMin + 1]();
-	std::fill_n(x_max, yMax - yMin + 1, -1);
-	std::fill_n(x_min, yMax - yMin + 1, -1);
+	P_p1_4d = renderer->GetProjection() * vec4(C_p1_3d);
+	P_p2_4d = renderer->GetProjection() * vec4(C_p2_3d);
+	P_p3_4d = renderer->GetProjection() * vec4(C_p3_3d);
 }
-
-
-
-//void SwapPoints(vec3& p1, vec3& p2)
-//{
-//	vec3 temp = p1;
-//	p1 = p2;
-//	p2 = temp;
-//}
-//bool SortPoints(vec3& p1, vec3& p2,Axis axis)
-//{
-//	vec3 temp;
-//	switch (axis)
-//	{
-//	case X:
-//		if (p1.x > p2.x)
-//		{
-//			SwapPoints(p1, p2);
-//			return true;
-//		}
-//		break;
-//	case Y:
-//		if (p1.y > p2.y)
-//		{
-//			SwapPoints(p1, p2);
-//			return true;
-//		}
-//		break;
-//	case Z:
-//		if (p1.z > p2.z)
-//		{
-//			SwapPoints(p1, p2);
-//			return true;
-//		}
-//		break;
-//	default:
-//		break;
-//	}
-//	return false;
-//}
 
 
 
@@ -702,33 +686,8 @@ float Line::GetZ(int x, int y)
 
 void Line::UpdateShape()
 {
-
 	C_p1_3d = renderer->Transform(p1_3d);
 	C_p2_3d = renderer->Transform(p2_3d);
-	p1 = renderer->vec3ToVec2(C_p1_3d);
-	p2 = renderer->vec3ToVec2(C_p2_3d);
-
-	yMax = max(p1.y, p2.y);
-	yMin = min(p1.y, p2.y);
-
-	renderer->yMin = min(yMin, renderer->yMin);
-	renderer->yMax = max(yMin, renderer->yMax);
-
-	should_draw = ShouldDrawShape();
-	if (should_draw)
-	{
-		if (x_min != NULL)
-		{
-			delete x_min;
-		}
-		if (x_max != NULL)
-		{
-			delete x_max;
-		}
-		
-		x_max = new int[yMax - yMin + 1]();
-		x_min = new int[yMax - yMin + 1]();
-	}
 }
 
 float Line::GetColor(int x, int y, int z, vector<Light*> lights, Shadow shadow)
@@ -741,27 +700,7 @@ void Normal::UpdateShape()
 	C_p1_3d = renderer->Transform(p1_3d);
 	normal_direction = normalize(renderer->NormTransform(p2_3d));
 	C_p2_3d = C_p1_3d + normal_size * normal_direction;
-	p1 = renderer->vec3ToVec2(C_p1_3d);
-	p2 = renderer->vec3ToVec2(C_p2_3d);
-	yMax = max(p1.y, p2.y);
-	yMin = min(p1.y, p2.y);
 	
-
-	should_draw = ShouldDrawShape();
-	if (should_draw)
-	{
-		if (x_min != NULL)
-		{
-			delete x_min;
-		}
-		if (x_max != NULL)
-		{
-			delete x_max;
-		}
-
-		x_max = new int[yMax - yMin + 1]();
-		x_min = new int[yMax - yMin + 1]();
-	}
 }
 
 void Shape::RasterizeLine(vec2 ver1, vec2 ver2)
@@ -958,74 +897,84 @@ bool CustomCompareYMax::operator()( Shape* shape1,  Shape* shape2) const
 void Renderer::DrawTriangles(vector<Triangle>* triangles,
 	vector<Line>* boundBoxLines, GLfloat proportionalValue)
 {	
-	for (auto it = triangles->begin(); it != triangles->end(); ++it)
+	RendererActions action = shouldDrawModel(boundBoxLines);
+	if(action != NotDraw)
 	{
-		it->Clipper();
+		for (auto it = triangles->begin(); it != triangles->end(); ++it)
+		{
+			it->UpdateShape();
+			if (action == Clip)
+			{
+				it->Clipper();
+			}
+			else
+			{
+				triangulation_triangles.push_back(*it);
+			}
+		}
+		
+		
+		for (auto it = triangulation_triangles.begin(); it != triangulation_triangles.end(); ++it)
+		{
+			it->Rasterize();
+			yMax = max(yMax, it->yMax);
+			yMin = min(yMin, it->yMin);
+			shapes.push_back(&(*it));
+
+			if (isShowFacesNormals)
+			{
+				if (it->normal.should_draw)
+				{
+					yMax = max(yMax, it->normal.yMax);
+					yMin = min(yMin, it->normal.yMin);
+					it->normal.Rasterize();
+					shapes.push_back(&(it->normal));
+				}
+			}
+
+			if (isShowFacesNormals)
+			{
+				if (it->normal.should_draw)
+				{
+					yMax = max(yMax, it->normal.yMax);
+					yMin = min(yMin, it->normal.yMin);
+					it->normal.Rasterize();
+					shapes.push_back(&(it->normal));
+				}
+			}
+
+			if (isShowVerticsNormals)
+			{
+				if (it->p1_normal.should_draw)
+				{
+					yMax = max(yMax, it->p1_normal.yMax);
+					yMin = min(yMin, it->p1_normal.yMin);
+					it->p1_normal.Rasterize();
+					shapes.push_back(&(it->p1_normal));
+				}
+				if (it->p2_normal.should_draw)
+				{
+					yMax = max(yMax, it->p2_normal.yMax);
+					yMin = min(yMin, it->p2_normal.yMin);
+					it->p2_normal.Rasterize();
+					shapes.push_back(&(it->p2_normal));
+				}
+				if (it->p3_normal.should_draw)
+				{
+					yMax = max(yMax, it->p3_normal.yMax);
+					yMin = min(yMin, it->p3_normal.yMin);
+					it->p3_normal.Rasterize();
+					shapes.push_back(&(it->p3_normal));
+				}
+			}
+		}
+
+		if (isShowBoundBox)
+		{
+			DrawBoundingBox(boundBoxLines);
+		}
 	}
-
-	for (auto it = triangulation_triangles.begin(); it != triangulation_triangles.end(); ++it)
-	{
-		it->UpdateShape();
-		yMax = max(yMax, it->yMax);
-		yMin = min(yMin, it->yMin);
-		it->Rasterize();
-
-		shapes.push_back(&(*it));
-
-		if (isShowFacesNormals)
-		{
-			if (it->normal.should_draw)
-			{
-				yMax = max(yMax, it->normal.yMax);
-				yMin = min(yMin, it->normal.yMin);
-				it->normal.Rasterize();
-				shapes.push_back(&(it->normal));
-			}
-		}
-
-		if (isShowFacesNormals)
-		{
-			if (it->normal.should_draw)
-			{
-				yMax = max(yMax, it->normal.yMax);
-				yMin = min(yMin, it->normal.yMin);
-				it->normal.Rasterize();
-				shapes.push_back(&(it->normal));
-			}
-		}
-
-		if (isShowVerticsNormals)
-		{
-			if (it->p1_normal.should_draw)
-			{
-				yMax = max(yMax, it->p1_normal.yMax);
-				yMin = min(yMin, it->p1_normal.yMin);
-				it->p1_normal.Rasterize();
-				shapes.push_back(&(it->p1_normal));
-			}
-			if (it->p2_normal.should_draw)
-			{
-				yMax = max(yMax, it->p2_normal.yMax);
-				yMin = min(yMin, it->p2_normal.yMin);
-				it->p2_normal.Rasterize();
-				shapes.push_back(&(it->p2_normal));
-			}
-			if (it->p3_normal.should_draw)
-			{
-				yMax = max(yMax, it->p3_normal.yMax);
-				yMin = min(yMin, it->p3_normal.yMin);
-				it->p3_normal.Rasterize();
-				shapes.push_back(&(it->p3_normal));
-			}
-		}
-	}
-
 	
-
-	if (isShowBoundBox)
-	{
-		DrawBoundingBox(boundBoxLines);
-	}
 }
 
 void Renderer::DrawBoundingBox(vector<Line>* boundBoxLines)
@@ -1036,31 +985,46 @@ void Renderer::DrawBoundingBox(vector<Line>* boundBoxLines)
 	{
 		line = &(boundBoxLines->at(i));
 		line->UpdateShape();
+		line->Rasterize();
 		yMax = max(yMax, line->yMax);
 		yMin = min(yMin, line->yMin);
-		line->Rasterize();
 		shapes.push_back(line);
 	}
 }
 
 //check if part of the object is inside the camera view frame	
-bool Renderer::shouldDrawModel(const vector<vec3>* boundingBox)
+RendererActions Renderer::shouldDrawModel(const vector<Line>* boundBoxLines)
 {
-	vec4 maxBounds = cProjection * cTransform * vec4(Transform(vec3(boundingBox->at(1).x, boundingBox->at(0).y, boundingBox->at(0).z)));
-	vec4 minBounds = cProjection * cTransform * vec4(Transform(vec3(boundingBox->at(0).x, boundingBox->at(2).y, boundingBox->at(4).z)));
+	//original bounds
+	vec3 tranformed_orig_back_top_right = getXYZ(cProjection * cTransform * oTransform * vec4(boundBoxLines->at(4).p1_3d));
+	vec3 tranformed_orig_front_bottom_left = getXYZ(cProjection * cTransform * oTransform * boundBoxLines->at(9).p1_3d);
+
+	vec3 maxBounds = vec3(max(tranformed_orig_back_top_right.x, tranformed_orig_front_bottom_left.x), max(tranformed_orig_back_top_right.y, tranformed_orig_front_bottom_left.y), max(tranformed_orig_back_top_right.z, tranformed_orig_front_bottom_left.z));
+	vec3 minBounds = vec3(min(tranformed_orig_back_top_right.x, tranformed_orig_front_bottom_left.x), min(tranformed_orig_back_top_right.y, tranformed_orig_front_bottom_left.y), min(tranformed_orig_back_top_right.z, tranformed_orig_front_bottom_left.z));
+
 	//check max
 	
-	if (minBounds.x > minBounds.w || minBounds.y > minBounds.w || minBounds.z > minBounds.w)
+	// no need to draw
+	if (minBounds.x > 1 || minBounds.y > 1 || minBounds.z >1)
 	{
-		return false;
+		return NotDraw;
 	}
 
-	if (maxBounds.x < -maxBounds.w || maxBounds.y < -maxBounds.w || maxBounds.z < -maxBounds.w)
+	if (maxBounds.x < -1 || maxBounds.y < -1 || maxBounds.z < -1)
 	{
-		return false;
+		return NotDraw;
 	}
 
-	return true;
+	//no need to clip all inside
+	if (minBounds.x > -1 && minBounds.y > -1 && minBounds.z > -1)
+	{
+		if (maxBounds.x < 1 && maxBounds.y < 1 && maxBounds.z < 1)
+		{
+			return Draw;
+		}
+	}
+
+	return Clip;
 }
 vec2 Renderer::vec3ToVec2(const vec3& ver)
 {
@@ -1253,9 +1217,13 @@ void Renderer::ZBufferScanConvert()
 				if (z <= m_zbuffer[ZINDEX(m_width, i, y)])
 				{
 					m_zbuffer[ZINDEX(m_width, i, y)] = z;
-					if ((lights.size() > 0) && ((*it)->is_light == false))
+					if (i == maxX || i == minX)
 					{
-						illumination = (*it)->GetColor(i, y, z, lights,shadow);
+						DrawPixel(i, y, WHITE);
+					}
+					else if ((lights.size() > 0) && ((*it)->is_light == false))
+					{
+						illumination = (*it)->GetColor(i, y, z, lights, shadow);
 						if (illumination > max_illumination)
 						{
 							max_illumination = illumination;

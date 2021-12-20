@@ -54,16 +54,16 @@ vector<Line>* SetRectangleVertices(GLfloat posX, GLfloat posY, GLfloat posZ, GLf
 	GLfloat halfZ = lenZ * 0.5f;
 
 	// front face points
-	vec3 frontTopLeft = vec3(posX - halfX, posY + halfY, posZ + halfZ);
-	vec3 frontTopRight = vec3(posX + halfX, posY + halfY, posZ + halfZ);
-	vec3 frontBottomLeft = vec3(posX + halfX, posY - halfY, posZ + halfZ);
-	vec3 frontBottomRight = vec3(posX - halfX, posY - halfY, posZ + halfZ);
+	vec3 frontTopLeft = vec3(posX - halfX, posY + halfY, posZ - halfZ);
+	vec3 frontTopRight = vec3(posX + halfX, posY + halfY, posZ - halfZ);
+	vec3 frontBottomLeft = vec3(posX - halfX, posY - halfY, posZ - halfZ);
+	vec3 frontBottomRight = vec3(posX + halfX, posY - halfY, posZ - halfZ);
 
 	// back face points
-	vec3 backTopLeft = vec3(posX - halfX, posY + halfY, posZ - halfZ);
-	vec3 backTopRight = vec3(posX + halfX, posY + halfY, posZ - halfZ);
-	vec3 backBottomLeft = vec3(posX + halfX, posY - halfY, posZ - halfZ);
-	vec3 backBottomRight = vec3(posX - halfX, posY - halfY, posZ - halfZ);
+	vec3 backTopLeft = vec3(posX - halfX, posY + halfY, posZ + halfZ);
+	vec3 backTopRight = vec3(posX + halfX, posY + halfY, posZ + halfZ);
+	vec3 backBottomLeft = vec3(posX - halfX, posY - halfY, posZ + halfZ);
+	vec3 backBottomRight = vec3(posX + halfX, posY - halfY, posZ + halfZ);
 
 
 	//lines

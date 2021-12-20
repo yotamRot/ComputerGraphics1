@@ -29,10 +29,6 @@ enum Face
 	Far
 };
 
-struct color {
-	int red, green, blue;
-};
-
 enum NormalKind
 {
 	face_normal,
@@ -58,7 +54,12 @@ enum Shadow
 	PHONG
 };
 
-
+enum RendererActions
+{
+	NotDraw,
+	Draw,
+	Clip
+};
 
 
 class Model {
@@ -150,7 +151,7 @@ public:
 	float normal_size;
 	bool is_valid;
 	NormalKind normal_kind;
-	void  UpdateShape() override;
+	void UpdateShape() override;
 
 	Normal(vec3& p1_3d, vec3& p2_3d, bool is_light,  NormalKind normal_kind, float normal_size=DEFAULT_NORMAL_SIZE, bool is_valid =true);
 };
@@ -195,7 +196,7 @@ public:
 
 	void Rasterize() override;
 	float GetZ(int x, int y) override ;
-	bool  ShouldDrawShape() override;
+	bool ShouldDrawShape() override;
 	void  UpdateShape() override;
 	float GetColor(int x, int y, int z, vector<Light*> lights, Shadow shadow) override;
 	float GetGouruad(int x, int y);
@@ -242,7 +243,7 @@ class Renderer
 	void CreateLocalBuffer();
 
 	void transformToScreen(vec2& vec);
-	bool shouldDrawModel(const vector<vec3>* boundingBox);
+	RendererActions Renderer::shouldDrawModel(const vector<Line>* boundBoxLines);
 
 
 
