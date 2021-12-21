@@ -271,42 +271,6 @@ void Triangle::Rasterize()
 	yMin = min(min(p1_2d.y, p2_2d.y), p3_2d.y);
 	renderer->yMin = min(yMin, renderer->yMin);
 	renderer->yMax = max(yMax, renderer->yMax);
-	vec3 p1_light_direction, p2_light_direction, p3_light_direction;
-	vec3 p1_camera_direction, p2_camera_direction, p3_camera_direction;
-	vec3 p1_reflect_direction, p2_reflect_direction, p3_reflect_direction;
-	float i, ia, id, is;
-	p1_illumination = p2_illumination = p3_illumination = 0;
-	for (auto it = renderer->lights.begin(); it != renderer->lights.end(); ++it)
-	{
-		if ((*it)->type == PARALLEL_SOURCE)
-		{
-			p1_light_direction = normalize((*it)->c_light_position);
-			p2_light_direction = normalize((*it)->c_light_position);
-			p3_light_direction = normalize((*it)->c_light_position);
-		}
-		else // Point source
-		{
-			p1_light_direction = normalize((*it)->c_light_position - C_p1_3d);
-			p2_light_direction = normalize((*it)->c_light_position - C_p2_3d);
-			p3_light_direction = normalize((*it)->c_light_position - C_p3_3d);
-		}
-		p1_camera_direction = normalize(vec3(0) - C_p1_3d);
-		p2_camera_direction = normalize(vec3(0) - C_p2_3d);
-		p3_camera_direction = normalize(vec3(0) - C_p3_3d);
-		p1_reflect_direction = normalize(-p1_light_direction - 2 * (max(dot(-p1_light_direction, p1_normal.normal_direction), 0)) * p1_normal.normal_direction);
-		p2_reflect_direction = normalize(-p2_light_direction - 2 * (max(dot(-p2_light_direction, p2_normal.normal_direction), 0)) * p2_normal.normal_direction);
-		p3_reflect_direction = normalize(-p3_light_direction - 2 * (max(dot(-p3_light_direction, p3_normal.normal_direction), 0)) * p3_normal.normal_direction);
-		p1_illumination += /*ia*/ka * (*it)->La +
-			/*id*/kd * max(dot(p1_light_direction, p1_normal.normal_direction), 0) * (*it)->Ld +
-			/*is*/ks * pow(max(dot(p1_reflect_direction, p1_camera_direction), 0), ALPHA) * (*it)->Ls;
-		p2_illumination += /*ia*/ka * (*it)->La +
-			/*id*/kd * max(dot(p2_light_direction, p2_normal.normal_direction), 0) * (*it)->Ld +
-			/*is*/ks * pow(max(dot(p2_reflect_direction, p2_camera_direction), 0), ALPHA) * (*it)->Ls;
-		p3_illumination += /*ia*/ka * (*it)->La +
-			/*id*/kd * max(dot(p3_light_direction, p3_normal.normal_direction), 0) * (*it)->Ld +
-			/*is*/ks * pow(max(dot(p3_reflect_direction, p3_camera_direction), 0), ALPHA) * (*it)->Ls;
-	}
-
 	if (x_min != NULL)
 	{
 		delete x_min;
@@ -442,7 +406,41 @@ void Triangle::UpdateShape()
 	P_p1_4d = renderer->GetProjection() * vec4(C_p1_3d);
 	P_p2_4d = renderer->GetProjection() * vec4(C_p2_3d);
 	P_p3_4d = renderer->GetProjection() * vec4(C_p3_3d);
-
+	vec3 p1_light_direction, p2_light_direction, p3_light_direction;
+	vec3 p1_camera_direction, p2_camera_direction, p3_camera_direction;
+	vec3 p1_reflect_direction, p2_reflect_direction, p3_reflect_direction;
+	float i, ia, id, is;
+	p1_illumination = p2_illumination = p3_illumination = 0;
+	for (auto it = renderer->lights.begin(); it != renderer->lights.end(); ++it)
+	{
+		if ((*it)->type == PARALLEL_SOURCE)
+		{
+			p1_light_direction = normalize((*it)->c_light_position);
+			p2_light_direction = normalize((*it)->c_light_position);
+			p3_light_direction = normalize((*it)->c_light_position);
+		}
+		else // Point source
+		{
+			p1_light_direction = normalize((*it)->c_light_position - C_p1_3d);
+			p2_light_direction = normalize((*it)->c_light_position - C_p2_3d);
+			p3_light_direction = normalize((*it)->c_light_position - C_p3_3d);
+		}
+		p1_camera_direction = normalize(vec3(0) - C_p1_3d);
+		p2_camera_direction = normalize(vec3(0) - C_p2_3d);
+		p3_camera_direction = normalize(vec3(0) - C_p3_3d);
+		p1_reflect_direction = normalize(-p1_light_direction - 2 * (max(dot(-p1_light_direction, p1_normal.normal_direction), 0)) * p1_normal.normal_direction);
+		p2_reflect_direction = normalize(-p2_light_direction - 2 * (max(dot(-p2_light_direction, p2_normal.normal_direction), 0)) * p2_normal.normal_direction);
+		p3_reflect_direction = normalize(-p3_light_direction - 2 * (max(dot(-p3_light_direction, p3_normal.normal_direction), 0)) * p3_normal.normal_direction);
+		p1_illumination += /*ia*/ka * (*it)->La +
+			/*id*/kd * max(dot(p1_light_direction, p1_normal.normal_direction), 0) * (*it)->Ld +
+			/*is*/ks * pow(max(dot(p1_reflect_direction, p1_camera_direction), 0), ALPHA) * (*it)->Ls;
+		p2_illumination += /*ia*/ka * (*it)->La +
+			/*id*/kd * max(dot(p2_light_direction, p2_normal.normal_direction), 0) * (*it)->Ld +
+			/*is*/ks * pow(max(dot(p2_reflect_direction, p2_camera_direction), 0), ALPHA) * (*it)->Ls;
+		p3_illumination += /*ia*/ka * (*it)->La +
+			/*id*/kd * max(dot(p3_light_direction, p3_normal.normal_direction), 0) * (*it)->Ld +
+			/*is*/ks * pow(max(dot(p3_reflect_direction, p3_camera_direction), 0), ALPHA) * (*it)->Ls;
+	}
 
 	if (normal.is_valid)
 	{
@@ -621,11 +619,29 @@ vec3 Triangle::GetColor(vec3& C_cords, vector<Light*> lights, Shadow shadow, vec
 	case FLAT:
 		normal = this->normal.normal_direction;
 		break;
-	case GOURAUD:
-		return (GetGouruad(C_cords) * shape_color);
+	case GOURAUD:		
+		if (this->p1_normal.is_valid)
+		{
+			return (GetGouruad(C_cords) * shape_color);
+		}
+		else // there isn't normal for the vertex
+		{
+			// lets do flat shading
+			normal = this->normal.normal_direction;
+			break;
+		}
 	case PHONG:
-		normal = GetPhong(C_cords);
-		break;
+		if (this->p1_normal.is_valid)
+		{
+			normal = GetPhong(C_cords);
+			break;
+		}
+		else // there isn't normal for the vertex
+		{
+			// lets do flat shading
+			normal = this->normal.normal_direction;
+			break;
+		}
 	}
 	for (auto it = lights.begin(); it != lights.end(); ++it)
 	{
@@ -1309,11 +1325,11 @@ void Renderer::ZBufferScanConvert()
 				if (abs(C_cords.z) <= m_zbuffer[ZINDEX(m_width, i, y)])
 				{
 					m_zbuffer[ZINDEX(m_width, i, y)] = abs(C_cords.z);
-					if (i == maxX || i == minX)
-					{
-						DrawPixel(i, y, WHITE);
-					}
-					else if ((lights.size() > 0) && ((*it)->is_light == false))
+					//if (i == maxX || i == minX)
+					//{
+					//	DrawPixel(i, y, WHITE);
+					//}else
+					 if ((lights.size() > 0) && ((*it)->is_light == false))
 					{
 						color = (*it)->GetColor(C_cords, lights, shadow, (*it)->shape_color);
 						//if (illumination > max_illumination)
