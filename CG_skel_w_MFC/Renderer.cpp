@@ -13,7 +13,7 @@
 #define ALPHA 2
 
 
-#define EPSILON 0.1
+#define EPSILON 0.01
 
 enum Axis
 {
@@ -262,6 +262,21 @@ void Line::Rasterize()
 	RasterizeLine(p1_2d, p2_2d);
 }
 
+Shape::~Shape()
+{
+	if (this->x_max != NULL)
+	{
+		delete[] x_max;
+	}
+
+	if (this->x_min != NULL)
+	{
+		delete[] x_min;
+	}
+
+}
+
+
 void Triangle::Rasterize()
 {
 	p1_2d = renderer->vec3ToVec2(C_p1_3d);
@@ -271,14 +286,6 @@ void Triangle::Rasterize()
 	yMin = min(min(p1_2d.y, p2_2d.y), p3_2d.y);
 	renderer->yMin = min(yMin, renderer->yMin);
 	renderer->yMax = max(yMax, renderer->yMax);
-	if (x_min != NULL)
-	{
-		delete x_min;
-	}
-	if (x_max != NULL)
-	{
-		delete x_max;
-	}
 	x_max = new int[yMax - yMin + 1]();
 	x_min = new int[yMax - yMin + 1]();
 	std::fill_n(x_max, yMax - yMin + 1, -1);
@@ -537,9 +544,9 @@ int Triangle::ClipFace(Triangle& triangle1, Triangle& triangle2, Face face)
 		p3Cond = P_p3_4d.z < P_p3_4d.w;
 		break;
 	case Near:
-		p1Cond = P_p1_4d.z > -P_p1_4d.w + EPSILON;
-		p2Cond = P_p2_4d.z > -P_p2_4d.w + EPSILON;
-		p3Cond = P_p3_4d.z > -P_p3_4d.w + EPSILON;
+		p1Cond = P_p1_4d.z > -P_p1_4d.w ;
+		p2Cond = P_p2_4d.z > -P_p2_4d.w ;
+		p3Cond = P_p3_4d.z > -P_p3_4d.w ;
 		break;
 	default:
 		break;
@@ -706,8 +713,8 @@ void Line::ClipFace(Face face)
 		p2Cond = P_p2_4d.z < P_p2_4d.w;
 		break;
 	case Near:
-		p1Cond = P_p1_4d.z > -P_p1_4d.w + EPSILON;
-		p2Cond = P_p2_4d.z > -P_p2_4d.w + EPSILON;
+		p1Cond = P_p1_4d.z > -P_p1_4d.w;
+		p2Cond = P_p2_4d.z > -P_p2_4d.w;
 		break;
 	default:
 		break;
@@ -765,13 +772,15 @@ void Triangle::Clip()
 		{
 			numOfTriangles = newTriangles.at(0).ClipFace(Newtriangle1, Newtriangle2, (Face)face);
 			newTriangles.erase(newTriangles.begin());
-			if (numOfTriangles > 0)
+			if (numOfTriangles == 1)
 			{
 				newTriangles.push_back(Newtriangle1);
-				if (numOfTriangles == 2)
-				{
-					newTriangles.push_back(Newtriangle2);
-				}
+			
+			}
+			else if (numOfTriangles ==2)
+			{
+				newTriangles.push_back(Newtriangle1);
+				newTriangles.push_back(Newtriangle2);
 			}
 		}
 	}
@@ -974,7 +983,7 @@ void Renderer::CreateBuffers(int width, int height)
 	CreateOpenGLBuffer(); //Do not remove this line.
 	m_outBuffer = new float[3 * m_width * m_height];
 	m_zbuffer = new float[m_width * m_height];
-	//ClearColorBuffer();
+	ClearColorBuffer();
 	ClearDepthBuffer();
 }
 
@@ -1105,7 +1114,7 @@ RendererActions Renderer::shouldDrawModel(const vector<Line>* boundBoxLines)
 {
 	//original bounds
 	vec3 tranformed_orig_back_top_right = getXYZ(cProjection * cTransform * oTransform * vec4(boundBoxLines->at(4).p1_3d));
-	vec3 tranformed_orig_front_bottom_left = getXYZ(cProjection * cTransform * oTransform * boundBoxLines->at(9).p1_3d);
+	vec3 tranformed_orig_front_bottom_left = getXYZ(cProjection * cTransform * oTransform * vec4(boundBoxLines->at(9).p1_3d));
 
 	vec3 maxBounds = vec3(max(tranformed_orig_back_top_right.x, tranformed_orig_front_bottom_left.x), max(tranformed_orig_back_top_right.y, tranformed_orig_front_bottom_left.y), max(tranformed_orig_back_top_right.z, tranformed_orig_front_bottom_left.z));
 	vec3 minBounds = vec3(min(tranformed_orig_back_top_right.x, tranformed_orig_front_bottom_left.x), min(tranformed_orig_back_top_right.y, tranformed_orig_front_bottom_left.y), min(tranformed_orig_back_top_right.z, tranformed_orig_front_bottom_left.z));
@@ -1157,7 +1166,7 @@ mat4 Renderer::GetProjection()
 vec3 Renderer::Transform(const vec3& ver)
 {
 	vec4 tempVec = cTransform * oTransform * vec4(ver);
-	return vec3(tempVec.x / tempVec.w, tempVec.y / tempVec.w, tempVec.z / tempVec.w);
+	return vec3(tempVec.x / tempVec.w, tempVec.y / tempVec.w, min(tempVec.z / tempVec.w, -EPSILON));
 }
 
 vec3 Renderer::NormTransform(const vec3& ver)
@@ -1325,11 +1334,11 @@ void Renderer::ZBufferScanConvert()
 				if (abs(C_cords.z) <= m_zbuffer[ZINDEX(m_width, i, y)])
 				{
 					m_zbuffer[ZINDEX(m_width, i, y)] = abs(C_cords.z);
-					//if (i == maxX || i == minX)
-					//{
-					//	DrawPixel(i, y, WHITE);
-					//}else
-					 if ((lights.size() > 0) && ((*it)->is_light == false))
+					if (i == maxX || i == minX)
+					{
+						DrawPixel(i, y, WHITE);
+					}
+					else if ((lights.size() > 0) && ((*it)->is_light == false))
 					{
 						color = (*it)->GetColor(C_cords, lights, shadow, (*it)->shape_color);
 						//if (illumination > max_illumination)

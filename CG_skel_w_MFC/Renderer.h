@@ -92,7 +92,7 @@ class Shape
 {
 public:
 	Shape() = default;
-
+	virtual ~Shape() = 0;
 	void RasterizeLine(vec2 verMin, vec2 verMax);
 	void RasterizeBigNegetive(vec2& ver1, vec2& ver2);
 	void RasterizeRegularNegetive(vec2& ver1, vec2& ver2);

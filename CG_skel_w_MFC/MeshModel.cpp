@@ -328,6 +328,8 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	ks = 1.0;
 	triangles = new vector<Triangle>;
 	vec3 p1, p2, p3;
+
+	_world_transform[2][3] = -5;
 	//faces_normal_end_positions = new vector<vec3>;
 
 	Triangle curTriangle;
