@@ -96,11 +96,15 @@ public:
 	void RasterizeRegularNegetive(vec2& ver1, vec2& ver2);
 	void RasterizeBig(vec2& ver1, vec2& ver2);
 	void RasterizeRegular(vec2& ver1, vec2& ver2);	
+	void  Clipper();
+	void ClipLine(Face face);
+
 	virtual float  GetZ(int x, int y) =0;
 	virtual void  Rasterize() =0;
 	virtual void  UpdateShape() = 0;
 	virtual bool  ShouldDrawShape() = 0;
 	virtual float GetColor(int x, int y, int z, vector<Light*> lights, Shadow shadow) = 0;
+	virtual void Clip() = 0;
 
 	bool is_light;
 	int yMin;
@@ -124,15 +128,22 @@ public:
 	vec3 p1_3d;
 	vec3 p2_3d;
 
-	vec2 p1;
-	vec2 p2;
+	vec2 p1_2d;
+	vec2 p2_2d;
+
 	vec3 C_p1_3d;
 	vec3 C_p2_3d;
+
+	vec4 P_p1_4d;
+	vec4 P_p2_4d;
 
 	void  Rasterize() override;
 	float GetZ(int x, int y) override;
 	bool ShouldDrawShape() override;
 	void UpdateShape() override;
+	void Clip() override;
+	void ClipFace(Face face);
+
 	float GetColor(int x, int y, int z, vector<Light*> lights, Shadow shadow) override;
 
 
@@ -198,13 +209,12 @@ public:
 	float GetZ(int x, int y) override ;
 	bool ShouldDrawShape() override;
 	void  UpdateShape() override;
+	void Clip() override;
 	float GetColor(int x, int y, int z, vector<Light*> lights, Shadow shadow) override;
 	float GetGouruad(int x, int y);
 	vec3 GetPhong(int x, int y);
-	void  Clipper();
-	void Clip();
 	int ClipFace(Triangle& triangle1, Triangle& triangle2, Face face);
-	void ClipLine(Face face);
+
 
 	Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d, vec3 rgb, bool is_light, Normal& normal,
 		Normal& p1_normal=invalid_normal, Normal& p2_normal=invalid_normal,
@@ -231,8 +241,6 @@ class Renderer
 	mat4 nTransform;
 	mat4 oTransform;
 
-	bool isShowVerticsNormals;
-	bool isShowFacesNormals;
 	bool isShowBoundBox;
 
 	vector<Shape*> shapes;
@@ -280,6 +288,8 @@ public:
 	mat4 GetProjection();
 	int yMin;
 	int yMax;
+	bool isShowVerticsNormals;
+	bool isShowFacesNormals;
 	vector<Light*> lights;
 	vector<Light*> GetLights();
 	vector<Triangle> triangulation_triangles;

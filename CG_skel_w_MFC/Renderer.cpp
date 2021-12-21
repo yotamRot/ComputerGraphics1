@@ -233,11 +233,11 @@ void RasterizeArrangeVeritcs(vec2& ver1, vec2& ver2, bool byX = true)
 
 void Line::Rasterize()
 {
-	p1 = renderer->vec3ToVec2(C_p1_3d);
-	p2 = renderer->vec3ToVec2(C_p2_3d);
+	p1_2d = renderer->vec3ToVec2(C_p1_3d);
+	p2_2d = renderer->vec3ToVec2(C_p2_3d);
 
-	yMax = max(p1.y, p2.y);
-	yMin = min(p1.y, p2.y);
+	yMax = max(p1_2d.y, p2_2d.y);
+	yMin = min(p1_2d.y, p2_2d.y);
 
 	renderer->yMin = min(yMin, renderer->yMin);
 	renderer->yMax = max(yMin, renderer->yMax);
@@ -259,7 +259,7 @@ void Line::Rasterize()
 	}
 	std::fill_n(x_max, yMax - yMin + 1, -1);
 	std::fill_n(x_min, yMax - yMin + 1, -1);
-	RasterizeLine(p1, p2);
+	RasterizeLine(p1_2d, p2_2d);
 }
 
 void Triangle::Rasterize()
@@ -305,20 +305,6 @@ void Triangle::Rasterize()
 		p3_illumination += /*ia*/ka * (*it)->La +
 			/*id*/kd * dot(p3_light_direction, p3_normal.normal_direction) * (*it)->Ld +
 			/*is*/ks * pow(dot(p3_reflect_direction, p3_camera_direction), ALPHA) * (*it)->Ls;
-	}
-
-
-	if (normal.is_valid)
-	{
-		normal.UpdateShape();
-	}
-
-	if (p1_normal.is_valid)
-	{
-		p1_normal.UpdateShape();
-		p2_normal.UpdateShape();
-		p3_normal.UpdateShape();
-
 	}
 
 	if (x_min != NULL)
@@ -440,7 +426,7 @@ bool Line::ShouldDrawShape()
 	}
 }
 
-void Triangle::Clipper()
+void Shape::Clipper()
 {
 	should_draw = ShouldDrawShape();
 	if (should_draw)
@@ -458,6 +444,19 @@ void Triangle::UpdateShape()
 	P_p1_4d = renderer->GetProjection() * vec4(C_p1_3d);
 	P_p2_4d = renderer->GetProjection() * vec4(C_p2_3d);
 	P_p3_4d = renderer->GetProjection() * vec4(C_p3_3d);
+
+
+	if (normal.is_valid)
+	{
+		normal.UpdateShape();
+	}
+
+	if (p1_normal.is_valid)
+	{
+		p1_normal.UpdateShape();
+		p2_normal.UpdateShape();
+		p3_normal.UpdateShape();
+	}
 }
 
 
@@ -649,8 +648,89 @@ float Triangle::GetColor(int x, int y, int z, vector<Light*> lights, Shadow shad
 	return i;
 }
 
+void Line::Clip()
+{
+	should_draw = true;
+	for (int face = Up; face <= Far && should_draw; face++)
+	{
+		ClipFace(Face(face));
+	}
+}
+
+void Line::ClipFace(Face face)
+{
+	bool p1Cond, p2Cond, p3Cond;
+	P_p1_4d = P_p1_4d / P_p1_4d.w;
+	P_p2_4d = P_p2_4d / P_p2_4d.w;
+	switch (face)
+	{
+	case Down:
+		p1Cond = P_p1_4d.y > -P_p1_4d.w;
+		p2Cond = P_p2_4d.y > -P_p2_4d.w;
+		break;
+	case Up:
+		p1Cond = P_p1_4d.y < P_p1_4d.w;
+		p2Cond = P_p2_4d.y < P_p2_4d.w;
+		break;
+	case Left:
+		p1Cond = P_p1_4d.x > -P_p1_4d.w;
+		p2Cond = P_p2_4d.x > -P_p2_4d.w;
+		break;
+	case Right:
+		p1Cond = P_p1_4d.x < P_p1_4d.w;
+		p2Cond = P_p2_4d.x < P_p2_4d.w;
+		break;
+	case Far:
+		p1Cond = P_p1_4d.z < P_p1_4d.w;
+		p2Cond = P_p2_4d.z < P_p2_4d.w;
+		break;
+	case Near:
+		p1Cond = P_p1_4d.z > -P_p1_4d.w + EPSILON;
+		p2Cond = P_p2_4d.z > -P_p2_4d.w + EPSILON;
+		break;
+	default:
+		break;
+	}
+
+	int insideCounter = trueCounter(p1Cond, p2Cond, false);
+
+	if (insideCounter == 2) // all inside no need clip
+	{
+		return;
+	}
+	else if (insideCounter == 1) // one outside need to clip 
+	{
+		if (!p1Cond) // p1 is out
+		{
+			ClipLinePoints(getXYZ(P_p1_4d), getXYZ(P_p2_4d), C_p1_3d, C_p2_3d, P_p1_4d, C_p1_3d, face);
+		}
+		else // p2 is out
+		{
+			ClipLinePoints(getXYZ(P_p2_4d), getXYZ(P_p1_4d), C_p2_3d, C_p1_3d, P_p2_4d, C_p1_3d, face);
+		}
+	}
+	else // outside
+	{
+		should_draw = false;
+	}
+}
+
+
 void Triangle::Clip()
 {
+	//first clip normals because we might need them clipped in new triangle
+	if (normal.is_valid && renderer->isShowFacesNormals)
+	{
+		normal.Clip();
+	}
+
+	if (p1_normal.is_valid && renderer->isShowVerticsNormals)
+	{
+		p1_normal.Clip();
+		p2_normal.Clip();
+		p3_normal.Clip();
+	}
+
 	vector<Triangle> newTriangles;
 	Triangle Newtriangle1;
 	Triangle Newtriangle2;
@@ -675,11 +755,17 @@ void Triangle::Clip()
 		}
 	}
 	renderer->triangulation_triangles.insert(renderer->triangulation_triangles.end() ,newTriangles.begin(), newTriangles.end());
+
 }
 
 float Line::GetZ(int x, int y)
 {
-	const float t = length(vec2(x, y) - p1) / length(p2 - p1);
+	float dist = length(p2_2d - p1_2d);
+	if (dist == 0)
+	{
+		C_p1_3d.z;
+	}
+	const float t = length(vec2(x, y) - p1_2d) / length(p2_2d - p1_2d);
 	return C_p1_3d.z * t + (1-t) * C_p2_3d.z;
 }
 
@@ -688,6 +774,8 @@ void Line::UpdateShape()
 {
 	C_p1_3d = renderer->Transform(p1_3d);
 	C_p2_3d = renderer->Transform(p2_3d);
+	P_p1_4d = renderer->GetProjection() * vec4(C_p1_3d);
+	P_p2_4d = renderer->GetProjection() * vec4(C_p2_3d);
 }
 
 float Line::GetColor(int x, int y, int z, vector<Light*> lights, Shadow shadow)
@@ -700,6 +788,8 @@ void Normal::UpdateShape()
 	C_p1_3d = renderer->Transform(p1_3d);
 	normal_direction = normalize(renderer->NormTransform(p2_3d));
 	C_p2_3d = C_p1_3d + normal_size * normal_direction;
+	P_p1_4d = renderer->GetProjection() * vec4(C_p1_3d);
+	P_p2_4d = renderer->GetProjection() * vec4(C_p2_3d);
 	
 }
 
@@ -889,10 +979,7 @@ bool CustomCompareYmin::operator()( Shape* shape1,  Shape* shape2) const
 	return shape1->yMin < shape2->yMin;
 }
 
-bool CustomCompareYMax::operator()( Shape* shape1,  Shape* shape2) const
-{
-	return shape1->yMax < shape2->yMax;
-}
+
 
 void Renderer::DrawTriangles(vector<Triangle>* triangles,
 	vector<Line>* boundBoxLines, GLfloat proportionalValue)
