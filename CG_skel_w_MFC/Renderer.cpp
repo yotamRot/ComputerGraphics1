@@ -325,7 +325,7 @@ void Triangle::Rasterize()
 	RasterizeLine(p3_2d, p1_2d);
 }
 
-float Triangle::GetZ(int x, int y)
+vec3 Triangle::GetCoordinates(int x, int y)
 {
 	float A1, A2, A3;
 	vec2 cord = vec2(x, y);
@@ -340,21 +340,20 @@ float Triangle::GetZ(int x, int y)
 	{
 		if (length(p2_2d - p1_2d) == 0)
 		{
-			return C_p1_3d.z;
+			return C_p1_3d;
 		}
 		const float t = length(cord - p1_2d) / length(p2_2d - p1_2d);
-		return C_p1_3d.z * t + (1 - t) * C_p2_3d.z;
+		return C_p1_3d * t + (1 - t) * C_p2_3d;
 	}
-	return (A1 * C_p1_3d.z + A2 * C_p2_3d.z + A3 * C_p3_3d.z) / normalFactor;
+	return (A1 * C_p1_3d + A2 * C_p2_3d + A3 * C_p3_3d) / normalFactor;
 }
 
-float Triangle::GetGouruad(int x, int y)
+float Triangle::GetGouruad(vec3& C_cord)
 {
 	float A1, A2, A3;
-	vec2 cord = vec2(x, y);
-	vec3 vec0 = vec3(p1_2d - cord, 0);
-	vec3 vec1 = vec3(p2_2d - cord, 0);
-	vec3 vec2 = vec3(p3_2d - cord, 0);
+	vec3 vec0 = C_p1_3d - C_cord;
+	vec3 vec1 = C_p2_3d - C_cord;
+	vec3 vec2 = C_p3_3d - C_cord;
 	A1 = length(cross(vec1, vec2));
 	A2 = length(cross(vec2, vec0));
 	A3 = length(cross(vec0, vec1));
@@ -362,13 +361,12 @@ float Triangle::GetGouruad(int x, int y)
 	return ((A1 * p1_illumination + A2 * p2_illumination + A3 * p3_illumination) / normalFactor);
 }
 
-vec3 Triangle::GetPhong(int x, int y)
+vec3 Triangle::GetPhong(vec3& C_cord)
 {
 	float A1, A2, A3;
-	vec2 cord = vec2(x, y);
-	vec3 vec0 = vec3(p1_2d - cord, 0);
-	vec3 vec1 = vec3(p2_2d - cord, 0);
-	vec3 vec2 = vec3(p3_2d - cord, 0);
+	vec3 vec0 = C_p1_3d - C_cord;
+	vec3 vec1 = C_p2_3d - C_cord;
+	vec3 vec2 = C_p3_3d - C_cord;
 	A1 = length(cross(vec1, vec2));
 	A2 = length(cross(vec2, vec0));
 	A3 = length(cross(vec0, vec1));
@@ -608,7 +606,7 @@ int Triangle::ClipFace(Triangle& triangle1, Triangle& triangle2, Face face)
 	return 0;
 }
 
-vec3 Triangle::GetColor(int x, int y, int z, vector<Light*> lights, Shadow shadow, vec3 shape_color)
+vec3 Triangle::GetColor(vec3& C_cords, vector<Light*> lights, Shadow shadow, vec3& shape_color)
 {
 	float ia, id, is;
 	vec3 light_direction;
@@ -617,15 +615,16 @@ vec3 Triangle::GetColor(int x, int y, int z, vector<Light*> lights, Shadow shado
 	vec3 normal;
 	vec3 color;
 	color = vec3(0);
+	int printCounter = 0;
 	switch (shadow)
 	{
 	case FLAT:
 		normal = this->normal.normal_direction;
 		break;
 	case GOURAUD:
-		return (GetGouruad(x, y) * shape_color);
+		return (GetGouruad(C_cords) * shape_color);
 	case PHONG:
-		normal = GetPhong(x, y);
+		normal = GetPhong(C_cords);
 		break;
 	}
 	for (auto it = lights.begin(); it != lights.end(); ++it)
@@ -636,9 +635,14 @@ vec3 Triangle::GetColor(int x, int y, int z, vector<Light*> lights, Shadow shado
 		}
 		else // Point source
 		{
-			light_direction = normalize((*it)->c_light_position - vec3(x, y, z));
+			light_direction = normalize((*it)->c_light_position - C_cords);
 		}
-		camera_direction = normalize(vec3(0) - vec3(x, y, z));
+	/*	if (printCounter % 1000 == 0)
+		{
+			printf("x-%.3f y-%.3f z%.3f\t", light_direction.x, light_direction.y, light_direction.z);
+		}*/
+		//printCounter++;
+		camera_direction = normalize(vec3(0) - C_cords);
 		reflect_direction = normalize(-light_direction - 2 * (dot(-light_direction, normal)) * normal);
 		ia = ka * (*it)->La;
 		id = kd * max(dot(light_direction, normal),0) * (*it)->Ld;
@@ -759,15 +763,15 @@ void Triangle::Clip()
 
 }
 
-float Line::GetZ(int x, int y)
+vec3 Line::GetCoordinates(int x, int y)
 {
 	float dist = length(p2_2d - p1_2d);
 	if (dist == 0)
 	{
-		C_p1_3d.z;
+		C_p1_3d;
 	}
 	const float t = length(vec2(x, y) - p1_2d) / length(p2_2d - p1_2d);
-	return C_p1_3d.z * t + (1-t) * C_p2_3d.z;
+	return C_p1_3d * t + (1-t) * C_p2_3d;
 }
 
 
@@ -779,7 +783,7 @@ void Line::UpdateShape()
 	P_p2_4d = renderer->GetProjection() * vec4(C_p2_3d);
 }
 
-vec3 Line::GetColor(int x, int y, int z, vector<Light*> lights, Shadow shadow, vec3 shape_color)
+vec3 Line::GetColor(vec3& C_cords, vector<Light*> lights, Shadow shadow, vec3& shape_color)
 {
 	return 1;
 }
@@ -1279,7 +1283,7 @@ void Renderer::SetObjectMatrices(const mat4& oTransform, const mat4& nTransform)
 
 void Renderer::ZBufferScanConvert()
 {
-	float z;
+	vec3 C_cords;
 	int minX, maxX;
 	int fixed_y;
 	vec3 color;
@@ -1301,17 +1305,17 @@ void Renderer::ZBufferScanConvert()
 			maxX = min((*it)->x_max[fixed_y], m_width -1);
 			for (int i = minX; i <= maxX; i++)
 			{
-				z =abs((*it)->GetZ(i, y));
-				if (z <= m_zbuffer[ZINDEX(m_width, i, y)])
+				C_cords =(*it)->GetCoordinates(i, y);
+				if (abs(C_cords.z) <= m_zbuffer[ZINDEX(m_width, i, y)])
 				{
-					m_zbuffer[ZINDEX(m_width, i, y)] = z;
+					m_zbuffer[ZINDEX(m_width, i, y)] = abs(C_cords.z);
 					if (i == maxX || i == minX)
 					{
 						DrawPixel(i, y, WHITE);
 					}
 					else if ((lights.size() > 0) && ((*it)->is_light == false))
 					{
-						color = (*it)->GetColor(i, y, z, lights, shadow, (*it)->shape_color);
+						color = (*it)->GetColor(C_cords, lights, shadow, (*it)->shape_color);
 						//if (illumination > max_illumination)
 						//{
 						//	max_illumination = illumination;

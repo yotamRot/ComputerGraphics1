@@ -266,7 +266,7 @@ void Scene::draw()
 	MeshModel* curModel;
 	for (auto it = lights.begin(); it != lights.end(); ++it)
 	{
-		(*it)->c_light_position = LightPosition(m_renderer->GetProjection(), (*it)->model->_world_transform, (*it)->model->_model_transform);
+		(*it)->c_light_position = LightPosition(curCameraInv, (*it)->model->_world_transform, (*it)->model->_model_transform);
 	}
 	for (vector<Model*>::iterator it = models.begin(); it != models.end(); ++it)
 	{

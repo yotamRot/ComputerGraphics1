@@ -101,11 +101,11 @@ public:
 	void  Clipper();
 	void ClipLine(Face face);
 
-	virtual float  GetZ(int x, int y) =0;
+	virtual vec3  GetCoordinates(int x, int y) =0;
 	virtual void  Rasterize() =0;
 	virtual void  UpdateShape() = 0;
 	virtual bool  ShouldDrawShape() = 0;
-	virtual vec3 GetColor(int x, int y, int z, vector<Light*> lights, Shadow shadow, vec3 shape_color) = 0;
+	virtual vec3 GetColor(vec3& C_cords, vector<Light*> lights, Shadow shadow, vec3& shape_color) = 0;
 	virtual void Clip() = 0;
 
 	bool is_light;
@@ -140,13 +140,13 @@ public:
 	vec4 P_p2_4d;
 
 	void  Rasterize() override;
-	float GetZ(int x, int y) override;
+	vec3 GetCoordinates(int x, int y) override;
 	bool ShouldDrawShape() override;
 	void UpdateShape() override;
 	void Clip() override;
 	void ClipFace(Face face);
 
-	vec3 GetColor(int x, int y, int z, vector<Light*> lights, Shadow shadow, vec3 shape_color) override;
+	vec3 GetColor(vec3& C_cords, vector<Light*> lights, Shadow shadow, vec3& shape_color) override;
 
 
 
@@ -208,13 +208,13 @@ public:
 	float p3_illumination;
 
 	void Rasterize() override;
-	float GetZ(int x, int y) override ;
+	vec3 GetCoordinates(int x, int y) override ;
 	bool ShouldDrawShape() override;
 	void  UpdateShape() override;
 	void Clip() override;
-	vec3 GetColor(int x, int y, int z, vector<Light*> lights, Shadow shadow, vec3 shape_color) override;
-	float GetGouruad(int x, int y);
-	vec3 GetPhong(int x, int y);
+	vec3 GetColor(vec3& C_cords, vector<Light*> lights, Shadow shadow, vec3& shape_color) override;
+	float GetGouruad(vec3& C_cords);
+	vec3 GetPhong(vec3& C_cords);
 	int ClipFace(Triangle& triangle1, Triangle& triangle2, Face face);
 
 
