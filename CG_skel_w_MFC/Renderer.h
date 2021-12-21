@@ -74,14 +74,16 @@ protected:
 
 class Light {
 public:
-	Light(int modelId, Model* model);
-	int modelId;
-	Model* model;
-	LightType type;
-	vec3 c_light_position;
 	float La;
 	float Ld;
 	float Ls;
+	int modelId;
+	vec3 c_light_position;
+	vec3 light_color;
+	Model* model;
+	LightType type;
+
+	Light(int modelId, Model* model);
 	vec3 GetL();
 };
 
@@ -103,7 +105,7 @@ public:
 	virtual void  Rasterize() =0;
 	virtual void  UpdateShape() = 0;
 	virtual bool  ShouldDrawShape() = 0;
-	virtual float GetColor(int x, int y, int z, vector<Light*> lights, Shadow shadow) = 0;
+	virtual vec3 GetColor(int x, int y, int z, vector<Light*> lights, Shadow shadow, vec3 shape_color) = 0;
 	virtual void Clip() = 0;
 
 	bool is_light;
@@ -144,7 +146,7 @@ public:
 	void Clip() override;
 	void ClipFace(Face face);
 
-	float GetColor(int x, int y, int z, vector<Light*> lights, Shadow shadow) override;
+	vec3 GetColor(int x, int y, int z, vector<Light*> lights, Shadow shadow, vec3 shape_color) override;
 
 
 
@@ -210,7 +212,7 @@ public:
 	bool ShouldDrawShape() override;
 	void  UpdateShape() override;
 	void Clip() override;
-	float GetColor(int x, int y, int z, vector<Light*> lights, Shadow shadow) override;
+	vec3 GetColor(int x, int y, int z, vector<Light*> lights, Shadow shadow, vec3 shape_color) override;
 	float GetGouruad(int x, int y);
 	vec3 GetPhong(int x, int y);
 	int ClipFace(Triangle& triangle1, Triangle& triangle2, Face face);

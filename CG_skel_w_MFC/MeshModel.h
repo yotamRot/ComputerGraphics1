@@ -33,7 +33,7 @@ public:
 	vector<Line>* bound_box_vertices;
 
 	vec3 mesh_color;
-
+	vec3 matirials; // x - emissive, y - diffuse, z - specular
 
 	MeshModel(string fileName);
 	~MeshModel(void);

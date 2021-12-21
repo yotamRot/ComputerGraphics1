@@ -92,6 +92,7 @@ int mainMenuId;
 int menuObjectsId;
 int menuSwitchToCameraId;
 int menuSwitchToLightId;
+int menuSwitchLightType;
 int menuLookAtCameraId;
 int menuLookAtLightId;
 //int menuChangeColor;
@@ -305,6 +306,20 @@ void switchToLightMenu(int id)
 	scene->draw();
 }
 
+void switchLightTypeMenu(int id)
+{
+	if (id == PARALLEL_SOURCE)
+	{
+		scene->GetActiveLight()->type = POINT_SOURCE;
+	}
+	else // POINT SOURCE need to switch to PARALLEL SOURCE
+	{
+		scene->GetActiveLight()->type = PARALLEL_SOURCE;
+	}
+	scene->draw();
+}
+
+
 void lookAtLightMenu(int id)
 {
 	scene->lookAtLight(id);
@@ -513,12 +528,16 @@ void initMenu()
 
 	menuLookAtLightId = glutCreateMenu(lookAtLightMenu);
 	menuSwitchToLightId = glutCreateMenu(switchToLightMenu);
+	menuSwitchLightType = glutCreateMenu(switchLightTypeMenu);
+	glutAddMenuEntry("Parallel Source",PARALLEL_SOURCE);
+	glutAddMenuEntry("Point Source",POINT_SOURCE);
 	menuLights = glutCreateMenu(lightsMenu);
 	glutAddMenuEntry("Add Light", ADD_LIGHT);
 	glutAddMenuEntry("Control Active Light", CONTROL_ACTIVE_LIGHT);
 	glutAddSubMenu("Look At Light", menuLookAtLightId);
 	glutAddSubMenu("Select Light", menuSwitchToLightId);
 	glutAddMenuEntry("Change Active Light L Parameters", CHANGE_PARAMETERS);
+	glutAddSubMenu("Change Active Light Type", menuSwitchLightType);
 
 
 	menuShadow = glutCreateMenu(shadowMenu);
@@ -533,11 +552,7 @@ void initMenu()
 	glutAddMenuEntry("Show Faces Normal", SHOW_FACES_NORMAL);
 	glutAddMenuEntry("Show Bounding Box", SHOW_BOUNDING_BOX);
 	glutAddMenuEntry("Change Color", CHANGE_COLOR);
-	//glutSetMenu(menuChangeColor);
-	//glutAddMenuEntry("White", WHITE);
-	//glutAddMenuEntry("Red", RED);
-	//glutAddMenuEntry("Green", GREEN);
-	//glutAddMenuEntry("Blue", BLUE);
+
 
 	int menuProjections = glutCreateMenu(projectionMenu);
 	glutAddMenuEntry("Orthographic", ORTHOGRAPHIC);
