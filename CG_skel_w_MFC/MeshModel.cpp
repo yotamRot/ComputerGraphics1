@@ -83,9 +83,6 @@ vector<Line>* SetRectangleVertices(GLfloat posX, GLfloat posY, GLfloat posZ, GLf
 	lines->push_back(Line(frontBottomRight, frontTopRight, false));
 	lines->push_back(Line(frontBottomRight, backBottomRight, false));
 
-
-
-
 	return lines;
 }
 

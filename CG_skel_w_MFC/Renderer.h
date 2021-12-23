@@ -19,6 +19,11 @@ class Renderer;
 #define GREEN						vec3(0,1,0)
 #define BLUE						vec3(0,0,1)
 
+// fog params
+#define FOG_COLOR				vec3(0.5,0.5,0.5)
+#define FOG_MIN					1
+#define FOG_MAX					20
+
 enum Face
 {
 	Up,
@@ -291,5 +296,5 @@ public:
 	vector<Light*> lights;
 	vector<Light*> GetLights();
 	vector<Triangle> triangulation_triangles;
-
+	void addFog(vec3& color, float z);
 };

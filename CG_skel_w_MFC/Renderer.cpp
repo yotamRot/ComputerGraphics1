@@ -471,9 +471,9 @@ int trueCounter(bool first, bool second, bool third)
 int Triangle::ClipFace(Triangle& triangle1, Triangle& triangle2, Face face)
 {
 	bool p1Cond, p2Cond, p3Cond;
-	P_p1_4d = P_p1_4d / P_p1_4d.w;
-	P_p2_4d = P_p2_4d / P_p2_4d.w;
-	P_p3_4d = P_p3_4d / P_p3_4d.w;
+	P_p1_4d = P_p1_4d;
+	P_p2_4d = P_p2_4d;
+	P_p3_4d = P_p3_4d;
 	switch (face)
 	{
 	case Down:
@@ -627,6 +627,9 @@ vec3 Triangle::GetColor(vec3& C_cords, vector<Light*> lights, Shadow shadow, vec
 		color += (*it)->light_color *(ia + id + is);
 	}
 	color = color * shape_color;
+
+	//apply fog
+	renderer->addFog(color, C_cords.z);
 	return color;
 }
 
@@ -643,8 +646,8 @@ void Line::Clip()
 void Line::ClipFace(Face face)
 {
 	bool p1Cond, p2Cond, p3Cond;
-	P_p1_4d = P_p1_4d / P_p1_4d.w;
-	P_p2_4d = P_p2_4d / P_p2_4d.w;
+	P_p1_4d = P_p1_4d;
+	P_p2_4d = P_p2_4d;
 	switch (face)
 	{
 	case Down:
@@ -1126,6 +1129,13 @@ vector<Light*> Renderer::GetLights()
 	return lights;
 }
 
+void Renderer::addFog(vec3& color, float z)
+{
+	float clamped_z = max(min(abs(z), FOG_MAX), FOG_MIN);
+	float fogFactor = (FOG_MAX - clamped_z) /(FOG_MAX - FOG_MIN);
+	color = color * fogFactor + (1 - fogFactor) * FOG_COLOR;
+}
+
 mat4 Renderer::GetProjection()
 {
 	return cProjection;
@@ -1296,21 +1306,14 @@ void Renderer::ZBufferScanConvert()
 				if (abs(C_cords.z) <= m_zbuffer[ZINDEX(m_width, i, y)])
 				{
 					m_zbuffer[ZINDEX(m_width, i, y)] = abs(C_cords.z);
-					if (i == maxX || i == minX)
-					{
-						DrawPixel(i, y, WHITE);
-					}
-					else if ((lights.size() > 0) && ((*it)->is_light == false))
+					//if (i == maxX || i == minX)
+					//{
+					//	DrawPixel(i, y, WHITE);
+					//}else
+					
+					if ((lights.size() > 0) && ((*it)->is_light == false))
 					{
 						color = (*it)->GetColor(C_cords, lights, shadow, (*it)->shape_color);
-						//if (illumination > max_illumination)
-						//{
-						//	max_illumination = illumination;
-						//}
-						//else if (illumination > min_illumination)
-						//{
-						//	min_illumination = illumination;
-						//}
 						DrawPixel(i, y, color);
 					}
 					else
