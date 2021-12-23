@@ -62,7 +62,7 @@ vec3 rtf;
 vec3 lbn;
 vec3 l;
 vec3 RGB;
-vec3 ambient_rgb;
+vec4 ambient_rgbl;
 vec3 k;
 
 void SetLbnRtf(vec3 Ilbn, vec3 Irtf)
@@ -83,9 +83,10 @@ void SetLightL(vec3 l_params)
     l = l_params;
 }
 
-void SetRGB(vec3 colors)
+void SetRGBLa(vec4 rgbl)
 {
-    ambient_rgb = colors;
+    ambient_rgbl = rgbl;
+
 }
 
 void SetColorParam(vec3 colors, vec3 k_params)
@@ -618,16 +619,16 @@ void LDialog::OnPaint()
 // ----------------------
 
 RgbDialog::RgbDialog(CString title)
-    : CInputDialog(title), mRed(ambient_rgb.x), mGreen(ambient_rgb.y), mBlue(ambient_rgb.z)
+    : CInputDialog(title), mRed(ambient_rgbl.x), mGreen(ambient_rgbl.y), mBlue(ambient_rgbl.z), mLa(ambient_rgbl.w)
 { }
 
 RgbDialog::~RgbDialog()
 { }
 
 
-vec3 RgbDialog::GetRGB()
+vec4 RgbDialog::GetRGBLa()
 {
-    return vec3(mRed, mGreen, mBlue);
+    return vec4(mRed, mGreen, mBlue, mLa);
 }
 
 void RgbDialog::DoDataExchange(CDataExchange* pDX)
@@ -636,6 +637,7 @@ void RgbDialog::DoDataExchange(CDataExchange* pDX)
     DDX_Text(pDX, IDC_RED_EDIT, mRed);
     DDX_Text(pDX, IDC_GREEN_EDIT, mGreen);
     DDX_Text(pDX, IDC_BLUE_EDIT, mBlue);
+    DDX_Text(pDX, IDC_L_A_EDIT, mLa);
 }
 
 // CXyzDialog message handlers
@@ -656,6 +658,9 @@ int RgbDialog::OnCreate(LPCREATESTRUCT lpcs)
     mBlueEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
         CRect(150, 210, 340, 230), this, IDC_BLUE_EDIT);
 
+    mLaEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(150, 280, 340, 300), this, IDC_L_A_EDIT);
+
     return 0;
 }
 
@@ -672,6 +677,9 @@ void RgbDialog::OnPaint()
 
     CRect b_rect(100, 212, 450, 230);
     dc.DrawText(CString(BLUE_EDIT_TITLE), -1, &b_rect, DT_SINGLELINE);
+    
+    CRect l_rect(100, 282, 450, 300);
+    dc.DrawText(CString(L_A_EDIT_TITLE), -1, &l_rect, DT_SINGLELINE);
 
     mRedEdit.SetFocus();
 }

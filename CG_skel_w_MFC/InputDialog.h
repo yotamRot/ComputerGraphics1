@@ -9,7 +9,7 @@ using std::string;
 void SetLbnRtf(vec3 Ilbn, vec3 Irtf);
 void SetLightL(vec3 l_params);
 void SetColorParam(vec3 colors, vec3 k_params);
-void SetRGB(vec3 colors);
+void SetRGBLa(vec4 rgbl);
 // ------------------------
 //    Class CInputDialog
 // ------------------------
@@ -242,15 +242,17 @@ public:
     RgbDialog(CString title = "Input Dialog");
     virtual ~RgbDialog();
 
-    vec3 GetRGB();  //R G B
+    vec4 GetRGBLa();  //R G B La
 
 protected:
-    float mRed;// mBottom;
-    float mGreen;// mFar;
-    float mBlue;// mNear;
+    float mRed;
+    float mGreen;
+    float mBlue;
+    float mLa;
     CEdit mRedEdit;
     CEdit mGreenEdit;
     CEdit mBlueEdit;
+    CEdit mLaEdit;
 
 
     virtual void DoDataExchange(CDataExchange* pDX);

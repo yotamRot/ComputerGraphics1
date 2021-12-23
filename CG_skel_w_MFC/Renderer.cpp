@@ -619,11 +619,6 @@ vec3 Triangle::GetColor(vec3& C_cords, vector<Light*> lights, Shadow shadow, vec
 		{
 			light_direction = normalize((*it)->c_light_position - C_cords);
 		}
-	/*	if (printCounter % 1000 == 0)
-		{
-			printf("x-%.3f y-%.3f z%.3f\t", light_direction.x, light_direction.y, light_direction.z);
-		}*/
-		//printCounter++;
 		camera_direction = normalize(vec3(0) - C_cords);
 		reflect_direction = normalize(-light_direction - 2 * (dot(-light_direction, normal)) * normal);
 		ia = ka * (*it)->La;
@@ -1153,7 +1148,7 @@ vec3 Renderer::NormTransform(const vec3& ver)
 void Renderer::ConfigureRenderer(const mat4& projection, const mat4& transform,
 								bool isDrawVertexNormal, bool isDrawFaceNormal,
 								bool isDrawBoundBox, vector<Light*> scene_lights,
-								Shadow scene_shadow, vec3 ambient_rgb)
+								Shadow scene_shadow)
 {
 	cTransform = mat4(transform);
 	cProjection = mat4(projection);
@@ -1167,8 +1162,6 @@ void Renderer::ConfigureRenderer(const mat4& projection, const mat4& transform,
 	lights = scene_lights;
 	shadow = scene_shadow;
 	shapes.clear();
-	scene_ambient = ambient_rgb;
-
 }	
 
 
@@ -1294,11 +1287,6 @@ void Renderer::ZBufferScanConvert()
 		yMax = min((*it)->yMax, m_height - 1);
 		for (int y = yMin; y <= yMax; y++)
 		{
-			if ((*it)->shape_color == vec3(1))
-			{
-				int tmp = 1;
-				tmp++;
-			}
 			fixed_y = y - yMin;
 			minX = max((*it)->x_min[fixed_y],0);
 			maxX = min((*it)->x_max[fixed_y], m_width -1);
@@ -1323,11 +1311,11 @@ void Renderer::ZBufferScanConvert()
 						//{
 						//	min_illumination = illumination;
 						//}
-						DrawPixel(i, y, (scene_ambient*color));
+						DrawPixel(i, y, color);
 					}
 					else
 					{
-						DrawPixel(i, y, (scene_ambient * (*it)->shape_color));
+						DrawPixel(i, y, (*it)->shape_color);
 					}
 				}
 			}

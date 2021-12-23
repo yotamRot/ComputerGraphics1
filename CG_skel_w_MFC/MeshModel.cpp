@@ -476,9 +476,9 @@ CameraModel::CameraModel(int cameraIndex) : cameraIndex(cameraIndex)
 
 LightModel::LightModel(int lightIndex) : lightIndex(lightIndex)
 {
-	ka = 0.5;
-	kd = 0.8;
-	ks = 1.0;
+	ka = 1;
+	kd = 1;
+	ks = 1;
 	mesh_color = WHITE;
 	triangles = new vector<Triangle>;
 	Normal curFaceNormal;

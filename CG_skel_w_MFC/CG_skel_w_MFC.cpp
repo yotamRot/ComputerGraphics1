@@ -154,11 +154,11 @@ void lookAtLightMenu(int id)
 
 void ChangeAmbientColors()
 {
-	SetRGB(scene->GetAmbientRGB());
-	RgbDialog dlga;
-	if (dlga.DoModal() == IDOK) {
-		vec3 rgb = dlga.GetRGB();
-		scene->ChangeAmbientRgb(rgb);
+	SetRGBLa(scene->GetAmbientRGB());
+	RgbDialog dlg;
+	if (dlg.DoModal() == IDOK) {
+		vec4 rgbl = dlg.GetRGBLa();
+		scene->ChangeAmbientRgbLa(rgbl);
 	}
 }
 
@@ -235,14 +235,12 @@ void ClearScene()
 	int tmp = glutGet(GLUT_MENU_NUM_ITEMS);
 	for (int i = 1; i <= tmp; i++)
 	{
-
 		glutRemoveMenuItem(1);
 	}
 	glutSetMenu(menuLookAtCameraId);
 	tmp = glutGet(GLUT_MENU_NUM_ITEMS);
 	for (int i = 1; i <= tmp; i++)
 	{
-
 		glutRemoveMenuItem(1);
 	}
 	glutAddMenuEntry((cameraPrefix + "0").c_str(), 0);
@@ -250,7 +248,6 @@ void ClearScene()
 	tmp = glutGet(GLUT_MENU_NUM_ITEMS);
 	for (int i = 1; i <= tmp; i++)
 	{
-
 		glutRemoveMenuItem(1);
 	}
 	glutAddMenuEntry((cameraPrefix + "0").c_str(), 0);
@@ -258,9 +255,15 @@ void ClearScene()
 	tmp = glutGet(GLUT_MENU_NUM_ITEMS);
 	for (int i = 1; i <= tmp; i++)
 	{
-
 		glutRemoveMenuItem(1);
 	}
+	glutSetMenu(menuLights);
+	tmp = glutGet(GLUT_MENU_NUM_ITEMS);
+	for (int i = 1; i <= tmp; i++)
+	{
+		glutRemoveMenuItem(1);
+	}
+
 	scene->ClearScene();
 }
 
@@ -294,6 +297,7 @@ void OpenFile()
 		std::string s((LPCTSTR)dlg.GetPathName());
 		newModelId = scene->loadOBJModel((LPCTSTR)dlg.GetPathName());
 		glutAddMenuEntry((LPCTSTR)dlg.GetFileName(), newModelId);
+		scene->lookAtModel(scene->activeModel);
 	}
 	else
 	{
@@ -306,7 +310,7 @@ void AddCube()
 	glutSetMenu(menuObjectsId);
 	newModelId = scene->loadCubeModel();
 	glutAddMenuEntry("Cube", newModelId);
-	scene->draw();
+	scene->lookAtModel(scene->activeModel);
 }
 
 void PrespectiveParameters()
@@ -516,7 +520,6 @@ void fileMenu(int id)
 			AddCube();
 			break;
 	}
-	scene->lookAtModel(scene->activeModel);
 	scene->draw();
 }
 
@@ -603,7 +606,7 @@ void CreateLightMenu()
 	glutAddSubMenu("Look At Light", menuLookAtLightId);
 	glutAddSubMenu("Select Light", menuSwitchToLightId);
 	glutAddMenuEntry("Change Active Light L Parameters", CHANGE_PARAMETERS);
-	glutAddSubMenu("Change Active Light Type", menuSwitchLightType);
+	glutAddSubMenu("Select Active Light Type", menuSwitchLightType);
 	glutAddMenuEntry("Edit Ambient Light", CHANGE_AMBIENT);
 }
 

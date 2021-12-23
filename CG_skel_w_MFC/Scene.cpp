@@ -43,7 +43,7 @@ Camera* Scene::GetActiveCamera()
 
 Light* Scene::GetActiveLight()
 {
-	return lights.at(activeCamera);
+	return lights.at(activeLight);
 }
 
 vec3 Scene::GetModelRGB()
@@ -65,9 +65,10 @@ void Scene::ChangeActiveLightL(vec3 l_params)
 	lights.at(activeCamera)->Ls = l_params.z;
 }
 
-void Scene::ChangeAmbientRgb(vec3 color)
+void Scene::ChangeAmbientRgbLa(vec4 & rgbl)
 {
-	ambient_rgb = color;
+	lights.at(0)->light_color = vec3(rgbl.x, rgbl.y, rgbl.z);
+	lights.at(0)->La = rgbl.w;
 }
 
 
@@ -269,7 +270,7 @@ void Scene::draw()
 	mat4 curCameraInv = curCameraModel->_w_TransformInv * curCameraModel->_m_TransformInv;
 	m_renderer->ClearColorBuffer();
 	m_renderer->ClearDepthBuffer();
-	m_renderer->ConfigureRenderer(curProjection, curCameraInv, isShowVerticsNormals, isShowFacesNormals, isDrawBoundBox, lights, current_shadow,ambient_rgb);
+	m_renderer->ConfigureRenderer(curProjection, curCameraInv, isShowVerticsNormals, isShowFacesNormals, isDrawBoundBox, lights, current_shadow);
 	MeshModel* curModel;
 	for (auto it = lights.begin(); it != lights.end(); ++it)
 	{
@@ -287,10 +288,20 @@ void Scene::draw()
 			}
 			cameraIndex++;
 		}
+		else if(dynamic_cast<LightModel*>(*it))
+		{
+			if (dynamic_cast<LightModel*>(*it)->lightIndex == 0) //dont want to draw ambient light
+			{
+				continue;
+			}
+			else
+			{
+				(*it)->draw(m_renderer);// draw models
+			}
+		}
 		else
 		{
 			(*it)->draw(m_renderer);// draw models
-	
 		}
 	}
 
@@ -304,7 +315,7 @@ void Scene::drawDemo()
 	m_renderer->SwapBuffers();
 }
 
-Scene::Scene(Renderer *renderer) : m_renderer(renderer), current_shadow(FLAT), ambient_rgb(vec3(1,1,1))
+Scene::Scene(Renderer *renderer) : m_renderer(renderer), current_shadow(FLAT)
 {	
 	InitScene();
 }
@@ -312,6 +323,11 @@ Scene::Scene(Renderer *renderer) : m_renderer(renderer), current_shadow(FLAT), a
 void Scene::InitScene()
 {
 	activeCamera = addCamera();
+	// add ambient Light with id 0 and set Ld & Ls to 0
+	activeLight = addLight();
+	lights.at(0)->Ld = 0;
+	lights.at(0)->Ls = 0;
+	lights.at(0)->La = 1;
 	activeModel = ILLEGAL_ACTIVE_MOVEL;
 	proj = FRUSTUM;
 	setActiveCameraProjection(proj);
@@ -457,9 +473,9 @@ void Scene::ChangeShadow(Shadow s)
 	current_shadow = s;
 }
 
-vec3 Scene::GetAmbientRGB()
+vec4 Scene::GetAmbientRGB()
 {
-	return ambient_rgb;
+	return vec4(lights.at(0)->light_color,lights.at(0)->La);
 }
 
 void Camera::MaintainRatio(float widthRatio, float heightRatio, Projection proj)
@@ -539,14 +555,6 @@ int Scene::addLight()
 	return newLightIndex;
 }
 
-//int Scene::loadOBJModel(string fileName)
-//{
-//	MeshModel* model = new MeshModel(fileName);
-//	activeModel = models.size();
-//	modelToVectorId.push_back(activeModel);
-//	models.push_back(model);
-//	return modelToVectorId.size() - 1; // new model index
-//}
 
 void Scene::controlLight(int lightId)
 {
