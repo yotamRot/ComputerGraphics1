@@ -506,7 +506,6 @@ void shadowMenu(int id)
 
 void fileMenu(int id)
 {
-	
 
 	switch (id)
 	{

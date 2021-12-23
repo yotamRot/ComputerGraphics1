@@ -9,7 +9,7 @@
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 #define ZINDEX(width,x,y) (x+y*width)
-#define DRAW_OPEN_MODELS 0
+#define DRAW_OPEN_MODELS 0 
 #define ALPHA 2
 
 
@@ -233,8 +233,8 @@ void RasterizeArrangeVeritcs(vec2& ver1, vec2& ver2, bool byX = true)
 
 void Line::Rasterize()
 {
-	p1_2d = renderer->vec3ToVec2(C_p1_3d);
-	p2_2d = renderer->vec3ToVec2(C_p2_3d);
+	p1_2d = renderer->vec4ToVec2(P_p1_4d);
+	p2_2d = renderer->vec4ToVec2(P_p2_4d);
 
 	yMax = max(p1_2d.y, p2_2d.y);
 	yMin = min(p1_2d.y, p2_2d.y);
@@ -242,7 +242,6 @@ void Line::Rasterize()
 	renderer->yMin = min(yMin, renderer->yMin);
 	renderer->yMax = max(yMin, renderer->yMax);
 
-	should_draw = ShouldDrawShape();
 	if (should_draw)
 	{
 		if (x_min != NULL)
@@ -256,10 +255,11 @@ void Line::Rasterize()
 
 		x_max = new int[yMax - yMin + 1]();
 		x_min = new int[yMax - yMin + 1]();
+		std::fill_n(x_max, yMax - yMin + 1, -1);
+		std::fill_n(x_min, yMax - yMin + 1, -1);
+		RasterizeLine(p1_2d, p2_2d);
 	}
-	std::fill_n(x_max, yMax - yMin + 1, -1);
-	std::fill_n(x_min, yMax - yMin + 1, -1);
-	RasterizeLine(p1_2d, p2_2d);
+	
 }
 
 Shape::~Shape()
@@ -276,12 +276,28 @@ Shape::~Shape()
 
 }
 
+Shape::Shape()
+{
+	x_max = x_min = NULL;
+}
+
+Shape::Shape(const Shape& a)
+{
+	x_max = x_min = NULL;
+	yMin = a.yMin;
+	yMax = a.yMin;
+	shape_color = a.shape_color;
+	should_draw = a.should_draw;
+	is_light = a.is_light;
+}
+
+
 
 void Triangle::Rasterize()
 {
-	p1_2d = renderer->vec3ToVec2(C_p1_3d);
-	p2_2d = renderer->vec3ToVec2(C_p2_3d);
-	p3_2d = renderer->vec3ToVec2(C_p3_3d);
+	p1_2d = renderer->vec4ToVec2(P_p1_4d);
+	p2_2d = renderer->vec4ToVec2(P_p2_4d);
+	p3_2d = renderer->vec4ToVec2(P_p3_4d);
 	yMax = max(max(p1_2d.y, p2_2d.y), p3_2d.y);
 	yMin = min(min(p1_2d.y, p2_2d.y), p3_2d.y);
 	renderer->yMin = min(yMin, renderer->yMin);
@@ -345,64 +361,6 @@ vec3 Triangle::GetPhong(vec3& C_cord)
 	return ((A1 * p1_normal.normal_direction + A2 * p2_normal.normal_direction + A3 * p3_normal.normal_direction) / normalFactor);
 }
 
-bool Triangle::ShouldDrawShape()
-{
-	vec4 tmp[4];
-#if DRAW_OPEN_MODELS
-	if (dot(normal.C_p2_3d - normal.C_p1_3d, -(normal.C_p1_3d)) < 0)
-	{
-		return false;
-	}
-#endif // 3D
-
-	mat4 proj = renderer->GetProjection();
-
-	tmp[1] = proj * vec4(C_p1_3d);
-	tmp[2] = proj * vec4(C_p2_3d);
-	tmp[3] = proj * vec4(C_p3_3d);
-
-	//if (!LiangBarskyClipping(vec3(tmp[1].x, tmp[1].y, tmp[1].z), vec3(tmp[2].x, tmp[2].y, tmp[2].z), vec3(tmp[1].w), vec3(-tmp[1].w)) &&
-	//	!LiangBarskyClipping(vec3(tmp[1].x, tmp[1].y, tmp[1].z), vec3(tmp[3].x, tmp[3].y, tmp[3].z), vec3(tmp[1].w), vec3(-tmp[1].w)) &&
-	//	!LiangBarskyClipping(vec3(tmp[3].x, tmp[3].y, tmp[3].z), vec3(tmp[2].x, tmp[2].y, tmp[2].z), vec3(tmp[2].w), vec3(-tmp[2].w)))
-	//{
-	//	// all triangle is outside
-	//	return false;
-	//}
-	//else
-	//{
-	//	// preform clipping
-	//	return true;
-	//}
-	return true;
-}
-
-bool Line::ShouldDrawShape()
-{
-	vec4 tmp[4];
-
-	mat4 proj = renderer->GetProjection();
-
-	tmp[1] = proj * vec4(C_p1_3d);
-	tmp[2] = proj * vec4(C_p2_3d);
-
-	if (!LiangBarskyClipping(vec3(tmp[1].x, tmp[1].y, tmp[1].z), vec3(tmp[2].x, tmp[2].y, tmp[2].z), vec3(tmp[1].w), vec3(-tmp[1].w)))
-	{
-		return false;
-	}
-	else
-	{
-		return true;
-	}
-}
-
-void Shape::Clipper()
-{
-	should_draw = ShouldDrawShape();
-	if (should_draw)
-	{
-		Clip();
-	}
-}
 
 void Triangle::UpdateShape()
 {
@@ -607,7 +565,8 @@ int Triangle::ClipFace(Triangle& triangle1, Triangle& triangle2, Face face)
 		
 		return 1;
 	}
-	// not supposed to get here - if yes balagan
+	// trianle is out
+	triangle1.should_draw = false;
 	return 0;
 }
 
@@ -679,6 +638,7 @@ vec3 Triangle::GetColor(vec3& C_cords, vector<Light*> lights, Shadow shadow, vec
 void Line::Clip()
 {
 	should_draw = true;
+
 	for (int face = Up; face <= Far && should_draw; face++)
 	{
 		ClipFace(Face(face));
@@ -746,6 +706,16 @@ void Line::ClipFace(Face face)
 
 void Triangle::Clip()
 {
+
+#if DRAW_OPEN_MODELS
+	if (dot(normal.C_p2_3d - normal.C_p1_3d, -(normal.C_p1_3d)) < 0)
+	{
+		should_draw = false;
+		return;
+	}
+#endif
+
+
 	//first clip normals because we might need them clipped in new triangle
 	if (normal.is_valid && renderer->isShowFacesNormals)
 	{
@@ -1022,7 +992,7 @@ void Renderer::DrawTriangles(vector<Triangle>* triangles,
 			it->UpdateShape();
 			if (action == Clip)
 			{
-				it->Clipper();
+				it->Clip();
 			}
 			else
 			{
@@ -1102,10 +1072,16 @@ void Renderer::DrawBoundingBox(vector<Line>* boundBoxLines)
 	{
 		line = &(boundBoxLines->at(i));
 		line->UpdateShape();
-		line->Rasterize();
-		yMax = max(yMax, line->yMax);
-		yMin = min(yMin, line->yMin);
-		shapes.push_back(line);
+		line->Clip();
+		if (line->should_draw)
+		{
+			shapes.push_back(line);
+			line->Rasterize();
+			yMax = max(yMax, line->yMax);
+			yMin = min(yMin, line->yMin);
+
+		}
+
 	}
 }
 
@@ -1114,7 +1090,7 @@ RendererActions Renderer::shouldDrawModel(const vector<Line>* boundBoxLines)
 {
 	//original bounds
 	vec3 tranformed_orig_back_top_right = getXYZ(cProjection * cTransform * oTransform * vec4(boundBoxLines->at(4).p1_3d));
-	vec3 tranformed_orig_front_bottom_left = getXYZ(cProjection * cTransform * oTransform * vec4(boundBoxLines->at(9).p1_3d));
+	vec3 tranformed_orig_front_bottom_left = getXYZ(cProjection * cTransform * oTransform * vec4(boundBoxLines->at(9).p2_3d));
 
 	vec3 maxBounds = vec3(max(tranformed_orig_back_top_right.x, tranformed_orig_front_bottom_left.x), max(tranformed_orig_back_top_right.y, tranformed_orig_front_bottom_left.y), max(tranformed_orig_back_top_right.z, tranformed_orig_front_bottom_left.z));
 	vec3 minBounds = vec3(min(tranformed_orig_back_top_right.x, tranformed_orig_front_bottom_left.x), min(tranformed_orig_back_top_right.y, tranformed_orig_front_bottom_left.y), min(tranformed_orig_back_top_right.z, tranformed_orig_front_bottom_left.z));
@@ -1143,12 +1119,9 @@ RendererActions Renderer::shouldDrawModel(const vector<Line>* boundBoxLines)
 
 	return Clip;
 }
-vec2 Renderer::vec3ToVec2(const vec3& ver)
+vec2 Renderer::vec4ToVec2(const vec4& ver)
 {
-	vec4 tempVec = vec4(ver);
-	tempVec = this->cProjection *  tempVec;
-
-	vec2 point = vec2(tempVec.x / tempVec.w, tempVec.y / tempVec.w);
+	vec2 point = getXY(ver);
 	transformToScreen(point);
 	return point;
 }
@@ -1354,7 +1327,7 @@ void Renderer::ZBufferScanConvert()
 					}
 					else
 					{
-						DrawPixel(i, y, (scene_ambient*(*it)->shape_color));
+						DrawPixel(i, y, (scene_ambient * (*it)->shape_color));
 					}
 				}
 			}

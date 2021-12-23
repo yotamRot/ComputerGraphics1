@@ -91,20 +91,18 @@ public:
 class Shape
 {
 public:
-	Shape() = default;
+	Shape();
+	Shape(const Shape& a);
 	virtual ~Shape() = 0;
 	void RasterizeLine(vec2 verMin, vec2 verMax);
 	void RasterizeBigNegetive(vec2& ver1, vec2& ver2);
 	void RasterizeRegularNegetive(vec2& ver1, vec2& ver2);
 	void RasterizeBig(vec2& ver1, vec2& ver2);
 	void RasterizeRegular(vec2& ver1, vec2& ver2);	
-	void  Clipper();
-	void ClipLine(Face face);
 
 	virtual vec3  GetCoordinates(int x, int y) =0;
 	virtual void  Rasterize() =0;
 	virtual void  UpdateShape() = 0;
-	virtual bool  ShouldDrawShape() = 0;
 	virtual vec3 GetColor(vec3& C_cords, vector<Light*> lights, Shadow shadow, vec3& shape_color) = 0;
 	virtual void Clip() = 0;
 
@@ -141,12 +139,12 @@ public:
 
 	void  Rasterize() override;
 	vec3 GetCoordinates(int x, int y) override;
-	bool ShouldDrawShape() override;
 	void UpdateShape() override;
 	void Clip() override;
 	void ClipFace(Face face);
 
 	vec3 GetColor(vec3& C_cords, vector<Light*> lights, Shadow shadow, vec3& shape_color) override;
+
 
 
 
@@ -209,7 +207,6 @@ public:
 
 	void Rasterize() override;
 	vec3 GetCoordinates(int x, int y) override ;
-	bool ShouldDrawShape() override;
 	void  UpdateShape() override;
 	void Clip() override;
 	vec3 GetColor(vec3& C_cords, vector<Light*> lights, Shadow shadow, vec3& shape_color) override;
@@ -284,7 +281,7 @@ public:
 	void SetDemoBuffer();
 	void ResizeBuffers(int width, int height);
 	void ZBufferScanConvert();
-	vec2 vec3ToVec2(const vec3& ver);
+	vec2 vec4ToVec2(const vec4& ver);
 	vec3 Transform(const vec3& ver);
 	vec3 NormTransform(const vec3& ver);
 	mat4 GetProjection();

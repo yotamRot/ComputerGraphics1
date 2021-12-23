@@ -448,4 +448,10 @@ vec3 getXYZ(const vec4& a)
     return vec3(a.x / a.w, a.y / a.w, a.z / a.w);
 }
 
+inline
+vec2 getXY(const vec4& a)
+{
+    return vec2(a.x / a.w, a.y / a.w);
+}
+
 //----------------------------------------------------------------------------

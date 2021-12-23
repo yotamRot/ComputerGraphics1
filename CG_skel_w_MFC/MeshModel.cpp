@@ -79,9 +79,9 @@ vector<Line>* SetRectangleVertices(GLfloat posX, GLfloat posY, GLfloat posZ, GLf
 	lines->push_back(Line(backBottomLeft, backBottomRight, false));
 	lines->push_back(Line(backBottomLeft, frontBottomLeft, false));
 
-	lines->push_back(Line(frontBottomLeft, frontBottomRight, false));
-	lines->push_back(Line(frontBottomLeft, frontTopLeft, false));
-	lines->push_back(Line(frontBottomLeft, backBottomLeft, false));
+	lines->push_back(Line(frontBottomRight, frontBottomLeft, false));
+	lines->push_back(Line(frontBottomRight, frontTopRight, false));
+	lines->push_back(Line(frontBottomRight, backBottomRight, false));
 
 
 
@@ -377,6 +377,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p3 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // bottom right
 	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(-1, 0, 0), false, face_normal);
 	curTriangle = Triangle(p1, p2, p3, mesh_color, false, curFaceNormal);
+	triangles->push_back(curTriangle);
 
 	p1 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
 	p2 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top right
