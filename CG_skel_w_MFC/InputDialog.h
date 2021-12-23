@@ -9,6 +9,7 @@ using std::string;
 void SetLbnRtf(vec3 Ilbn, vec3 Irtf);
 void SetLightL(vec3 l_params);
 void SetColorParam(vec3 colors, vec3 k_params);
+void SetRGB(vec3 colors);
 // ------------------------
 //    Class CInputDialog
 // ------------------------
@@ -225,6 +226,32 @@ protected:
     CEdit mLaEdit;
     CEdit mLdEdit;
     CEdit mLsEdit;
+
+    virtual void DoDataExchange(CDataExchange* pDX);
+
+    afx_msg int OnCreate(LPCREATESTRUCT lpcs);
+    afx_msg void OnPaint();
+    DECLARE_MESSAGE_MAP()
+};
+
+
+
+class RgbDialog : public CInputDialog
+{
+public:
+    RgbDialog(CString title = "Input Dialog");
+    virtual ~RgbDialog();
+
+    vec3 GetRGB();  //R G B
+
+protected:
+    float mRed;// mBottom;
+    float mGreen;// mFar;
+    float mBlue;// mNear;
+    CEdit mRedEdit;
+    CEdit mGreenEdit;
+    CEdit mBlueEdit;
+
 
     virtual void DoDataExchange(CDataExchange* pDX);
 

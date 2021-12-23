@@ -50,18 +50,19 @@
 #define FOVY_EDIT_TITLE             "Fovy ="
 #define ASPECT_EDIT_TITLE           "Aspect ="
 
-#define RED_EDIT_TITLE              "Red ="
-#define GREEN_EDIT_TITLE            "Green ="
-#define BLUE_EDIT_TITLE             "Blue ="
-#define K_A_EDIT_TITLE              "Ka ="
-#define K_D_EDIT_TITLE              "Kd ="
-#define K_S_EDIT_TITLE              "Ks ="
+#define RED_EDIT_TITLE              "Red  "
+#define GREEN_EDIT_TITLE            "Green"
+#define BLUE_EDIT_TITLE             "Blue "
+#define K_A_EDIT_TITLE              "Ka "
+#define K_D_EDIT_TITLE              "Kd "
+#define K_S_EDIT_TITLE              "Ks "
 
 
 vec3 rtf;
 vec3 lbn;
 vec3 l;
 vec3 RGB;
+vec3 ambient_rgb;
 vec3 k;
 
 void SetLbnRtf(vec3 Ilbn, vec3 Irtf)
@@ -80,6 +81,11 @@ void SetLbnRtf(vec3 Ilbn, vec3 Irtf)
 void SetLightL(vec3 l_params)
 {
     l = l_params;
+}
+
+void SetRGB(vec3 colors)
+{
+    ambient_rgb = colors;
 }
 
 void SetColorParam(vec3 colors, vec3 k_params)
@@ -604,4 +610,68 @@ void LDialog::OnPaint()
     dc.DrawText(CString(L_S_EDIT_TITLE), -1, &z_rect, DT_SINGLELINE);
 
     mLaEdit.SetFocus();
+}
+
+
+// ----------------------
+//    Class RGBDialog
+// ----------------------
+
+RgbDialog::RgbDialog(CString title)
+    : CInputDialog(title), mRed(ambient_rgb.x), mGreen(ambient_rgb.y), mBlue(ambient_rgb.z)
+{ }
+
+RgbDialog::~RgbDialog()
+{ }
+
+
+vec3 RgbDialog::GetRGB()
+{
+    return vec3(mRed, mGreen, mBlue);
+}
+
+void RgbDialog::DoDataExchange(CDataExchange* pDX)
+{
+    CInputDialog::DoDataExchange(pDX);
+    DDX_Text(pDX, IDC_RED_EDIT, mRed);
+    DDX_Text(pDX, IDC_GREEN_EDIT, mGreen);
+    DDX_Text(pDX, IDC_BLUE_EDIT, mBlue);
+}
+
+// CXyzDialog message handlers
+BEGIN_MESSAGE_MAP(RgbDialog, CInputDialog)
+    ON_WM_CREATE()
+    ON_WM_PAINT()
+END_MESSAGE_MAP()
+
+int RgbDialog::OnCreate(LPCREATESTRUCT lpcs)
+{
+
+    mRedEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(150, 70, 340, 90), this, IDC_RED_EDIT);
+
+    mGreenEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(150, 140, 340, 160), this, IDC_GREEN_EDIT);
+
+    mBlueEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(150, 210, 340, 230), this, IDC_BLUE_EDIT);
+
+    return 0;
+}
+
+void RgbDialog::OnPaint()
+{
+    CPaintDC dc(this);
+    dc.SetBkMode(TRANSPARENT);
+
+    CRect r_rect(100, 72, 450, 90);
+    dc.DrawText(CString(RED_EDIT_TITLE), -1, &r_rect, DT_SINGLELINE);
+
+    CRect g_rect(100, 142, 450, 160);
+    dc.DrawText(CString(GREEN_EDIT_TITLE), -1, &g_rect, DT_SINGLELINE);
+
+    CRect b_rect(100, 212, 450, 230);
+    dc.DrawText(CString(BLUE_EDIT_TITLE), -1, &b_rect, DT_SINGLELINE);
+
+    mRedEdit.SetFocus();
 }

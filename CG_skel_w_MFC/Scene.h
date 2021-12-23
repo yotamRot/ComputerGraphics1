@@ -84,6 +84,7 @@ class Scene {
 	Renderer* m_renderer;
 	TransAxis axis;
 	Shadow current_shadow;
+	vec3 ambient_rgb;
 	void ResetZoom();
 public:
 	vector<int> modelToVectorId;
@@ -119,6 +120,7 @@ public:
 	vec3 GetModelRGB();
 	vec3 GetModelK();
 	void ChangeActiveLightL(vec3 l_params);
+	void ChangeAmbientRgb(vec3 color);
 	void Zoom(ZoomDirection direction);
 	int activeModel;
 	int activeLight;
@@ -132,4 +134,5 @@ public:
 	void ChangeModelColorIndex(vec3 rgb);
 	void ChangeModelIlluminationParams(vec3 k);
 	void ChangeShadow(Shadow s);
+	vec3 GetAmbientRGB();
 };

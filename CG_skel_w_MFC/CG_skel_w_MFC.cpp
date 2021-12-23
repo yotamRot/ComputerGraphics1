@@ -40,7 +40,7 @@
 #define SHOW_VERTICES_NORMAL		1
 #define SHOW_FACES_NORMAL			2
 #define SHOW_BOUNDING_BOX			3
-#define CHANGE_COLOR				4
+#define CHANGE_OBJECT_COLOR			4
 
 #define ORTHOGRPHIC_PARAMETERS		1
 #define PRESPECTIVE_PARAMETERS		2
@@ -55,6 +55,7 @@
 #define ADD_LIGHT					1
 #define CONTROL_ACTIVE_LIGHT		2
 #define CHANGE_PARAMETERS			3
+#define CHANGE_AMBIENT				4
 
 //shadow menu
 #define FLAT_SHADOW					1
@@ -95,13 +96,246 @@ int menuSwitchToLightId;
 int menuSwitchLightType;
 int menuLookAtCameraId;
 int menuLookAtLightId;
-//int menuChangeColor;
+int newCameraId;
+int newModelId;
+// menu
 int menuLights;
 int menuShadow;
+int menuFile;
+int menuTramsformation;
+int menuCameras;
+int menuFeatures;
+int menuProjections;
+int menuProjectionParameters;
+int menuTransformationAxies;
 Transformation curTramsformation = MOVE;
 Projection curProjection = PERSPECTIVE;
 bool lb_down,rb_down,mb_down;
 bool prv_lb_down = false;
+
+
+void switchToCameraMenu(int id)
+{
+	scene->switchToCamera(id);
+	scene->draw();
+}
+
+void lookAtCameraMenu(int id)
+{
+	scene->lookAtCamera(id);
+	scene->draw();
+}
+
+void switchToLightMenu(int id)
+{
+	scene->controlLight(id);
+	scene->draw();
+}
+
+void switchLightTypeMenu(int id)
+{
+	if (id == PARALLEL_SOURCE)
+	{
+		scene->GetActiveLight()->type = PARALLEL_SOURCE;
+	}
+	else //  PARALLEL SOURCE need to switch to POINT SOURCE
+	{
+		scene->GetActiveLight()->type = POINT_SOURCE;
+	}
+	scene->draw();
+}
+
+
+void lookAtLightMenu(int id)
+{
+	scene->lookAtLight(id);
+	scene->draw();
+}
+
+void ChangeAmbientColors()
+{
+	SetRGB(scene->GetAmbientRGB());
+	RgbDialog dlga;
+	if (dlga.DoModal() == IDOK) {
+		vec3 rgb = dlga.GetRGB();
+		scene->ChangeAmbientRgb(rgb);
+	}
+}
+
+void ChangeLightLParams()
+{
+	SetLightL(scene->GetActiveLight()->GetL());
+	LDialog dlg;
+	if (dlg.DoModal() == IDOK) {
+		vec3 l_params = dlg.GetL();
+		scene->ChangeActiveLightL(l_params);
+	}
+}
+
+void AddLight()
+{
+	int newLightId = scene->addLight();
+	glutSetMenu(menuLookAtLightId);
+	glutAddMenuEntry((lightPrefix + std::to_string(newLightId)).c_str(), newLightId);
+	glutSetMenu(menuSwitchToLightId);
+	glutAddMenuEntry((lightPrefix + std::to_string(newLightId)).c_str(), newLightId);
+}
+
+void ShowVertixNormals()
+{
+	if (scene->toggleShowVerticesNormals())
+	{
+		glutChangeToMenuEntry(1, "Hide Vertices Normal", SHOW_VERTICES_NORMAL);
+	}
+	else
+	{
+		glutChangeToMenuEntry(1, "Show Vertices Normal", SHOW_VERTICES_NORMAL);
+	}
+}
+
+void ShowFacesNormals()
+{
+	if (scene->toggleShowFacesNormals())
+	{
+		glutChangeToMenuEntry(2, "Hide Faces Normal", SHOW_FACES_NORMAL);
+	}
+	else
+	{
+		glutChangeToMenuEntry(2, "Show Faces Normal", SHOW_FACES_NORMAL);
+	}
+}
+
+void ShowBoundingBox()
+{
+	if (scene->toggleDrawBoundBox())
+	{
+		glutChangeToMenuEntry(3, "Hide Bounding Box", SHOW_BOUNDING_BOX);
+	}
+	else
+	{
+		glutChangeToMenuEntry(3, "Show Bounding Box", SHOW_BOUNDING_BOX);
+	}
+}
+
+void ChangeObjectColor()
+{
+	SetColorParam(scene->GetModelRGB(), scene->GetModelK());
+	ColorDialog dlg;
+	if (dlg.DoModal() == IDOK) {
+		vec3 rgb = dlg.GetRGB();
+		scene->ChangeModelColorIndex(rgb);
+		vec3 k = dlg.GetK();
+		scene->ChangeModelIlluminationParams(k);
+	}
+}
+
+void ClearScene()
+{
+	glutSetMenu(menuObjectsId);
+	int tmp = glutGet(GLUT_MENU_NUM_ITEMS);
+	for (int i = 1; i <= tmp; i++)
+	{
+
+		glutRemoveMenuItem(1);
+	}
+	glutSetMenu(menuLookAtCameraId);
+	tmp = glutGet(GLUT_MENU_NUM_ITEMS);
+	for (int i = 1; i <= tmp; i++)
+	{
+
+		glutRemoveMenuItem(1);
+	}
+	glutAddMenuEntry((cameraPrefix + "0").c_str(), 0);
+	glutSetMenu(menuSwitchToCameraId);
+	tmp = glutGet(GLUT_MENU_NUM_ITEMS);
+	for (int i = 1; i <= tmp; i++)
+	{
+
+		glutRemoveMenuItem(1);
+	}
+	glutAddMenuEntry((cameraPrefix + "0").c_str(), 0);
+	glutSetMenu(menuLookAtLightId);
+	tmp = glutGet(GLUT_MENU_NUM_ITEMS);
+	for (int i = 1; i <= tmp; i++)
+	{
+
+		glutRemoveMenuItem(1);
+	}
+	scene->ClearScene();
+}
+
+void AddCamera()
+{
+	newCameraId = scene->addCamera();
+	glutSetMenu(menuLookAtCameraId);
+	glutAddMenuEntry((cameraPrefix + std::to_string(newCameraId)).c_str(), newCameraId);
+	glutSetMenu(menuSwitchToCameraId);
+	glutAddMenuEntry((cameraPrefix + std::to_string(newCameraId)).c_str(), newCameraId);
+}
+
+void RenderCameras()
+{
+	if (scene->toggleRenderCameras())
+	{
+		glutChangeToMenuEntry(2, "Hide Cameras", RENDER_CAMERAS);
+	}
+	else
+	{
+		glutChangeToMenuEntry(2, "Render Cameras", RENDER_CAMERAS);
+	}
+}
+
+void OpenFile()
+{
+	CFileDialog dlg(TRUE, _T(".obj"), NULL, NULL, _T("*.obj|*.*"));
+	if (dlg.DoModal() == IDOK)
+	{
+		glutSetMenu(menuObjectsId);
+		std::string s((LPCTSTR)dlg.GetPathName());
+		newModelId = scene->loadOBJModel((LPCTSTR)dlg.GetPathName());
+		glutAddMenuEntry((LPCTSTR)dlg.GetFileName(), newModelId);
+	}
+	else
+	{
+		return;
+	}
+}
+
+void AddCube()
+{
+	glutSetMenu(menuObjectsId);
+	newModelId = scene->loadCubeModel();
+	glutAddMenuEntry("Cube", newModelId);
+	scene->draw();
+}
+
+void PrespectiveParameters()
+{
+	CPerspDialog dlg;
+	if (dlg.DoModal() == IDOK) {
+		vec4 param = dlg.GetParams();
+		scene->ChangeProjectionParameters(PERSPECTIVE, vec3(), vec3(), param);
+	}
+}
+
+void OrthoFrustrumParameters(int id)
+{
+	CRltbnfDialog dlg;
+	if (dlg.DoModal() == IDOK)
+	{
+		vec3 rtf = dlg.GetRTF();
+		vec3 lbn = dlg.GetLBN();
+		if (id == ORTHOGRPHIC_PARAMETERS)
+		{
+			scene->ChangeProjectionParameters(ORTHOGRAPHIC, rtf, lbn);
+		}
+		else if (id == FRUSTUM_PARAMETERS)
+		{
+			scene->ChangeProjectionParameters(FRUSTUM, rtf, lbn);
+		}
+
+	}
+}
 
 //----------------------------------------------------------------------------
 // Callbacks
@@ -113,8 +347,7 @@ void display( void )
 
 void reshape( int width, int height )
 {
-
-//update the renderer's buffers
+	//update the renderer's buffers
 	renderer->ResizeBuffers(width, height);
 	glViewport(0, 0, width, height);
 	scene->MaintingCamerasRatios(oldWidth, oldHeight, width, height);
@@ -216,25 +449,13 @@ void objectsMenu(int id)
 
 void camerasMenu(int id)
 {
-	int newCameraId;
 	switch (id)
 	{
 		case ADD_CAMERA:
-			newCameraId = scene->addCamera();
-			glutSetMenu(menuLookAtCameraId);
-			glutAddMenuEntry((cameraPrefix + std::to_string(newCameraId)).c_str(), newCameraId);
-			glutSetMenu(menuSwitchToCameraId);
-			glutAddMenuEntry((cameraPrefix + std::to_string(newCameraId)).c_str(), newCameraId);
+			AddCamera();
 			break;
 		case RENDER_CAMERAS:
-			if (scene->toggleRenderCameras())
-			{
-				glutChangeToMenuEntry(2, "Hide Cameras", RENDER_CAMERAS);
-			}
-			else
-			{
-				glutChangeToMenuEntry(2, "Render Cameras", RENDER_CAMERAS);
-			}
+			RenderCameras();
 			break;
 		case CONTROL_ACTIVE_CAMERA:
 			scene->ControlActiveCamera();
@@ -246,26 +467,20 @@ void camerasMenu(int id)
 
 void lightsMenu(int id)
 {
-	int newLightId;
+	
 	switch (id)
 	{
 		case ADD_LIGHT:
-			newLightId = scene->addLight();
-			glutSetMenu(menuLookAtLightId);
-			glutAddMenuEntry((lightPrefix + std::to_string(newLightId)).c_str(), newLightId);
-			glutSetMenu(menuSwitchToLightId);
-			glutAddMenuEntry((lightPrefix + std::to_string(newLightId)).c_str(), newLightId);
+			AddLight();
 			break;
 		case CONTROL_ACTIVE_LIGHT:
 			scene->ControlActiveLight();
 			break;
 		case CHANGE_PARAMETERS:
-			SetLightL(scene->GetActiveLight()->GetL());
-			LDialog dlg;
-			if (dlg.DoModal() == IDOK) {
-				vec3 l_params = dlg.GetL();
-				scene->ChangeActiveLightL(l_params);
-			}
+			ChangeLightLParams();
+			break;
+		case CHANGE_AMBIENT:
+			ChangeAmbientColors();
 			break;
 	}
 	scene->draw();
@@ -288,70 +503,18 @@ void shadowMenu(int id)
 	scene->draw();
 }
 
-void switchToCameraMenu(int id)
-{
-	scene->switchToCamera(id);
-	scene->draw();
-}
-
-void lookAtCameraMenu(int id)
-{
-	scene->lookAtCamera(id);
-	scene->draw();
-}
-
-void switchToLightMenu(int id)
-{
-	scene->controlLight(id);
-	scene->draw();
-}
-
-void switchLightTypeMenu(int id)
-{
-	if (id == PARALLEL_SOURCE)
-	{
-		scene->GetActiveLight()->type = PARALLEL_SOURCE;
-	}
-	else //  PARALLEL SOURCE need to switch to POINT SOURCE
-	{
-		scene->GetActiveLight()->type = POINT_SOURCE;
-	}
-	scene->draw();
-}
-
-
-void lookAtLightMenu(int id)
-{
-	scene->lookAtLight(id);
-	scene->draw();
-}
 
 void fileMenu(int id)
 {
-	int newModelId;
-	CFileDialog dlg(TRUE, _T(".obj"), NULL, NULL, _T("*.obj|*.*"));
-	char* tmp;
+	
+
 	switch (id)
 	{
 		case FILE_OPEN:
-
-			if(dlg.DoModal()==IDOK)
-			{
-				glutSetMenu(menuObjectsId);
-				std::string s((LPCTSTR)dlg.GetPathName());
-				newModelId =scene->loadOBJModel((LPCTSTR)dlg.GetPathName());
-				glutAddMenuEntry((LPCTSTR)dlg.GetFileName(), newModelId);
-			}
-			else
-			{
-				return;
-			}
+			OpenFile();
 			break;
 		case ADD_CUBE:
-			glutSetMenu(menuObjectsId);
-			newModelId = scene->loadCubeModel();
-			glutAddMenuEntry("Cube",newModelId);
-			scene->draw();
+			AddCube();
 			break;
 	}
 	scene->lookAtModel(scene->activeModel);
@@ -374,44 +537,16 @@ void featuresMenu(int id)
 	switch (id)
 	{
 		case SHOW_VERTICES_NORMAL:
-			if (scene->toggleShowVerticesNormals())
-			{
-				glutChangeToMenuEntry(1, "Hide Vertices Normal", SHOW_VERTICES_NORMAL);
-			}
-			else
-			{
-				glutChangeToMenuEntry(1, "Show Vertices Normal", SHOW_VERTICES_NORMAL);
-			}
+			ShowVertixNormals();
 			break;
 		case SHOW_FACES_NORMAL:
-			if (scene->toggleShowFacesNormals())
-			{
-				glutChangeToMenuEntry(2, "Hide Faces Normal", SHOW_FACES_NORMAL);
-			}
-			else
-			{
-				glutChangeToMenuEntry(2, "Show Faces Normal", SHOW_FACES_NORMAL);
-			}
+			ShowFacesNormals();
 			break;
 		case SHOW_BOUNDING_BOX:
-			if (scene->toggleDrawBoundBox())
-			{
-				glutChangeToMenuEntry(3, "Hide Bounding Box", SHOW_BOUNDING_BOX);
-			}
-			else
-			{
-				glutChangeToMenuEntry(3, "Show Bounding Box", SHOW_BOUNDING_BOX);
-			}
+			ShowBoundingBox();
 			break;
-		case CHANGE_COLOR:
-			SetColorParam(scene->GetModelRGB(), scene->GetModelK());
-			ColorDialog dlg;
-			if (dlg.DoModal() == IDOK) {
-				vec3 rgb = dlg.GetRGB();
-				scene->ChangeModelColorIndex(rgb);
-				vec3 k = dlg.GetK();
-				scene->ChangeModelIlluminationParams(k);
-			}
+		case CHANGE_OBJECT_COLOR:
+			ChangeObjectColor();
 			break;
 	}
 	scene->draw();
@@ -428,109 +563,41 @@ void ProjParameresMenu(int id)
 	SetLbnRtf(scene->Getlbn(), scene->Getrtf());
 	if (id == PRESPECTIVE_PARAMETERS)
 	{
-		CPerspDialog dlg;
-		if (dlg.DoModal() == IDOK) {
-			vec4 param = dlg.GetParams();
-			scene->ChangeProjectionParameters(PERSPECTIVE, vec3(), vec3(), param);
-		}
+		PrespectiveParameters();
 	}
 	else
 	{
-		CRltbnfDialog dlg;
-		if (dlg.DoModal() == IDOK)
-		{
-			vec3 rtf = dlg.GetRTF();
-			vec3 lbn = dlg.GetLBN();
-			if (id == ORTHOGRPHIC_PARAMETERS)
-			{
-				scene->ChangeProjectionParameters(ORTHOGRAPHIC, rtf, lbn);
-			}
-			else if (id == FRUSTUM_PARAMETERS)
-			{
-				scene->ChangeProjectionParameters(FRUSTUM, rtf, lbn);
-			}
-
-		}
+		OrthoFrustrumParameters(id);
 	}
-
 	scene->draw();
 }
 
 void mainMenu(int id)
 {
-	int tmp;
+
 	switch (id)
 	{
 	case MAIN_ABOUT:
 		AfxMessageBox(_T("Computer Graphics"));
 		break;
 	case CLEAR:
-		glutSetMenu(menuObjectsId);
-		tmp = glutGet(GLUT_MENU_NUM_ITEMS);
-		for (int i = 1; i <= tmp; i++)
-		{
-			
-			glutRemoveMenuItem(1);
-		}
-		glutSetMenu(menuLookAtCameraId);
-		tmp = glutGet(GLUT_MENU_NUM_ITEMS);
-		for (int i = 1; i <= tmp; i++)
-		{
-
-			glutRemoveMenuItem(1);
-		}
-		glutAddMenuEntry((cameraPrefix + "0").c_str(), 0);
-		glutSetMenu(menuSwitchToCameraId);
-		tmp = glutGet(GLUT_MENU_NUM_ITEMS);
-		for (int i = 1; i <= tmp; i++)
-		{
-
-			glutRemoveMenuItem(1);
-		}
-		glutAddMenuEntry((cameraPrefix + "0").c_str(), 0);
-		glutSetMenu(menuLookAtLightId);
-		tmp = glutGet(GLUT_MENU_NUM_ITEMS);
-		for (int i = 1; i <= tmp; i++)
-		{
-
-			glutRemoveMenuItem(1);
-		}
-		scene->ClearScene();
+		ClearScene();
 		scene->draw();
 		break;
 	}
 }
 
-void initMenu()
+
+//----------------------------------------------------------------------------
+// Menu creation
+
+void CreateLightMenu()
 {
-	int menuFile = glutCreateMenu(fileMenu);
-	glutAddMenuEntry("Open..",FILE_OPEN);
-	glutAddMenuEntry("Add Cube", ADD_CUBE);
-	int menuTramsformation = glutCreateMenu(transformationMenu);
-	glutAddMenuEntry("Move", MOVE);
-	glutAddMenuEntry("Rotate", ROTATE);
-	glutAddMenuEntry("Scale", SCALE);
-
-	int menuTransformationAxies = glutCreateMenu(transAxiesMenu);
-	glutAddMenuEntry("Model Axies", MODEL);
-	glutAddMenuEntry("World Axies", WORLD);
-	
-	menuLookAtCameraId = glutCreateMenu(lookAtCameraMenu);
-	glutAddMenuEntry((cameraPrefix + "0").c_str(), 0);
-	menuSwitchToCameraId = glutCreateMenu(switchToCameraMenu);
-	glutAddMenuEntry((cameraPrefix + "0").c_str(), 0);
-	int menuCameras = glutCreateMenu(camerasMenu);
-	glutAddMenuEntry("Add Camera", ADD_CAMERA);
-	glutAddMenuEntry("Render Cameras", RENDER_CAMERAS);
-	glutAddMenuEntry("Control Active Camera", CONTROL_ACTIVE_CAMERA);
-	glutAddSubMenu("Look At Camera", menuLookAtCameraId);
-	glutAddSubMenu("Select Camera", menuSwitchToCameraId);
-
 	menuLookAtLightId = glutCreateMenu(lookAtLightMenu);
 	menuSwitchToLightId = glutCreateMenu(switchToLightMenu);
 	menuSwitchLightType = glutCreateMenu(switchLightTypeMenu);
-	glutAddMenuEntry("Parallel Source",PARALLEL_SOURCE);
-	glutAddMenuEntry("Point Source",POINT_SOURCE);
+	glutAddMenuEntry("Parallel Source", PARALLEL_SOURCE);
+	glutAddMenuEntry("Point Source", POINT_SOURCE);
 	menuLights = glutCreateMenu(lightsMenu);
 	glutAddMenuEntry("Add Light", ADD_LIGHT);
 	glutAddMenuEntry("Control Active Light", CONTROL_ACTIVE_LIGHT);
@@ -538,37 +605,73 @@ void initMenu()
 	glutAddSubMenu("Select Light", menuSwitchToLightId);
 	glutAddMenuEntry("Change Active Light L Parameters", CHANGE_PARAMETERS);
 	glutAddSubMenu("Change Active Light Type", menuSwitchLightType);
+	glutAddMenuEntry("Edit Ambient Light", CHANGE_AMBIENT);
+}
 
+void CreateCameraMenu()
+{
+	menuLookAtCameraId = glutCreateMenu(lookAtCameraMenu);
+	glutAddMenuEntry((cameraPrefix + "0").c_str(), 0);
+	menuSwitchToCameraId = glutCreateMenu(switchToCameraMenu);
+	glutAddMenuEntry((cameraPrefix + "0").c_str(), 0);
+	menuCameras = glutCreateMenu(camerasMenu);
+	glutAddMenuEntry("Add Camera", ADD_CAMERA);
+	glutAddMenuEntry("Render Cameras", RENDER_CAMERAS);
+	glutAddMenuEntry("Control Active Camera", CONTROL_ACTIVE_CAMERA);
+	glutAddSubMenu("Look At Camera", menuLookAtCameraId);
+	glutAddSubMenu("Select Camera", menuSwitchToCameraId);
+}
 
+void CreateLoadMenu()
+{
+	menuFile = glutCreateMenu(fileMenu);
+	glutAddMenuEntry("Open..", FILE_OPEN);
+	glutAddMenuEntry("Add Cube", ADD_CUBE);
+}
+
+void CreateTransformationMenus()
+{
+	menuTramsformation = glutCreateMenu(transformationMenu);
+	glutAddMenuEntry("Move", MOVE);
+	glutAddMenuEntry("Rotate", ROTATE);
+	glutAddMenuEntry("Scale", SCALE);
+	menuTransformationAxies = glutCreateMenu(transAxiesMenu);
+	glutAddMenuEntry("Model Axies", MODEL);
+	glutAddMenuEntry("World Axies", WORLD);
+}
+
+void CreateShadowMenu()
+{
 	menuShadow = glutCreateMenu(shadowMenu);
 	glutAddMenuEntry("Flat Shadow", FLAT_SHADOW);
 	glutAddMenuEntry("Gouruad Shadow", GOURAUD_SHADOW);
 	glutAddMenuEntry("Phong Shadow", PHONG_SHADOW);
+}
 
-
-	//menuChangeColor = glutCreateMenu(changeColorMenu);
-	int menuFeatures = glutCreateMenu(featuresMenu);
+void CreateFeaturesMenu()
+{
+	menuFeatures = glutCreateMenu(featuresMenu);
 	glutAddMenuEntry("Show Vertices Normal", SHOW_VERTICES_NORMAL);
 	glutAddMenuEntry("Show Faces Normal", SHOW_FACES_NORMAL);
 	glutAddMenuEntry("Show Bounding Box", SHOW_BOUNDING_BOX);
-	glutAddMenuEntry("Change Color", CHANGE_COLOR);
+	glutAddMenuEntry("Change Color", CHANGE_OBJECT_COLOR);
+}
 
-
-	int menuProjections = glutCreateMenu(projectionMenu);
+void CreateProjectionMenus()
+{
+	menuProjections = glutCreateMenu(projectionMenu);
 	glutAddMenuEntry("Orthographic", ORTHOGRAPHIC);
 	glutAddMenuEntry("Prespective", PERSPECTIVE);
-	
-
-	int menuProjectionParameters = glutCreateMenu(ProjParameresMenu);
+	menuProjectionParameters = glutCreateMenu(ProjParameresMenu);
 	glutAddMenuEntry("Orthographic Parameters", ORTHOGRPHIC_PARAMETERS);
 	glutAddMenuEntry("Prespective Parameters", PRESPECTIVE_PARAMETERS);
 	glutAddMenuEntry("Frustum Parameters", FRUSTUM_PARAMETERS);
-	
+}
+
+void CreateMainMenu()
+{
 	menuObjectsId = glutCreateMenu(objectsMenu);
-
-	//glutSetMenu(mainMenuId);
 	mainMenuId = glutCreateMenu(mainMenu);
-
 	glutAddSubMenu("Load", menuFile);
 	glutAddSubMenu("Transformations", menuTramsformation);
 	glutAddSubMenu("Transformations axis", menuTransformationAxies);
@@ -581,6 +684,19 @@ void initMenu()
 	glutAddSubMenu("Cameras", menuCameras);
 	glutAddSubMenu("Light Sources", menuLights);
 	glutAddSubMenu("Shadow", menuShadow);
+}
+
+void initMenu()
+{
+	CreateLoadMenu();
+	CreateTransformationMenus();
+	CreateCameraMenu();
+	CreateLightMenu();
+	CreateShadowMenu();
+	CreateFeaturesMenu();
+	CreateProjectionMenus();
+
+	CreateMainMenu();
 
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 }

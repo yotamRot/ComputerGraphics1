@@ -1180,7 +1180,7 @@ vec3 Renderer::NormTransform(const vec3& ver)
 void Renderer::ConfigureRenderer(const mat4& projection, const mat4& transform,
 								bool isDrawVertexNormal, bool isDrawFaceNormal,
 								bool isDrawBoundBox, vector<Light*> scene_lights,
-								Shadow scene_shadow)
+								Shadow scene_shadow, vec3 ambient_rgb)
 {
 	cTransform = mat4(transform);
 	cProjection = mat4(projection);
@@ -1194,6 +1194,7 @@ void Renderer::ConfigureRenderer(const mat4& projection, const mat4& transform,
 	lights = scene_lights;
 	shadow = scene_shadow;
 	shapes.clear();
+	scene_ambient = ambient_rgb;
 
 }	
 
@@ -1349,11 +1350,11 @@ void Renderer::ZBufferScanConvert()
 						//{
 						//	min_illumination = illumination;
 						//}
-						DrawPixel(i, y, color);
+						DrawPixel(i, y, (scene_ambient*color));
 					}
 					else
 					{
-						DrawPixel(i, y, (*it)->shape_color);
+						DrawPixel(i, y, (scene_ambient*(*it)->shape_color));
 					}
 				}
 			}

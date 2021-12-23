@@ -242,7 +242,7 @@ class Renderer
 	mat4 cProjection;
 	mat4 nTransform;
 	mat4 oTransform;
-
+	vec3 scene_ambient;
 	bool isShowBoundBox;
 
 	vector<Shape*> shapes;
@@ -276,7 +276,7 @@ public:
 	void DrawPixel(int x, int y, vec3& rgb);
 	void ConfigureRenderer(const mat4& projection, const mat4& cTransform ,
 		bool isDrawVertexNormal, bool isDrawFaceNormal, bool isDrawBoundBox,
-		vector<Light*> scene_lights, Shadow scene_shadow);
+		vector<Light*> scene_lights, Shadow scene_shadow, vec3 ambient_rgb);
 	void SetObjectMatrices(const mat4& oTransform, const mat4& nTransform);
 	void SwapBuffers();
 	void ClearColorBuffer();
