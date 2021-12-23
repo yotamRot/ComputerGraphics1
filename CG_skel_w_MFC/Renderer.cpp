@@ -13,6 +13,9 @@
 #define ALPHA 2
 
 
+#define SUPER_SAMPLE_FACTOR 2
+#define SUPER_SAMPLE_AVREGE 0.25
+
 #define EPSILON 0.01
 
 enum Axis
@@ -177,12 +180,12 @@ bool LiangBarskyClipping(vec3& point1, vec3& point2, vec3& max, vec3& min)
 
 
 
-Renderer::Renderer() :m_width(512), m_height(512), is_wire_frame(false)
+Renderer::Renderer() :m_width(512), m_height(512), extended_m_height(512 * SUPER_SAMPLE_FACTOR), extended_m_width(512 * SUPER_SAMPLE_FACTOR), is_wire_frame(false)
 {
 	InitOpenGLRendering();
 	CreateBuffers(512,512);
 }
-Renderer::Renderer(int width, int height) :m_width(width), m_height(height), is_wire_frame(false)
+Renderer::Renderer(int width, int height) :m_width(width), m_height(height) , extended_m_height(512 * SUPER_SAMPLE_FACTOR), extended_m_width(512 * SUPER_SAMPLE_FACTOR), is_wire_frame(false)
 {
 	InitOpenGLRendering();
 	CreateBuffers(width,height);
@@ -194,22 +197,30 @@ Renderer::~Renderer(void)
 
 void Renderer::transformToScreen(vec2& vec)
 {
-	vec.x = floorf((m_width / 2) * (vec.x + 1));
-	vec.y = floorf((m_height / 2) * (vec.y + 1));
+	vec.x = floorf((extended_m_width / 2) * (vec.x + 1));
+	vec.y = floorf((extended_m_height / 2) * (vec.y + 1));
 }
 
 
 void Renderer::DrawPixel(int x, int y, vec3& rgb)
 {
-	if (x < 1 || x >= m_width || y < 1 || y >= m_height)
+	if (x < 1 || x >= extended_m_width || y < 1 || y >= extended_m_height)
 	{
 		return;
 	}
 
-	m_outBuffer[INDEX(m_width, x, y, 0)] = rgb.x;//red
-	m_outBuffer[INDEX(m_width, x, y, 1)] = rgb.y;//green
-	m_outBuffer[INDEX(m_width, x, y, 2)] = rgb.z;//blue
+	m_super_sample_Buffer[INDEX(extended_m_width, x, y, 0)] = rgb.x;//red
+	m_super_sample_Buffer[INDEX(extended_m_width, x, y, 1)] = rgb.y;//green
+	m_super_sample_Buffer[INDEX(extended_m_width, x, y, 2)] = rgb.z;//blue
 }
+
+vec3 Renderer::GetPixel(int x, int y)
+{
+	return vec3(m_super_sample_Buffer[INDEX(extended_m_width, x, y, 0)],
+		m_super_sample_Buffer[INDEX(extended_m_width, x, y, 1)],
+		m_super_sample_Buffer[INDEX(extended_m_width, x, y, 2)]);
+}
+
 
 void RasterizeArrangeVeritcs(vec2& ver1, vec2& ver2, bool byX = true)
 {
@@ -966,9 +977,12 @@ void Renderer::CreateBuffers(int width, int height)
 {
 	m_width = width;
 	m_height = height;
+	extended_m_height = m_height * SUPER_SAMPLE_FACTOR;
+	extended_m_width = m_width * SUPER_SAMPLE_FACTOR;
 	CreateOpenGLBuffer(); //Do not remove this line.
 	m_outBuffer = new float[3 * m_width * m_height];
-	m_zbuffer = new float[m_width * m_height];
+	m_super_sample_Buffer = new float[3 * extended_m_width * extended_m_height];
+	m_zbuffer = new float[extended_m_width * extended_m_height];;
 	ClearColorBuffer();
 	ClearDepthBuffer();
 }
@@ -1154,6 +1168,22 @@ void Renderer::addFog(vec3& color, float z)
 	color = color * fogFactor + (1 - fogFactor) * FOG_COLOR;
 }
 
+void Renderer::superSampling()
+{	
+	vec3 avarege;
+	for (int i = 0; i < m_width; i++)
+	{
+		for (int j = 0; j < m_height; j++)
+		{
+			avarege = (GetPixel(2 * i, 2 * j) + GetPixel(2 * i, 2 * j + 1)
+				+ GetPixel(2 * i + 1, 2 * j) + GetPixel(2 * i + 1, 2 * j + 1)) * SUPER_SAMPLE_AVREGE;
+			m_outBuffer[INDEX(m_width, i, j, 0)] = avarege.x;//red
+			m_outBuffer[INDEX(m_width, i, j, 1)] = avarege.y;//green
+			m_outBuffer[INDEX(m_width, i, j, 2)] = avarege.z;//blue
+		}
+	}
+}
+
 mat4 Renderer::GetProjection()
 {
 	return cProjection;
@@ -1274,11 +1304,12 @@ void Renderer::SwapBuffers()
 void Renderer::ClearColorBuffer()
 {
 	memset(m_outBuffer, 0, (sizeof(float) * 3 * m_width * m_height));
+	memset(m_super_sample_Buffer, 0, (sizeof(float) * 3 * extended_m_width * extended_m_height));
 }
 
 void Renderer::ClearDepthBuffer()
 {
-	std::fill(m_zbuffer, m_zbuffer + m_width * m_height, std::numeric_limits<float>::infinity());
+	std::fill(m_zbuffer, m_zbuffer + extended_m_width * extended_m_height, std::numeric_limits<float>::infinity());
 }
 
 
@@ -1286,11 +1317,8 @@ void Renderer::ResizeBuffers(int width, int height)
 {
 	delete m_outBuffer;
 	delete m_zbuffer;
-	m_width = width;
-	m_height = height;
-	CreateOpenGLBuffer(); //Do not remove this line.
-	m_outBuffer = new float[3 * m_width * m_height];
-	m_zbuffer = new float[m_width * m_height];
+	CreateBuffers(width, height);
+	
 }
 
 
@@ -1312,18 +1340,18 @@ void Renderer::ZBufferScanConvert()
 	for (auto it = shapes.begin(); it != shapes.end(); ++it)
 	{
 		yMin = max(0, (*it)->yMin);
-		yMax = min((*it)->yMax, m_height - 1);
+		yMax = min((*it)->yMax, extended_m_height - 1);
 		for (int y = yMin; y <= yMax; y++)
 		{
 			fixed_y = y - yMin;
 			minX = max((*it)->x_min[fixed_y],0);
-			maxX = min((*it)->x_max[fixed_y], m_width -1);
+			maxX = min((*it)->x_max[fixed_y], extended_m_width -1);
 			for (int i = minX; i <= maxX; i++)
 			{
 				C_cords =(*it)->GetCoordinates(i, y);
-				if (abs(C_cords.z) <= m_zbuffer[ZINDEX(m_width, i, y)])
+				if (abs(C_cords.z) <= m_zbuffer[ZINDEX(extended_m_width, i, y)])
 				{
-					m_zbuffer[ZINDEX(m_width, i, y)] = abs(C_cords.z);
+					m_zbuffer[ZINDEX(extended_m_width, i, y)] = abs(C_cords.z);
 					if (is_wire_frame && (i == maxX || i == minX))
 					{
 						DrawPixel(i, y, WHITE);
@@ -1349,6 +1377,8 @@ void Renderer::ZBufferScanConvert()
 			}
 		}
 	}
+
+	superSampling();
 }
 
 void Shape::UpdateLimits(int x, int y)

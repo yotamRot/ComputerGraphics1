@@ -238,8 +238,10 @@ struct CustomCompareYMax
 class Renderer
 {
 	float *m_outBuffer; // 3*width*height
+	float *m_super_sample_Buffer; // 3*width*height
 	float *m_zbuffer; // width*height
 	int m_width, m_height;
+	int extended_m_width, extended_m_height;
 	mat4 cTransform;
 	mat4 cProjection;
 	mat4 nTransform;
@@ -255,8 +257,6 @@ class Renderer
 
 	void transformToScreen(vec2& vec);
 	RendererActions Renderer::shouldDrawModel(const vector<Line>* boundBoxLines);
-
-
 
 	//////////////////////////////
 	// openGL stuff. Don't touch.
@@ -275,6 +275,7 @@ public:
 		vector<Line>* boundBoxLines, GLfloat proportionalValue);
 	void DrawBoundingBox(vector<Line>* lines);
 	void DrawPixel(int x, int y, vec3& rgb);
+	vec3 GetPixel(int x, int y);
 	void ConfigureRenderer(const mat4& projection, const mat4& cTransform ,
 		bool isDrawVertexNormal, bool isDrawFaceNormal, bool isDrawBoundBox,
 		vector<Light*> scene_lights, Shadow scene_shadow);
@@ -298,4 +299,5 @@ public:
 	vector<Light*> GetLights();
 	vector<Triangle> triangulation_triangles;
 	void addFog(vec3& color, float z);
+	void superSampling();
 };
