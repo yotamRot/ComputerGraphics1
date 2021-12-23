@@ -41,6 +41,7 @@
 #define SHOW_FACES_NORMAL			2
 #define SHOW_BOUNDING_BOX			3
 #define CHANGE_OBJECT_COLOR			4
+#define WIRE_FRAME					5
 
 #define ORTHOGRPHIC_PARAMETERS		1
 #define PRESPECTIVE_PARAMETERS		2
@@ -215,6 +216,20 @@ void ShowBoundingBox()
 	{
 		glutChangeToMenuEntry(3, "Show Bounding Box", SHOW_BOUNDING_BOX);
 	}
+}
+
+void WireFrame()
+{
+	renderer->is_wire_frame = !renderer->is_wire_frame;
+	if (renderer->is_wire_frame)
+	{
+		glutChangeToMenuEntry(5, "Hide Wire Frame", WIRE_FRAME);
+	}
+	else
+	{
+		glutChangeToMenuEntry(5, "Show Wire Frame", WIRE_FRAME);
+	}
+
 }
 
 void ChangeObjectColor()
@@ -550,6 +565,9 @@ void featuresMenu(int id)
 		case CHANGE_OBJECT_COLOR:
 			ChangeObjectColor();
 			break;
+		case WIRE_FRAME:
+			WireFrame();
+			break;
 	}
 	scene->draw();
 }
@@ -657,6 +675,7 @@ void CreateFeaturesMenu()
 	glutAddMenuEntry("Show Faces Normal", SHOW_FACES_NORMAL);
 	glutAddMenuEntry("Show Bounding Box", SHOW_BOUNDING_BOX);
 	glutAddMenuEntry("Change Color", CHANGE_OBJECT_COLOR);
+	glutAddMenuEntry("Show Wire Frame", WIRE_FRAME);
 }
 
 void CreateProjectionMenus()

@@ -177,12 +177,12 @@ bool LiangBarskyClipping(vec3& point1, vec3& point2, vec3& max, vec3& min)
 
 
 
-Renderer::Renderer() :m_width(512), m_height(512)
+Renderer::Renderer() :m_width(512), m_height(512), is_wire_frame(false)
 {
 	InitOpenGLRendering();
 	CreateBuffers(512,512);
 }
-Renderer::Renderer(int width, int height) :m_width(width), m_height(height)
+Renderer::Renderer(int width, int height) :m_width(width), m_height(height), is_wire_frame(false)
 {
 	InitOpenGLRendering();
 	CreateBuffers(width,height);
@@ -338,26 +338,44 @@ vec3 Triangle::GetCoordinates(int x, int y)
 float Triangle::GetGouruad(vec3& C_cord)
 {
 	float A1, A2, A3;
-	vec3 vec0 = C_p1_3d - C_cord;
-	vec3 vec1 = C_p2_3d - C_cord;
-	vec3 vec2 = C_p3_3d - C_cord;
-	A1 = length(cross(vec1, vec2));
-	A2 = length(cross(vec2, vec0));
-	A3 = length(cross(vec0, vec1));
+	vec3 vec_0 = C_p1_3d - C_cord;
+	vec3 vec_1 = C_p2_3d - C_cord;
+	vec3 vec_2 = C_p3_3d - C_cord;
+	A1 = length(cross(vec_1, vec_2));
+	A2 = length(cross(vec_2, vec_0));
+	A3 = length(cross(vec_0, vec_1));
 	float normalFactor = A1 + A2 + A3;
+	if (normalFactor == 0)
+	{
+		if (length(p2_2d - p1_2d) == 0)
+		{
+			return p1_illumination;
+		}
+		const float t = length(vec2(C_cord.x,C_cord.y) - p1_2d) / length(p2_2d - p1_2d);
+		return p1_illumination * t + (1 - t) * p2_illumination;
+	}
 	return ((A1 * p1_illumination + A2 * p2_illumination + A3 * p3_illumination) / normalFactor);
 }
 
 vec3 Triangle::GetPhong(vec3& C_cord)
 {
 	float A1, A2, A3;
-	vec3 vec0 = C_p1_3d - C_cord;
-	vec3 vec1 = C_p2_3d - C_cord;
-	vec3 vec2 = C_p3_3d - C_cord;
-	A1 = length(cross(vec1, vec2));
-	A2 = length(cross(vec2, vec0));
-	A3 = length(cross(vec0, vec1));
+	vec3 vec_0 = C_p1_3d - C_cord;
+	vec3 vec_1 = C_p2_3d - C_cord;
+	vec3 vec_2 = C_p3_3d - C_cord;
+	A1 = length(cross(vec_1, vec_2));
+	A2 = length(cross(vec_2, vec_0));
+	A3 = length(cross(vec_0, vec_1));
 	float normalFactor = A1 + A2 + A3;
+	if (normalFactor == 0)
+	{
+		if (length(p2_2d - p1_2d) == 0)
+		{
+			return p1_normal.normal_direction;
+		}
+		const float t = length(vec2(C_cord.x, C_cord.y) - p1_2d) / length(p2_2d - p1_2d);
+		return p1_normal.normal_direction * t + (1 - t) * p2_normal.normal_direction;
+	}
 	return ((A1 * p1_normal.normal_direction + A2 * p2_normal.normal_direction + A3 * p3_normal.normal_direction) / normalFactor);
 }
 
@@ -1306,14 +1324,21 @@ void Renderer::ZBufferScanConvert()
 				if (abs(C_cords.z) <= m_zbuffer[ZINDEX(m_width, i, y)])
 				{
 					m_zbuffer[ZINDEX(m_width, i, y)] = abs(C_cords.z);
-					//if (i == maxX || i == minX)
-					//{
-					//	DrawPixel(i, y, WHITE);
-					//}else
-					
-					if ((lights.size() > 0) && ((*it)->is_light == false))
+					if (is_wire_frame && (i == maxX || i == minX))
+					{
+						DrawPixel(i, y, WHITE);
+					}
+					else if ((lights.size() > 0) && ((*it)->is_light == false))
 					{
 						color = (*it)->GetColor(C_cords, lights, shadow, (*it)->shape_color);
+						//if (illumination > max_illumination)
+						//{
+						//	max_illumination = illumination;
+						//}
+						//else if (illumination > min_illumination)
+						//{
+						//	min_illumination = illumination;
+						//}
 						DrawPixel(i, y, color);
 					}
 					else

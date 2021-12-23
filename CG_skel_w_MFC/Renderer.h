@@ -293,6 +293,7 @@ public:
 	int yMax;
 	bool isShowVerticsNormals;
 	bool isShowFacesNormals;
+	bool is_wire_frame;
 	vector<Light*> lights;
 	vector<Light*> GetLights();
 	vector<Triangle> triangulation_triangles;
