@@ -1187,11 +1187,14 @@ void Renderer::superSampling()
 	{
 		i = get<0>(*it);
 		j = get<1>(*it);
+		if (!(m_outBuffer[INDEX(m_width, i, j, 0)] || m_outBuffer[INDEX(m_width, i, j, 1)] || m_outBuffer[INDEX(m_width, i, j, 2)]))
+		{
 			avarege = (GetPixel(2 * i, 2 * j) + GetPixel(2 * i, 2 * j + 1)
 				+ GetPixel(2 * i + 1, 2 * j) + GetPixel(2 * i + 1, 2 * j + 1)) * SUPER_SAMPLE_AVREGE;
-		m_outBuffer[INDEX(m_width, i, j, 0)] = avarege.x;//red
-		m_outBuffer[INDEX(m_width, i, j, 1)] = avarege.y;//green
-		m_outBuffer[INDEX(m_width, i, j, 2)] = avarege.z;//blue
+				m_outBuffer[INDEX(m_width, i, j, 0)] = avarege.x;//red
+				m_outBuffer[INDEX(m_width, i, j, 1)] = avarege.y;//green
+				m_outBuffer[INDEX(m_width, i, j, 2)] = avarege.z;//blue
+		}
 	}
 }
 
