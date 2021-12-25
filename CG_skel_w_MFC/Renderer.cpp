@@ -197,28 +197,28 @@ Renderer::~Renderer(void)
 
 void Renderer::transformToScreen(vec2& vec)
 {
-	vec.x = floorf((extended_m_width / 2) * (vec.x + 1));
-	vec.y = floorf((extended_m_height / 2) * (vec.y + 1));
+	vec.x = floorf((cur_width / 2) * (vec.x + 1));
+	vec.y = floorf((cur_height / 2) * (vec.y + 1));
 }
 
 
 void Renderer::DrawPixel(int x, int y, vec3& rgb)
 {
-	if (x < 1 || x >= extended_m_width || y < 1 || y >= extended_m_height)
+	if (x < 1 || x >= cur_width || y < 1 || y >= cur_height)
 	{
 		return;
 	}
 
-	m_super_sample_Buffer[INDEX(extended_m_width, x, y, 0)] = rgb.x;//red
-	m_super_sample_Buffer[INDEX(extended_m_width, x, y, 1)] = rgb.y;//green
-	m_super_sample_Buffer[INDEX(extended_m_width, x, y, 2)] = rgb.z;//blue
+	m_local_color_buffer[INDEX(cur_width, x, y, 0)] = rgb.x;//red
+	m_local_color_buffer[INDEX(cur_width, x, y, 1)] = rgb.y;//green
+	m_local_color_buffer[INDEX(cur_width, x, y, 2)] = rgb.z;//blue
 }
 
 vec3 Renderer::GetPixel(int x, int y)
 {
-	return vec3(m_super_sample_Buffer[INDEX(extended_m_width, x, y, 0)],
-		m_super_sample_Buffer[INDEX(extended_m_width, x, y, 1)],
-		m_super_sample_Buffer[INDEX(extended_m_width, x, y, 2)]);
+	return vec3(m_local_color_buffer[INDEX(cur_width, x, y, 0)],
+		m_local_color_buffer[INDEX(cur_width, x, y, 1)],
+		m_local_color_buffer[INDEX(cur_width, x, y, 2)]);
 }
 
 
@@ -400,41 +400,46 @@ void Triangle::UpdateShape()
 	P_p1_4d = renderer->GetProjection() * vec4(C_p1_3d);
 	P_p2_4d = renderer->GetProjection() * vec4(C_p2_3d);
 	P_p3_4d = renderer->GetProjection() * vec4(C_p3_3d);
+
 	vec3 p1_light_direction, p2_light_direction, p3_light_direction;
 	vec3 p1_camera_direction, p2_camera_direction, p3_camera_direction;
 	vec3 p1_reflect_direction, p2_reflect_direction, p3_reflect_direction;
 	float i, ia, id, is;
 	p1_illumination = p2_illumination = p3_illumination = 0;
-	for (auto it = renderer->lights.begin(); it != renderer->lights.end(); ++it)
+	if (renderer->shadow == GOURAUD)
 	{
-		if ((*it)->type == PARALLEL_SOURCE)
+		for (auto it = renderer->lights.begin(); it != renderer->lights.end(); ++it)
 		{
-			p1_light_direction = normalize((*it)->c_light_position);
-			p2_light_direction = normalize((*it)->c_light_position);
-			p3_light_direction = normalize((*it)->c_light_position);
+			if ((*it)->type == PARALLEL_SOURCE)
+			{
+				p1_light_direction = normalize((*it)->c_light_position);
+				p2_light_direction = normalize((*it)->c_light_position);
+				p3_light_direction = normalize((*it)->c_light_position);
+			}
+			else // Point source
+			{
+				p1_light_direction = normalize((*it)->c_light_position - C_p1_3d);
+				p2_light_direction = normalize((*it)->c_light_position - C_p2_3d);
+				p3_light_direction = normalize((*it)->c_light_position - C_p3_3d);
+			}
+			p1_camera_direction = normalize(vec3(0) - C_p1_3d);
+			p2_camera_direction = normalize(vec3(0) - C_p2_3d);
+			p3_camera_direction = normalize(vec3(0) - C_p3_3d);
+			p1_reflect_direction = normalize(-p1_light_direction - 2 * (max(dot(-p1_light_direction, p1_normal.normal_direction), 0)) * p1_normal.normal_direction);
+			p2_reflect_direction = normalize(-p2_light_direction - 2 * (max(dot(-p2_light_direction, p2_normal.normal_direction), 0)) * p2_normal.normal_direction);
+			p3_reflect_direction = normalize(-p3_light_direction - 2 * (max(dot(-p3_light_direction, p3_normal.normal_direction), 0)) * p3_normal.normal_direction);
+			p1_illumination += /*ia*/ka * (*it)->La +
+				/*id*/kd * max(dot(p1_light_direction, p1_normal.normal_direction), 0) * (*it)->Ld +
+				/*is*/ks * pow(max(dot(p1_reflect_direction, p1_camera_direction), 0), ALPHA) * (*it)->Ls;
+			p2_illumination += /*ia*/ka * (*it)->La +
+				/*id*/kd * max(dot(p2_light_direction, p2_normal.normal_direction), 0) * (*it)->Ld +
+				/*is*/ks * pow(max(dot(p2_reflect_direction, p2_camera_direction), 0), ALPHA) * (*it)->Ls;
+			p3_illumination += /*ia*/ka * (*it)->La +
+				/*id*/kd * max(dot(p3_light_direction, p3_normal.normal_direction), 0) * (*it)->Ld +
+				/*is*/ks * pow(max(dot(p3_reflect_direction, p3_camera_direction), 0), ALPHA) * (*it)->Ls;
 		}
-		else // Point source
-		{
-			p1_light_direction = normalize((*it)->c_light_position - C_p1_3d);
-			p2_light_direction = normalize((*it)->c_light_position - C_p2_3d);
-			p3_light_direction = normalize((*it)->c_light_position - C_p3_3d);
-		}
-		p1_camera_direction = normalize(vec3(0) - C_p1_3d);
-		p2_camera_direction = normalize(vec3(0) - C_p2_3d);
-		p3_camera_direction = normalize(vec3(0) - C_p3_3d);
-		p1_reflect_direction = normalize(-p1_light_direction - 2 * (max(dot(-p1_light_direction, p1_normal.normal_direction), 0)) * p1_normal.normal_direction);
-		p2_reflect_direction = normalize(-p2_light_direction - 2 * (max(dot(-p2_light_direction, p2_normal.normal_direction), 0)) * p2_normal.normal_direction);
-		p3_reflect_direction = normalize(-p3_light_direction - 2 * (max(dot(-p3_light_direction, p3_normal.normal_direction), 0)) * p3_normal.normal_direction);
-		p1_illumination += /*ia*/ka * (*it)->La +
-			/*id*/kd * max(dot(p1_light_direction, p1_normal.normal_direction), 0) * (*it)->Ld +
-			/*is*/ks * pow(max(dot(p1_reflect_direction, p1_camera_direction), 0), ALPHA) * (*it)->Ls;
-		p2_illumination += /*ia*/ka * (*it)->La +
-			/*id*/kd * max(dot(p2_light_direction, p2_normal.normal_direction), 0) * (*it)->Ld +
-			/*is*/ks * pow(max(dot(p2_reflect_direction, p2_camera_direction), 0), ALPHA) * (*it)->Ls;
-		p3_illumination += /*ia*/ka * (*it)->La +
-			/*id*/kd * max(dot(p3_light_direction, p3_normal.normal_direction), 0) * (*it)->Ld +
-			/*is*/ks * pow(max(dot(p3_reflect_direction, p3_camera_direction), 0), ALPHA) * (*it)->Ls;
 	}
+	
 
 	if (normal.is_valid)
 	{
@@ -658,7 +663,10 @@ vec3 Triangle::GetColor(vec3& C_cords, vector<Light*> lights, Shadow shadow, vec
 	color = color * shape_color;
 
 	//apply fog
-	renderer->addFog(color, C_cords.z);
+	if (renderer->isFog)
+	{
+		renderer->addFog(color, C_cords.z);
+	}
 	return color;
 }
 
@@ -977,14 +985,17 @@ void Renderer::CreateBuffers(int width, int height)
 {
 	m_width = width;
 	m_height = height;
+	cur_width = width;
+	cur_height = height;
 	extended_m_height = m_height * SUPER_SAMPLE_FACTOR;
 	extended_m_width = m_width * SUPER_SAMPLE_FACTOR;
 	CreateOpenGLBuffer(); //Do not remove this line.
 	m_outBuffer = new float[3 * m_width * m_height];
-	m_super_sample_Buffer = new float[3 * extended_m_width * extended_m_height];
-	m_zbuffer = new float[extended_m_width * extended_m_height];;
-	ClearColorBuffer();
-	ClearDepthBuffer();
+	m_zbuffer = new float[m_width * m_height];
+	m_super_sample_out_Buffer = new float[3 * extended_m_width * extended_m_height];
+	m_super_sample_z_Buffer = new float[extended_m_width * extended_m_height];
+	m_local_color_buffer = m_outBuffer;
+	m_local_z_buffer = m_zbuffer;
 }
 
 void Renderer::SetDemoBuffer()
@@ -1171,16 +1182,16 @@ void Renderer::addFog(vec3& color, float z)
 void Renderer::superSampling()
 {	
 	vec3 avarege;
-	for (int i = 0; i < m_width; i++)
+	int i, j;
+	for (auto it = activePixels.begin(); it != activePixels.end(); ++it)
 	{
-		for (int j = 0; j < m_height; j++)
-		{
+		i = get<0>(*it);
+		j = get<1>(*it);
 			avarege = (GetPixel(2 * i, 2 * j) + GetPixel(2 * i, 2 * j + 1)
 				+ GetPixel(2 * i + 1, 2 * j) + GetPixel(2 * i + 1, 2 * j + 1)) * SUPER_SAMPLE_AVREGE;
-			m_outBuffer[INDEX(m_width, i, j, 0)] = avarege.x;//red
-			m_outBuffer[INDEX(m_width, i, j, 1)] = avarege.y;//green
-			m_outBuffer[INDEX(m_width, i, j, 2)] = avarege.z;//blue
-		}
+		m_outBuffer[INDEX(m_width, i, j, 0)] = avarege.x;//red
+		m_outBuffer[INDEX(m_width, i, j, 1)] = avarege.y;//green
+		m_outBuffer[INDEX(m_width, i, j, 2)] = avarege.z;//blue
 	}
 }
 
@@ -1203,23 +1214,48 @@ vec3 Renderer::NormTransform(const vec3& ver)
 	return normalize(vec3(tempVec.x, tempVec.y, tempVec.z));
 }
 
+
+
 void Renderer::ConfigureRenderer(const mat4& projection, const mat4& transform,
-								bool isDrawVertexNormal, bool isDrawFaceNormal,
+								bool isDrawVertexNormal, bool isDrawFaceNormal, bool isWireFrame, bool isFog, bool isSuperSample,
 								bool isDrawBoundBox, vector<Light*> scene_lights,
 								Shadow scene_shadow)
 {
-	cTransform = mat4(transform);
-	cProjection = mat4(projection);
+	cTransform = transform;
+	cProjection = projection;
+
 	isShowVerticsNormals = isDrawVertexNormal;
 	isShowFacesNormals = isDrawFaceNormal;
 	isShowBoundBox = isDrawBoundBox;
+	this->isSuperSample = isSuperSample;
+	this->isFog = isFog;
+	is_wire_frame = isWireFrame;
+
 	renderer = this;
 	yMin = m_height;
 	yMax = 0;
-	triangulation_triangles.clear();
 	lights = scene_lights;
 	shadow = scene_shadow;
+	if (isSuperSample)
+	{
+		m_local_color_buffer = m_super_sample_out_Buffer;
+		m_local_z_buffer = m_super_sample_z_Buffer;
+		cur_width = extended_m_width;
+		cur_height = extended_m_height;
+	}
+	else
+	{
+		m_local_color_buffer = m_outBuffer;
+		m_local_z_buffer = m_zbuffer;
+		cur_width = m_width;
+		cur_height = m_height;
+	}
+	ClearColorBuffer();
+	ClearDepthBuffer();
+
+	triangulation_triangles.clear();
 	shapes.clear();
+	activePixels.clear();
 }	
 
 
@@ -1303,13 +1339,16 @@ void Renderer::SwapBuffers()
 
 void Renderer::ClearColorBuffer()
 {
-	memset(m_outBuffer, 0, (sizeof(float) * 3 * m_width * m_height));
-	memset(m_super_sample_Buffer, 0, (sizeof(float) * 3 * extended_m_width * extended_m_height));
+	memset(m_outBuffer, 0, (sizeof(float) * 3 * m_width * m_height));// always need to clean
+	if (isSuperSample)
+	{
+		memset(m_local_color_buffer, 0, (sizeof(float) * 3 * cur_width * cur_height));
+	}
 }
 
 void Renderer::ClearDepthBuffer()
 {
-	std::fill(m_zbuffer, m_zbuffer + extended_m_width * extended_m_height, std::numeric_limits<float>::infinity());
+	std::fill(m_local_z_buffer, m_local_z_buffer + cur_width * cur_height, std::numeric_limits<float>::infinity());
 }
 
 
@@ -1317,6 +1356,8 @@ void Renderer::ResizeBuffers(int width, int height)
 {
 	delete m_outBuffer;
 	delete m_zbuffer;
+	delete m_super_sample_out_Buffer;
+	delete m_super_sample_z_Buffer;
 	CreateBuffers(width, height);
 	
 }
@@ -1340,18 +1381,19 @@ void Renderer::ZBufferScanConvert()
 	for (auto it = shapes.begin(); it != shapes.end(); ++it)
 	{
 		yMin = max(0, (*it)->yMin);
-		yMax = min((*it)->yMax, extended_m_height - 1);
+		yMax = min((*it)->yMax, cur_height - 1);
 		for (int y = yMin; y <= yMax; y++)
 		{
 			fixed_y = y - yMin;
 			minX = max((*it)->x_min[fixed_y],0);
-			maxX = min((*it)->x_max[fixed_y], extended_m_width -1);
+			maxX = min((*it)->x_max[fixed_y], cur_width -1);
 			for (int i = minX; i <= maxX; i++)
 			{
 				C_cords =(*it)->GetCoordinates(i, y);
-				if (abs(C_cords.z) <= m_zbuffer[ZINDEX(extended_m_width, i, y)])
+				if (abs(C_cords.z) <= m_local_z_buffer[ZINDEX(cur_width, i, y)])
 				{
-					m_zbuffer[ZINDEX(extended_m_width, i, y)] = abs(C_cords.z);
+					activePixels.push_back(tuple<int,int>(i / 2,y / 2));
+					m_local_z_buffer[ZINDEX(cur_width, i, y)] = abs(C_cords.z);
 					if (is_wire_frame && (i == maxX || i == minX))
 					{
 						DrawPixel(i, y, WHITE);
@@ -1359,14 +1401,6 @@ void Renderer::ZBufferScanConvert()
 					else if ((lights.size() > 0) && ((*it)->is_light == false))
 					{
 						color = (*it)->GetColor(C_cords, lights, shadow, (*it)->shape_color);
-						//if (illumination > max_illumination)
-						//{
-						//	max_illumination = illumination;
-						//}
-						//else if (illumination > min_illumination)
-						//{
-						//	min_illumination = illumination;
-						//}
 						DrawPixel(i, y, color);
 					}
 					else
@@ -1377,8 +1411,10 @@ void Renderer::ZBufferScanConvert()
 			}
 		}
 	}
-
-	superSampling();
+	if (isSuperSample)
+	{
+		superSampling();
+	}
 }
 
 void Shape::UpdateLimits(int x, int y)

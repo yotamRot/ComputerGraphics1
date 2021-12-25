@@ -260,6 +260,25 @@ bool Scene::toggleDrawBoundBox()
 	isDrawBoundBox = !isDrawBoundBox;
 	return isDrawBoundBox;
 }
+
+bool Scene::toggleShowFog()
+{
+	isShowFog = !isShowFog;
+	return isShowFog;
+}
+
+bool Scene::toggleShowWireFrame()
+{
+	isShowWireFrame = !isShowWireFrame;
+	return isShowWireFrame;
+}
+
+bool Scene::toggleSuperSample()
+{
+	isSuperSample = !isSuperSample;
+	return isSuperSample;
+}
+
 void Scene::draw()
 {
 	// 1. Send the renderer the current camera transform and the projection
@@ -268,9 +287,7 @@ void Scene::draw()
 	mat4 curProjection = cameras[activeCamera]->projection;
 	CameraModel* curCameraModel = (CameraModel*)(cameras[activeCamera]->model);
 	mat4 curCameraInv = curCameraModel->_w_TransformInv * curCameraModel->_m_TransformInv;
-	m_renderer->ClearColorBuffer();
-	m_renderer->ClearDepthBuffer();
-	m_renderer->ConfigureRenderer(curProjection, curCameraInv, isShowVerticsNormals, isShowFacesNormals, isDrawBoundBox, lights, current_shadow);
+	m_renderer->ConfigureRenderer(curProjection, curCameraInv, isShowVerticsNormals, isShowFacesNormals, isShowWireFrame,isShowFog,isSuperSample, isDrawBoundBox, lights, current_shadow);
 	MeshModel* curModel;
 	for (auto it = lights.begin(); it != lights.end(); ++it)
 	{
@@ -318,13 +335,6 @@ void Scene::drawDemo()
 Scene::Scene(Renderer *renderer) : m_renderer(renderer), current_shadow(FLAT)
 {	
 	InitScene();
-}
-
-void Scene::InitScene()
-{
-	activeCamera = addCamera();
-	// add ambient Light with id 0 and set Ld & Ls to 0
-	activeLight = addLight();
 	lights.at(0)->Ld = 0;
 	lights.at(0)->Ls = 0;
 	lights.at(0)->La = 1;
@@ -335,7 +345,18 @@ void Scene::InitScene()
 	isShowFacesNormals = false;
 	isRenderCameras = false;
 	isDrawBoundBox = false;
+	isShowFog = false;
+	isShowWireFrame = false;
+	isSuperSample = false;
 	axis = MODEL;
+}
+
+void Scene::InitScene()
+{
+	activeCamera = addCamera();
+	// add ambient Light with id 0 and set Ld & Ls to 0
+	activeLight = addLight();
+
 }
 void Scene::manipulateActiveModel(Transformation T, TransformationDirection direction
 									, TransAxis axis, float power)

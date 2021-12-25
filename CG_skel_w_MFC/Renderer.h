@@ -212,7 +212,7 @@ public:
 
 	void Rasterize() override;
 	vec3 GetCoordinates(int x, int y) override ;
-	void  UpdateShape() override;
+	void UpdateShape() override;
 	void Clip() override;
 	vec3 GetColor(vec3& C_cords, vector<Light*> lights, Shadow shadow, vec3& shape_color) override;
 	float GetGouruad(vec3& C_cords);
@@ -238,22 +238,25 @@ struct CustomCompareYMax
 class Renderer
 {
 	float *m_outBuffer; // 3*width*height
-	float *m_super_sample_Buffer; // 3*width*height
-	float *m_zbuffer; // width*height
+	float* m_zbuffer; // width*height
+	float *m_super_sample_out_Buffer; // 3*width*height
+	float *m_super_sample_z_Buffer; // 3*width*height
+	float *m_local_color_buffer; // 3*width*height
+	float *m_local_z_buffer; // 3*width*height
 	int m_width, m_height;
 	int extended_m_width, extended_m_height;
+	int cur_width, cur_height;
 	mat4 cTransform;
 	mat4 cProjection;
 	mat4 nTransform;
 	mat4 oTransform;
 	bool isShowBoundBox;
+	bool is_wire_frame;
+	bool isSuperSample;
 
 	vector<Shape*> shapes;
 
-	Shadow shadow;
-
 	void CreateBuffers(int width, int height);
-	void CreateLocalBuffer();
 
 	void transformToScreen(vec2& vec);
 	RendererActions Renderer::shouldDrawModel(const vector<Line>* boundBoxLines);
@@ -276,9 +279,10 @@ public:
 	void DrawBoundingBox(vector<Line>* lines);
 	void DrawPixel(int x, int y, vec3& rgb);
 	vec3 GetPixel(int x, int y);
-	void ConfigureRenderer(const mat4& projection, const mat4& cTransform ,
-		bool isDrawVertexNormal, bool isDrawFaceNormal, bool isDrawBoundBox,
-		vector<Light*> scene_lights, Shadow scene_shadow);
+	void Renderer::ConfigureRenderer(const mat4& projection, const mat4& transform,
+								bool isDrawVertexNormal, bool isDrawFaceNormal, bool isWireFrame, bool isFog,bool isSuperSample,
+								bool isDrawBoundBox, vector<Light*> scene_lights,
+								Shadow scene_shadow);
 	void SetObjectMatrices(const mat4& oTransform, const mat4& nTransform);
 	void SwapBuffers();
 	void ClearColorBuffer();
@@ -294,10 +298,12 @@ public:
 	int yMax;
 	bool isShowVerticsNormals;
 	bool isShowFacesNormals;
-	bool is_wire_frame;
+	bool isFog;
+	Shadow shadow;
 	vector<Light*> lights;
 	vector<Light*> GetLights();
 	vector<Triangle> triangulation_triangles;
 	void addFog(vec3& color, float z);
 	void superSampling();
+	vector<tuple<int,int>> activePixels;
 };

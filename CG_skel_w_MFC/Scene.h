@@ -81,6 +81,9 @@ class Scene {
 	bool isShowFacesNormals;
 	bool isRenderCameras;
 	bool isDrawBoundBox;
+	bool isShowFog;
+	bool isShowWireFrame;
+	bool isSuperSample;
 	Renderer* m_renderer;
 	TransAxis axis;
 	Shadow current_shadow;
@@ -111,6 +114,9 @@ public:
 	bool toggleShowFacesNormals();
 	bool toggleRenderCameras();
 	bool toggleDrawBoundBox();
+	bool toggleShowFog();
+	bool toggleShowWireFrame();
+	bool toggleSuperSample();
 	void draw();
 	void drawDemo();
 	int modelMenuIdToVectorId(int menuId);

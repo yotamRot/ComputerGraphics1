@@ -36,12 +36,14 @@
 #define CLEAR						6
 #define CAMERAS						7
 
-// features menu
+// renderer menu
 #define SHOW_VERTICES_NORMAL		1
 #define SHOW_FACES_NORMAL			2
 #define SHOW_BOUNDING_BOX			3
 #define CHANGE_OBJECT_COLOR			4
 #define WIRE_FRAME					5
+#define FOG							6
+#define SUPER_SAMPLE				7
 
 #define ORTHOGRPHIC_PARAMETERS		1
 #define PRESPECTIVE_PARAMETERS		2
@@ -105,9 +107,8 @@ int menuShadow;
 int menuFile;
 int menuTramsformation;
 int menuCameras;
-int menuFeatures;
+int menuRenderer;
 int menuProjections;
-int menuProjectionParameters;
 int menuTransformationAxies;
 Transformation curTramsformation = MOVE;
 Projection curProjection = PERSPECTIVE;
@@ -186,11 +187,11 @@ void ShowVertixNormals()
 {
 	if (scene->toggleShowVerticesNormals())
 	{
-		glutChangeToMenuEntry(1, "Hide Vertices Normal", SHOW_VERTICES_NORMAL);
+		glutChangeToMenuEntry(SHOW_VERTICES_NORMAL, "Hide Vertices Normal", SHOW_VERTICES_NORMAL);
 	}
 	else
 	{
-		glutChangeToMenuEntry(1, "Show Vertices Normal", SHOW_VERTICES_NORMAL);
+		glutChangeToMenuEntry(SHOW_VERTICES_NORMAL, "Show Vertices Normal", SHOW_VERTICES_NORMAL);
 	}
 }
 
@@ -198,11 +199,11 @@ void ShowFacesNormals()
 {
 	if (scene->toggleShowFacesNormals())
 	{
-		glutChangeToMenuEntry(2, "Hide Faces Normal", SHOW_FACES_NORMAL);
+		glutChangeToMenuEntry(SHOW_FACES_NORMAL, "Hide Faces Normal", SHOW_FACES_NORMAL);
 	}
 	else
 	{
-		glutChangeToMenuEntry(2, "Show Faces Normal", SHOW_FACES_NORMAL);
+		glutChangeToMenuEntry(SHOW_FACES_NORMAL, "Show Faces Normal", SHOW_FACES_NORMAL);
 	}
 }
 
@@ -210,27 +211,50 @@ void ShowBoundingBox()
 {
 	if (scene->toggleDrawBoundBox())
 	{
-		glutChangeToMenuEntry(3, "Hide Bounding Box", SHOW_BOUNDING_BOX);
+		glutChangeToMenuEntry(SHOW_BOUNDING_BOX, "Hide Bounding Box", SHOW_BOUNDING_BOX);
 	}
 	else
 	{
-		glutChangeToMenuEntry(3, "Show Bounding Box", SHOW_BOUNDING_BOX);
+		glutChangeToMenuEntry(SHOW_BOUNDING_BOX, "Show Bounding Box", SHOW_BOUNDING_BOX);
 	}
 }
 
 void WireFrame()
 {
-	renderer->is_wire_frame = !renderer->is_wire_frame;
-	if (renderer->is_wire_frame)
+	if (scene->toggleShowWireFrame())
 	{
-		glutChangeToMenuEntry(5, "Hide Wire Frame", WIRE_FRAME);
+		glutChangeToMenuEntry(WIRE_FRAME, "Hide Wire Frame", WIRE_FRAME);
 	}
 	else
 	{
-		glutChangeToMenuEntry(5, "Show Wire Frame", WIRE_FRAME);
+		glutChangeToMenuEntry(WIRE_FRAME, "Show Wire Frame", WIRE_FRAME);
 	}
-
 }
+
+void Fog()
+{
+	if (scene->toggleShowFog())
+	{
+		glutChangeToMenuEntry(FOG, "Hide Fog", FOG);
+	}
+	else
+	{
+		glutChangeToMenuEntry(FOG, "Show Fog", FOG);
+	}
+}
+
+void SuperSample()
+{
+	if (scene->toggleSuperSample())
+	{
+		glutChangeToMenuEntry(SUPER_SAMPLE, "Stop Supersample", SUPER_SAMPLE);
+	}
+	else
+	{
+		glutChangeToMenuEntry(SUPER_SAMPLE, "Use Supersample", SUPER_SAMPLE);
+	}
+}
+
 
 void ChangeObjectColor()
 {
@@ -568,11 +592,23 @@ void featuresMenu(int id)
 		case WIRE_FRAME:
 			WireFrame();
 			break;
+		case FOG:
+			Fog();
+			break;
+		case SUPER_SAMPLE:
+			SuperSample();
+			break;
 	}
 	scene->draw();
 }
 
 void projectionMenu(int id)
+{
+	scene->setActiveCameraProjection((Projection)id);
+	scene->draw();
+}
+
+void projectionChooseMenu(int id)
 {
 	scene->setActiveCameraProjection((Projection)id);
 	scene->draw();
@@ -668,25 +704,32 @@ void CreateShadowMenu()
 	glutAddMenuEntry("Phong Shadow", PHONG_SHADOW);
 }
 
-void CreateFeaturesMenu()
+void CreateRendererMenu()
 {
-	menuFeatures = glutCreateMenu(featuresMenu);
+	menuRenderer = glutCreateMenu(featuresMenu);
 	glutAddMenuEntry("Show Vertices Normal", SHOW_VERTICES_NORMAL);
 	glutAddMenuEntry("Show Faces Normal", SHOW_FACES_NORMAL);
 	glutAddMenuEntry("Show Bounding Box", SHOW_BOUNDING_BOX);
 	glutAddMenuEntry("Change Color", CHANGE_OBJECT_COLOR);
 	glutAddMenuEntry("Show Wire Frame", WIRE_FRAME);
+	glutAddMenuEntry("Show Fog", FOG);
+	glutAddMenuEntry("Use SuperSample", SUPER_SAMPLE);
 }
 
 void CreateProjectionMenus()
 {
-	menuProjections = glutCreateMenu(projectionMenu);
+	int menuChooseProjections = glutCreateMenu(projectionChooseMenu);
 	glutAddMenuEntry("Orthographic", ORTHOGRAPHIC);
 	glutAddMenuEntry("Prespective", PERSPECTIVE);
-	menuProjectionParameters = glutCreateMenu(ProjParameresMenu);
+	int menuProjectionParameters = glutCreateMenu(ProjParameresMenu);
 	glutAddMenuEntry("Orthographic Parameters", ORTHOGRPHIC_PARAMETERS);
 	glutAddMenuEntry("Prespective Parameters", PRESPECTIVE_PARAMETERS);
 	glutAddMenuEntry("Frustum Parameters", FRUSTUM_PARAMETERS);
+
+	menuProjections = glutCreateMenu(projectionMenu);
+	glutSetMenu(menuProjections);
+	glutAddSubMenu("Choose Projection", menuChooseProjections);
+	glutAddSubMenu("Projections parameters", menuProjectionParameters);
 }
 
 void CreateMainMenu()
@@ -697,14 +740,13 @@ void CreateMainMenu()
 	glutAddSubMenu("Transformations", menuTramsformation);
 	glutAddSubMenu("Transformations axis", menuTransformationAxies);
 	glutAddSubMenu("Projection", menuProjections);
-	glutAddSubMenu("Projection Parameters", menuProjectionParameters);
-	glutAddSubMenu("Features", menuFeatures);
+	glutAddSubMenu("Renderer", menuRenderer);
 	glutAddSubMenu("Objects", menuObjectsId);
 	glutAddMenuEntry("Clear Screen", CLEAR);
-	glutAddMenuEntry("About", MAIN_ABOUT);
 	glutAddSubMenu("Cameras", menuCameras);
 	glutAddSubMenu("Light Sources", menuLights);
 	glutAddSubMenu("Shadow", menuShadow);
+	glutAddMenuEntry("About", MAIN_ABOUT);
 }
 
 void initMenu()
@@ -714,7 +756,7 @@ void initMenu()
 	CreateCameraMenu();
 	CreateLightMenu();
 	CreateShadowMenu();
-	CreateFeaturesMenu();
+	CreateRendererMenu();
 	CreateProjectionMenus();
 
 	CreateMainMenu();
