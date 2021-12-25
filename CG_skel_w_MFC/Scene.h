@@ -50,7 +50,7 @@ class Camera {
 	vec3 lbn;  // left, bottom, near
 	vec3 rtf;  // right, top, far
 public:
-	Camera(vec3 lbn, vec3 rtf, int modelId, Model* model);
+	Camera(vec3& lbn, vec3& rtf, int modelId, Model* model);
 	mat4 projection;
 	int modelId;
 	Model* model;
@@ -124,20 +124,20 @@ public:
 	Light* GetActiveLight();
 	vec3 GetModelRGB();
 	vec3 GetModelK();
-	void ChangeActiveLightL(vec3 l_params);
-	void ChangeAmbientRgbLa(vec4 & rgbl);
+	void ChangeActiveLightL(vec3& l_params);
+	void ChangeAmbientRgbLa(vec4& rgbl);
 	void Zoom(ZoomDirection direction);
 	int activeModel;
 	int activeLight;
 	int activeCamera;
-	void ChangeProjectionParameters(Projection proj, vec3& rtf, vec3& lbn, vec4 pers_param=vec4());
+	void ChangeProjectionParameters(Projection proj, vec3& rtf, vec3& lbn, vec4& pers_param=vec4());
 	void SetTrasformationAxis(TransAxis Axis);
 	TransAxis GetTrasformationAxis();
 	vec3 Getlbn();
 	vec3 Getrtf();
 	void MaintingCamerasRatios(int oldWidth, int oldHeight, int newWidth, int newHeight);
-	void ChangeModelColorIndex(vec3 rgb);
-	void ChangeModelIlluminationParams(vec3 k);
+	void ChangeModelColorIndex(vec3& rgb);
+	void ChangeModelIlluminationParams(vec3& k);
 	void ChangeShadow(Shadow s);
 	vec4 GetAmbientRGB();
 };

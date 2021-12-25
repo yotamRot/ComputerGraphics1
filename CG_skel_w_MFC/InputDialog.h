@@ -6,10 +6,10 @@ using std::string;
 
 #include "vec.h"
 
-void SetLbnRtf(vec3 Ilbn, vec3 Irtf);
-void SetLightL(vec3 l_params);
-void SetColorParam(vec3 colors, vec3 k_params);
-void SetRGBLa(vec4 rgbl);
+void SetLbnRtf(vec3& Ilbn, vec3& Irtf);
+void SetLightL(vec3& l_params);
+void SetColorParam(vec3& colors, vec3& k_params);
+void SetRGBLa(vec4& rgbl);
 // ------------------------
 //    Class CInputDialog
 // ------------------------

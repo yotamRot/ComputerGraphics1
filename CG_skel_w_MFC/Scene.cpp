@@ -58,7 +58,7 @@ vec3 Scene::GetModelK()
 	return vec3(curModel->ka, curModel->kd, curModel->ks) ;
 }
 
-void Scene::ChangeActiveLightL(vec3 l_params)
+void Scene::ChangeActiveLightL(vec3& l_params)
 {
 	lights.at(activeCamera)->La = l_params.x;
 	lights.at(activeCamera)->Ld = l_params.y;
@@ -209,7 +209,7 @@ void Scene::setActiveCameraProjection(Projection proj)
 	}
 }
 
-void Scene::ChangeProjectionParameters(Projection proj, vec3& rtf, vec3& lbn,vec4 pers_param)
+void Scene::ChangeProjectionParameters(Projection proj, vec3& rtf, vec3& lbn,vec4& pers_param)
 {
 	Camera* curCamera = cameras.at(activeCamera);
 	this->proj = proj;
@@ -452,7 +452,7 @@ void Camera::Ortho(const float left, const float right,
 		(-1) * (zFar + zNear) / (zFar - zNear), 1);
 }
 
-Camera::Camera(vec3 lbn, vec3 rtf, int modelId, Model* model) :lbn(lbn), rtf(rtf), modelId(modelId) ,model(model)
+Camera::Camera(vec3& lbn, vec3& rtf, int modelId, Model* model) :lbn(lbn), rtf(rtf), modelId(modelId) ,model(model)
 {
 	eye = vec4(0, 0, 0, 1);
 	at = vec4(0, 0, -1, 1);
@@ -472,7 +472,7 @@ void Scene::MaintingCamerasRatios(int oldWidth, int oldHeight, int newWidth, int
 	}
 }
 
-void Scene::ChangeModelColorIndex(vec3 rgb)
+void Scene::ChangeModelColorIndex(vec3& rgb)
 {
 	MeshModel* cur_model = (MeshModel*)models.at(activeModel);
 	cur_model->mesh_color = rgb;
@@ -480,7 +480,7 @@ void Scene::ChangeModelColorIndex(vec3 rgb)
 }
 
 
-void Scene::ChangeModelIlluminationParams(vec3 k)
+void Scene::ChangeModelIlluminationParams(vec3& k)
 {
 	MeshModel* cur_model = (MeshModel*)models.at(activeModel);
 	cur_model->ka = k.x;

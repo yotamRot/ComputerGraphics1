@@ -65,7 +65,7 @@ vec3 RGB;
 vec4 ambient_rgbl;
 vec3 k;
 
-void SetLbnRtf(vec3 Ilbn, vec3 Irtf)
+void SetLbnRtf(vec3& Ilbn, vec3& Irtf)
 {
     Ilbn = Ilbn * 100;
     Irtf = Irtf * 100;
@@ -78,18 +78,18 @@ void SetLbnRtf(vec3 Ilbn, vec3 Irtf)
     lbn.z = float(round(Ilbn.z) / 100);
 }
 
-void SetLightL(vec3 l_params)
+void SetLightL(vec3& l_params)
 {
     l = l_params;
 }
 
-void SetRGBLa(vec4 rgbl)
+void SetRGBLa(vec4& rgbl)
 {
     ambient_rgbl = rgbl;
 
 }
 
-void SetColorParam(vec3 colors, vec3 k_params)
+void SetColorParam(vec3& colors, vec3& k_params)
 {
     RGB = colors;
     k = k_params;
