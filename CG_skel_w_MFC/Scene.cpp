@@ -60,9 +60,9 @@ vec3 Scene::GetModelK()
 
 void Scene::ChangeActiveLightL(vec3& l_params)
 {
-	lights.at(activeCamera)->La = l_params.x;
-	lights.at(activeCamera)->Ld = l_params.y;
-	lights.at(activeCamera)->Ls = l_params.z;
+	lights.at(activeLight)->La = l_params.x;
+	lights.at(activeLight)->Ld = l_params.y;
+	lights.at(activeLight)->Ls = l_params.z;
 }
 
 void Scene::ChangeAmbientRgbLa(vec4 & rgbl)
