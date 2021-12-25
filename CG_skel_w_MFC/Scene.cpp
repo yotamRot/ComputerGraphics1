@@ -321,7 +321,7 @@ void Scene::draw()
 			(*it)->draw(m_renderer);// draw models
 		}
 	}
-
+	m_renderer->DrawTriangles();
 	m_renderer->ZBufferScanConvert();
 	m_renderer->SwapBuffers();
 }

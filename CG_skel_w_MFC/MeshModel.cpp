@@ -296,7 +296,7 @@ vec3 MeshModel::GetBoundsLength()
 
 void MeshModel::draw(Renderer* renderer)
 {	
-	renderer->DrawTriangles(triangles, bound_box_vertices, GetProportionalValue());
+	renderer->ClipModel(triangles, bound_box_vertices);
 }
 
 vec3 MeshModel::CenteringTranslation(TransAxis axis)

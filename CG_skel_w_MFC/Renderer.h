@@ -247,7 +247,7 @@ class Renderer
 	int extended_m_width, extended_m_height;
 	int cur_width, cur_height;
 	mat4 cTransform;
-	mat4 cProjection;
+
 	mat4 nTransform;
 	mat4 oTransform;
 	bool isShowBoundBox;
@@ -274,8 +274,8 @@ public:
 	Renderer(int width, int height);
 	~Renderer(void);
 	void Init();
-	void Renderer::DrawTriangles(vector<Triangle>* triangles,
-		vector<Line>* boundBoxLines, GLfloat proportionalValue);
+	void DrawTriangles();
+	void ClipModel(vector<Triangle>* triangles, vector<Line>* boundBoxLines);
 	void DrawBoundingBox(vector<Line>* lines);
 	void DrawPixel(int x, int y, vec3& rgb);
 	vec3 GetPixel(int x, int y);
@@ -291,14 +291,14 @@ public:
 	void ResizeBuffers(int width, int height);
 	void ZBufferScanConvert();
 	vec2 vec4ToVec2(const vec4& ver);
-	vec3 Transform(const vec3& ver);
-	vec3 NormTransform(const vec3& ver);
-	mat4 GetProjection();
+	void Transform(const vec3& ver, vec3& C_ver, vec4& P_ver);
+	void NormTransform(const vec3& ver, vec3& direction);
 	int yMin;
 	int yMax;
 	bool isShowVerticsNormals;
 	bool isShowFacesNormals;
 	bool isFog;
+	mat4 cProjection;
 	Shadow shadow;
 	vector<Light*> lights;
 	vector<Light*> GetLights();

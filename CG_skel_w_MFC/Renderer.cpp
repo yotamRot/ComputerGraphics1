@@ -393,13 +393,9 @@ vec3 Triangle::GetPhong(vec3& C_cord)
 
 void Triangle::UpdateShape()
 {
-	C_p1_3d = renderer->Transform(p1_3d);
-	C_p2_3d = renderer->Transform(p2_3d);
-	C_p3_3d = renderer->Transform(p3_3d);
-
-	P_p1_4d = renderer->GetProjection() * vec4(C_p1_3d);
-	P_p2_4d = renderer->GetProjection() * vec4(C_p2_3d);
-	P_p3_4d = renderer->GetProjection() * vec4(C_p3_3d);
+	renderer->Transform(p1_3d, C_p1_3d, P_p1_4d);
+	renderer->Transform(p2_3d, C_p2_3d, P_p2_4d);
+	renderer->Transform(p3_3d, C_p3_3d, P_p3_4d);
 
 	vec3 p1_light_direction, p2_light_direction, p3_light_direction;
 	vec3 p1_camera_direction, p2_camera_direction, p3_camera_direction;
@@ -410,11 +406,13 @@ void Triangle::UpdateShape()
 	{
 		for (auto it = renderer->lights.begin(); it != renderer->lights.end(); ++it)
 		{
+			
 			if ((*it)->type == PARALLEL_SOURCE)
 			{
-				p1_light_direction = normalize((*it)->c_light_position);
-				p2_light_direction = normalize((*it)->c_light_position);
-				p3_light_direction = normalize((*it)->c_light_position);
+				normalize((*it)->c_light_position);
+				p1_light_direction = (*it)->c_light_position;
+				p2_light_direction = (*it)->c_light_position;
+				p3_light_direction = (*it)->c_light_position;
 			}
 			else // Point source
 			{
@@ -422,9 +420,9 @@ void Triangle::UpdateShape()
 				p2_light_direction = normalize((*it)->c_light_position - C_p2_3d);
 				p3_light_direction = normalize((*it)->c_light_position - C_p3_3d);
 			}
-			p1_camera_direction = normalize(vec3(0) - C_p1_3d);
-			p2_camera_direction = normalize(vec3(0) - C_p2_3d);
-			p3_camera_direction = normalize(vec3(0) - C_p3_3d);
+			p1_camera_direction = normalize(-C_p1_3d);
+			p2_camera_direction = normalize(-C_p2_3d);
+			p3_camera_direction = normalize(-C_p3_3d);
 			p1_reflect_direction = normalize(-p1_light_direction - 2 * (max(dot(-p1_light_direction, p1_normal.normal_direction), 0)) * p1_normal.normal_direction);
 			p2_reflect_direction = normalize(-p2_light_direction - 2 * (max(dot(-p2_light_direction, p2_normal.normal_direction), 0)) * p2_normal.normal_direction);
 			p3_reflect_direction = normalize(-p3_light_direction - 2 * (max(dot(-p3_light_direction, p3_normal.normal_direction), 0)) * p3_normal.normal_direction);
@@ -807,12 +805,9 @@ vec3 Line::GetCoordinates(int x, int y)
 
 void Line::UpdateShape()
 {
-	C_p1_3d = renderer->Transform(p1_3d);
-	C_p2_3d = renderer->Transform(p2_3d);
-	P_p1_4d = renderer->GetProjection() * vec4(C_p1_3d);
-	P_p2_4d = renderer->GetProjection() * vec4(C_p2_3d);
+	renderer->Transform(p1_3d, C_p1_3d, P_p1_4d);
+	renderer->Transform(p2_3d, C_p2_3d, P_p2_4d);
 }
-
 vec3 Line::GetColor(vec3& C_cords, vector<Light*> lights, Shadow shadow, vec3& shape_color)
 {
 	return 1;
@@ -820,12 +815,10 @@ vec3 Line::GetColor(vec3& C_cords, vector<Light*> lights, Shadow shadow, vec3& s
 
 void Normal::UpdateShape()
 {
-	C_p1_3d = renderer->Transform(p1_3d);
-	normal_direction = normalize(renderer->NormTransform(p2_3d));
+	renderer->Transform(p1_3d, C_p1_3d, P_p1_4d);
+	renderer->NormTransform(p2_3d, normal_direction);
 	C_p2_3d = C_p1_3d + normal_size * normal_direction;
-	P_p1_4d = renderer->GetProjection() * vec4(C_p1_3d);
-	P_p2_4d = renderer->GetProjection() * vec4(C_p2_3d);
-	
+	P_p2_4d = renderer->cProjection * vec4(C_p2_3d);
 }
 
 void Shape::RasterizeLine(vec2 ver1, vec2 ver2)
@@ -1020,13 +1013,10 @@ bool CustomCompareYmin::operator()( Shape* shape1,  Shape* shape2) const
 	return shape1->yMin < shape2->yMin;
 }
 
-
-
-void Renderer::DrawTriangles(vector<Triangle>* triangles,
-	vector<Line>* boundBoxLines, GLfloat proportionalValue)
-{	
+void Renderer::ClipModel(vector<Triangle>* triangles, vector<Line>* boundBoxLines)
+{
 	RendererActions action = shouldDrawModel(boundBoxLines);
-	if(action != NotDraw)
+	if (action != NotDraw)
 	{
 		for (auto it = triangles->begin(); it != triangles->end(); ++it)
 		{
@@ -1040,70 +1030,72 @@ void Renderer::DrawTriangles(vector<Triangle>* triangles,
 				triangulation_triangles.push_back(*it);
 			}
 		}
-		
-		
-		for (auto it = triangulation_triangles.begin(); it != triangulation_triangles.end(); ++it)
+	}
+
+	if (isShowBoundBox)
+	{
+		DrawBoundingBox(boundBoxLines);
+	}
+}
+
+void Renderer::DrawTriangles()
+{	
+	for (auto it = triangulation_triangles.begin(); it != triangulation_triangles.end(); ++it)
+	{
+		it->Rasterize();
+		yMax = max(yMax, it->yMax);
+		yMin = min(yMin, it->yMin);
+		shapes.push_back(&(*it));
+
+		if (isShowFacesNormals)
 		{
-			it->Rasterize();
-			yMax = max(yMax, it->yMax);
-			yMin = min(yMin, it->yMin);
-			shapes.push_back(&(*it));
-
-			if (isShowFacesNormals)
+			if (it->normal.should_draw)
 			{
-				if (it->normal.should_draw)
-				{
-					yMax = max(yMax, it->normal.yMax);
-					yMin = min(yMin, it->normal.yMin);
-					it->normal.Rasterize();
-					shapes.push_back(&(it->normal));
-				}
-			}
-
-			if (isShowFacesNormals)
-			{
-				if (it->normal.should_draw)
-				{
-					yMax = max(yMax, it->normal.yMax);
-					yMin = min(yMin, it->normal.yMin);
-					it->normal.Rasterize();
-					shapes.push_back(&(it->normal));
-				}
-			}
-
-			if (isShowVerticsNormals)
-			{
-				if (it->p1_normal.should_draw)
-				{
-					yMax = max(yMax, it->p1_normal.yMax);
-					yMin = min(yMin, it->p1_normal.yMin);
-					it->p1_normal.Rasterize();
-					shapes.push_back(&(it->p1_normal));
-				}
-				if (it->p2_normal.should_draw)
-				{
-					yMax = max(yMax, it->p2_normal.yMax);
-					yMin = min(yMin, it->p2_normal.yMin);
-					it->p2_normal.Rasterize();
-					shapes.push_back(&(it->p2_normal));
-				}
-				if (it->p3_normal.should_draw)
-				{
-					yMax = max(yMax, it->p3_normal.yMax);
-					yMin = min(yMin, it->p3_normal.yMin);
-					it->p3_normal.Rasterize();
-					shapes.push_back(&(it->p3_normal));
-				}
+				yMax = max(yMax, it->normal.yMax);
+				yMin = min(yMin, it->normal.yMin);
+				it->normal.Rasterize();
+				shapes.push_back(&(it->normal));
 			}
 		}
 
-		if (isShowBoundBox)
+		if (isShowFacesNormals)
 		{
-			DrawBoundingBox(boundBoxLines);
+			if (it->normal.should_draw)
+			{
+				yMax = max(yMax, it->normal.yMax);
+				yMin = min(yMin, it->normal.yMin);
+				it->normal.Rasterize();
+				shapes.push_back(&(it->normal));
+			}
+		}
+
+		if (isShowVerticsNormals)
+		{
+			if (it->p1_normal.should_draw)
+			{
+				yMax = max(yMax, it->p1_normal.yMax);
+				yMin = min(yMin, it->p1_normal.yMin);
+				it->p1_normal.Rasterize();
+				shapes.push_back(&(it->p1_normal));
+			}
+			if (it->p2_normal.should_draw)
+			{
+				yMax = max(yMax, it->p2_normal.yMax);
+				yMin = min(yMin, it->p2_normal.yMin);
+				it->p2_normal.Rasterize();
+				shapes.push_back(&(it->p2_normal));
+			}
+			if (it->p3_normal.should_draw)
+			{
+				yMax = max(yMax, it->p3_normal.yMax);
+				yMin = min(yMin, it->p3_normal.yMin);
+				it->p3_normal.Rasterize();
+				shapes.push_back(&(it->p3_normal));
+			}
 		}
 	}
-	
 }
+		
 
 void Renderer::DrawBoundingBox(vector<Line>* boundBoxLines)
 {
@@ -1198,26 +1190,20 @@ void Renderer::superSampling()
 	}
 }
 
-mat4 Renderer::GetProjection()
+void Renderer::Transform(const vec3& ver ,vec3& C_ver ,vec4& P_ver)
 {
-	return cProjection;
+	const vec4 tempVec = cTransform * oTransform * vec4(ver);
+	C_ver = getXYZ(tempVec);
+	P_ver = cProjection * tempVec;
 }
 
-vec3 Renderer::Transform(const vec3& ver)
-{
-	vec4 tempVec = cTransform * oTransform * vec4(ver);
-	return vec3(tempVec.x / tempVec.w, tempVec.y / tempVec.w, min(tempVec.z / tempVec.w, -EPSILON));
-}
-
-vec3 Renderer::NormTransform(const vec3& ver)
+void Renderer::NormTransform(const vec3& ver, vec3& direction)
 {
 	vec4 tempVec = vec4(ver);
 	tempVec.w = 0;
 	tempVec = cTransform * nTransform * tempVec;
-	return normalize(vec3(tempVec.x, tempVec.y, tempVec.z));
+	direction =  normalize(vec3(tempVec.x, tempVec.y, tempVec.z));
 }
-
-
 
 void Renderer::ConfigureRenderer(const mat4& projection, const mat4& transform,
 								bool isDrawVertexNormal, bool isDrawFaceNormal, bool isWireFrame, bool isFog, bool isSuperSample,
