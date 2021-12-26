@@ -139,11 +139,11 @@ void switchLightTypeMenu(int id)
 {
 	if (id == PARALLEL_SOURCE)
 	{
-		scene->GetActiveLight()->type = PARALLEL_SOURCE;
+		scene->GetActiveLight().type = PARALLEL_SOURCE;
 	}
 	else //  PARALLEL SOURCE need to switch to POINT SOURCE
 	{
-		scene->GetActiveLight()->type = POINT_SOURCE;
+		scene->GetActiveLight().type = POINT_SOURCE;
 	}
 	scene->draw();
 }
@@ -167,7 +167,7 @@ void ChangeAmbientColors()
 
 void ChangeLightLParams()
 {
-	SetLightL(scene->GetActiveLight()->GetL());
+	SetLightL(scene->GetActiveLight().GetL());
 	LDialog dlg;
 	if (dlg.DoModal() == IDOK) {
 		vec3 l_params = dlg.GetL();

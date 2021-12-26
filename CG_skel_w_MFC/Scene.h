@@ -75,7 +75,7 @@ public:
 class Scene {
 
 	vector<Camera*> cameras;
-	vector<Light*> lights;
+	vector<Light> lights;
 	Projection proj;
 	bool isShowVerticsNormals;
 	bool isShowFacesNormals;
@@ -121,7 +121,7 @@ public:
 	void drawDemo();
 	int modelMenuIdToVectorId(int menuId);
 	Camera* GetActiveCamera();
-	Light* GetActiveLight();
+	Light& GetActiveLight();
 	vec3 GetModelRGB();
 	vec4 GetModelK();
 	void ChangeActiveLightL(vec3& l_params);

@@ -108,7 +108,7 @@ public:
 	virtual vec3  GetCoordinates(int x, int y) =0;
 	virtual void  Rasterize() =0;
 	virtual void  UpdateShape() = 0;
-	virtual vec3 GetColor(vec3& C_cords, vector<Light*> lights, Shadow shadow, vec3& shape_color) = 0;
+	virtual vec3 GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow, vec3& shape_color) = 0;
 	virtual void Clip() = 0;
 
 	bool is_light;
@@ -148,7 +148,7 @@ public:
 	void Clip() override;
 	void ClipFace(Face face);
 
-	vec3 GetColor(vec3& C_cords, vector<Light*> lights, Shadow shadow, vec3& shape_color) override;
+	vec3 GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow, vec3& shape_color) override;
 
 
 
@@ -215,7 +215,7 @@ public:
 	vec3 GetCoordinates(int x, int y) override ;
 	void UpdateShape() override;
 	void Clip() override;
-	vec3 GetColor(vec3& C_cords, vector<Light*> lights, Shadow shadow, vec3& shape_color) override;
+	vec3 GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow, vec3& shape_color) override;
 	float GetGouruad(vec3& C_cords);
 	vec3 GetPhong(vec3& C_cords);
 	int ClipFace(Triangle& triangle1, Triangle& triangle2, Face face);
@@ -282,7 +282,7 @@ public:
 	vec3 GetPixel(int x, int y);
 	void Renderer::ConfigureRenderer(const mat4& projection, const mat4& transform,
 								bool isDrawVertexNormal, bool isDrawFaceNormal, bool isWireFrame, bool isFog,bool isSuperSample,
-								bool isDrawBoundBox, vector<Light*> scene_lights,
+								bool isDrawBoundBox, vector<Light> scene_lights,
 								Shadow scene_shadow);
 	void SetObjectMatrices(const mat4& oTransform, const mat4& nTransform);
 	void SwapBuffers();
@@ -301,8 +301,8 @@ public:
 	bool isFog;
 	mat4 cProjection;
 	Shadow shadow;
-	vector<Light*> lights;
-	vector<Light*> GetLights();
+	vector<Light> lights;
+	vector<Light> GetLights();
 	vector<Triangle> triangulation_triangles;
 	void addFog(vec3& color, float z);
 	void superSampling();

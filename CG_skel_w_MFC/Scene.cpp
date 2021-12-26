@@ -41,7 +41,7 @@ Camera* Scene::GetActiveCamera()
 	return cameras.at(activeCamera);
 }
 
-Light* Scene::GetActiveLight()
+Light& Scene::GetActiveLight()
 {
 	return lights.at(activeLight);
 }
@@ -60,15 +60,17 @@ vec4 Scene::GetModelK()
 
 void Scene::ChangeActiveLightL(vec3& l_params)
 {
-	lights.at(activeLight)->La = l_params.x;
-	lights.at(activeLight)->Ld = l_params.y;
-	lights.at(activeLight)->Ls = l_params.z;
+	lights.at(activeLight).La = l_params.x;
+	lights.at(activeLight).Ld = l_params.y;
+	lights.at(activeLight).Ls = l_params.z;
 }
 
 void Scene::ChangeAmbientRgbLa(vec4 & rgbl)
 {
-	lights.at(0)->light_color = vec3(rgbl.x, rgbl.y, rgbl.z);
-	lights.at(0)->La = rgbl.w;
+	lights.at(0).light_color.x = rgbl.x;
+	lights.at(0).light_color.y = rgbl.y;
+	lights.at(0).light_color.z = rgbl.z;
+	lights.at(0).La = rgbl.w;
 }
 
 
@@ -158,8 +160,12 @@ void Scene::lookAtModel(int modelId)
 void Scene::ResetZoom()
 {
 	Camera* curCamera = cameras.at(activeCamera);
-	vec3 lbn = vec3(-0.5, -0.5, 0.5);
-	vec3 rtf = vec3(0.5, 0.5, 50);
+	vec3 lbn;
+	lbn.x = lbn.y = -0.5;
+	lbn.z = 0.5;
+	vec3 rtf;
+	rtf.x = rtf.y = 0.5;
+	rtf.z = 50;
 	if (proj == ORTHOGRAPHIC)
 	{
 		curCamera->Ortho(lbn.x, rtf.x, lbn.y, rtf.y, lbn.z, rtf.z);
@@ -189,7 +195,7 @@ void Scene::ControlActiveCamera()
 
 void Scene::ControlActiveLight()
 {
-	activeModel = lights.at(activeLight)->modelId;
+	activeModel = lights.at(activeLight).modelId;
 }
 
 void Scene::setActiveCameraProjection(Projection proj)
@@ -291,7 +297,7 @@ void Scene::draw()
 	MeshModel* curModel;
 	for (auto it = lights.begin(); it != lights.end(); ++it)
 	{
-		(*it)->c_light_position = LightPosition(curCameraInv, (*it)->model->_world_transform, (*it)->model->_model_transform);
+		(it)->c_light_position = LightPosition(curCameraInv, (it)->model->_world_transform, (it)->model->_model_transform);
 	}
 	for (vector<Model*>::iterator it = models.begin(); it != models.end(); ++it)
 	{
@@ -335,9 +341,9 @@ void Scene::drawDemo()
 Scene::Scene(Renderer *renderer) : m_renderer(renderer), current_shadow(FLAT)
 {	
 	InitScene();
-	lights.at(0)->Ld = 0;
-	lights.at(0)->Ls = 0;
-	lights.at(0)->La = 1;
+	lights.at(0).Ld = 0;
+	lights.at(0).Ls = 0;
+	lights.at(0).La = 1;
 	activeModel = ILLEGAL_ACTIVE_MOVEL;
 	proj = FRUSTUM;
 	setActiveCameraProjection(proj);
@@ -440,8 +446,12 @@ void Camera::Ortho(const float left, const float right,
 	const float bottom, const float top,
 	const float zNear, const float zFar)
 { 
-	lbn = vec3(left, bottom, zNear);
-	rtf = vec3(right, top, zFar);
+	lbn.x = left;
+	lbn.y = bottom;
+	lbn.z = zNear;
+	rtf.x = right;
+	rtf.y = top;
+	rtf.z = zFar;
 
 	projection = mat4(
 		(2) / (right - left), 0, 0, 0,
@@ -454,9 +464,14 @@ void Camera::Ortho(const float left, const float right,
 
 Camera::Camera(vec3& lbn, vec3& rtf, int modelId, Model* model) :lbn(lbn), rtf(rtf), modelId(modelId) ,model(model)
 {
-	eye = vec4(0, 0, 0, 1);
-	at = vec4(0, 0, -1, 1);
-	up = vec4(0, 1, 0, 1);
+	eye.x = eye.y = eye.z = 0;
+	eye.w = 1;
+	at.x = at.y = 0;
+	at.z = -1;
+	at.w = 1;
+	up.x = up.z = 0;
+	up.y = 1;
+	up.w = 1;
 	//set camera world view aligned with world asix with offset in z
 }
 
@@ -504,7 +519,7 @@ void Scene::ChangeShadow(Shadow s)
 
 vec4 Scene::GetAmbientRGB()
 {
-	return vec4(lights.at(0)->light_color,lights.at(0)->La);
+	return vec4(lights.at(0).light_color,lights.at(0).La);
 }
 
 void Camera::MaintainRatio(float widthRatio, float heightRatio, Projection proj)
@@ -578,7 +593,7 @@ int Scene::addLight()
 	activeLight = newLightIndex;
 	activeModel = models.size();
 	LightModel* lightModel = new LightModel(newLightIndex);
-	Light* newLight = new Light(models.size(), lightModel);
+	Light newLight = Light(models.size(), lightModel);
 	lights.push_back(newLight);
 	models.push_back(lightModel);
 	return newLightIndex;
@@ -588,12 +603,12 @@ int Scene::addLight()
 void Scene::controlLight(int lightId)
 {
 	activeLight = lightId;
-	Light* activeLight = lights.at(lightId);
+	Light activeLight = lights.at(lightId);
 	ControlActiveLight();
 }
 
 void Scene::lookAtLight(int lightId)
 {
-	Light* lightToLookAt = lights.at(lightId);
-	lookAtModel(lightToLookAt->modelId);
+	Light lightToLookAt = lights.at(lightId);
+	lookAtModel(lightToLookAt.modelId);
 }

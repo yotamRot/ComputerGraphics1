@@ -336,11 +336,12 @@ vec3 Triangle::GetCoordinates(int x, int y)
 	float normalFactor = A1 + A2 + A3;
 	if (normalFactor == 0)
 	{
-		if (length(p2_2d - p1_2d) == 0)
+		float line_len = length(p2_2d - p1_2d);
+		if (line_len == 0)
 		{
 			return C_p1_3d;
 		}
-		const float t = length(cord - p1_2d) / length(p2_2d - p1_2d);
+		const float t = length(cord - p1_2d) / line_len;
 		return C_p1_3d * t + (1 - t) * C_p2_3d;
 	}
 	return (A1 * C_p1_3d + A2 * C_p2_3d + A3 * C_p3_3d) / normalFactor;
@@ -407,18 +408,18 @@ void Triangle::UpdateShape()
 		for (auto it = renderer->lights.begin(); it != renderer->lights.end(); ++it)
 		{
 			
-			if ((*it)->type == PARALLEL_SOURCE)
+			if ((it)->type == PARALLEL_SOURCE)
 			{
-				normalize((*it)->c_light_position);
-				p1_light_direction = (*it)->c_light_position;
-				p2_light_direction = (*it)->c_light_position;
-				p3_light_direction = (*it)->c_light_position;
+				normalize((it)->c_light_position);
+				p1_light_direction = (it)->c_light_position;
+				p2_light_direction = (it)->c_light_position;
+				p3_light_direction = (it)->c_light_position;
 			}
 			else // Point source
 			{
-				p1_light_direction = normalize((*it)->c_light_position - C_p1_3d);
-				p2_light_direction = normalize((*it)->c_light_position - C_p2_3d);
-				p3_light_direction = normalize((*it)->c_light_position - C_p3_3d);
+				p1_light_direction = normalize((it)->c_light_position - C_p1_3d);
+				p2_light_direction = normalize((it)->c_light_position - C_p2_3d);
+				p3_light_direction = normalize((it)->c_light_position - C_p3_3d);
 			}
 			p1_camera_direction = normalize(-C_p1_3d);
 			p2_camera_direction = normalize(-C_p2_3d);
@@ -426,15 +427,15 @@ void Triangle::UpdateShape()
 			p1_reflect_direction = normalize(-p1_light_direction - 2 * (max(dot(-p1_light_direction, p1_normal.normal_direction), 0)) * p1_normal.normal_direction);
 			p2_reflect_direction = normalize(-p2_light_direction - 2 * (max(dot(-p2_light_direction, p2_normal.normal_direction), 0)) * p2_normal.normal_direction);
 			p3_reflect_direction = normalize(-p3_light_direction - 2 * (max(dot(-p3_light_direction, p3_normal.normal_direction), 0)) * p3_normal.normal_direction);
-			p1_illumination += /*ia*/ka * (*it)->La +
-				/*id*/kd * max(dot(p1_light_direction, p1_normal.normal_direction), 0) * (*it)->Ld +
-				/*is*/ks * pow(max(dot(p1_reflect_direction, p1_camera_direction), 0), ALPHA) * (*it)->Ls;
-			p2_illumination += /*ia*/ka * (*it)->La +
-				/*id*/kd * max(dot(p2_light_direction, p2_normal.normal_direction), 0) * (*it)->Ld +
-				/*is*/ks * pow(max(dot(p2_reflect_direction, p2_camera_direction), 0), ALPHA) * (*it)->Ls;
-			p3_illumination += /*ia*/ka * (*it)->La +
-				/*id*/kd * max(dot(p3_light_direction, p3_normal.normal_direction), 0) * (*it)->Ld +
-				/*is*/ks * pow(max(dot(p3_reflect_direction, p3_camera_direction), 0), ALPHA) * (*it)->Ls;
+			p1_illumination += /*ia*/ka * (it)->La +
+				/*id*/kd * max(dot(p1_light_direction, p1_normal.normal_direction), 0) * (it)->Ld +
+				/*is*/ks * pow(max(dot(p1_reflect_direction, p1_camera_direction), 0), ALPHA) * (it)->Ls;
+			p2_illumination += /*ia*/ka * (it)->La +
+				/*id*/kd * max(dot(p2_light_direction, p2_normal.normal_direction), 0) * (it)->Ld +
+				/*is*/ks * pow(max(dot(p2_reflect_direction, p2_camera_direction), 0), ALPHA) * (it)->Ls;
+			p3_illumination += /*ia*/ka * (it)->La +
+				/*id*/kd * max(dot(p3_light_direction, p3_normal.normal_direction), 0) * (it)->Ld +
+				/*is*/ks * pow(max(dot(p3_reflect_direction, p3_camera_direction), 0), ALPHA) * (it)->Ls;
 		}
 	}
 	
@@ -602,7 +603,7 @@ int Triangle::ClipFace(Triangle& triangle1, Triangle& triangle2, Face face)
 	return 0;
 }
 
-vec3 Triangle::GetColor(vec3& C_cords, vector<Light*> lights, Shadow shadow, vec3& shape_color)
+vec3 Triangle::GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow, vec3& shape_color)
 {
 	float ia, id, is;
 	vec3 light_direction;
@@ -643,20 +644,20 @@ vec3 Triangle::GetColor(vec3& C_cords, vector<Light*> lights, Shadow shadow, vec
 	}
 	for (auto it = lights.begin(); it != lights.end(); ++it)
 	{
-		if ((*it)->type == PARALLEL_SOURCE)
+		if ((it)->type == PARALLEL_SOURCE)
 		{
-			light_direction = normalize((*it)->c_light_position);
+			light_direction = normalize((it)->c_light_position);
 		}
 		else // Point source
 		{
-			light_direction = normalize((*it)->c_light_position - C_cords);
+			light_direction = normalize((it)->c_light_position - C_cords);
 		}
 		camera_direction = normalize(vec3(0) - C_cords);
 		reflect_direction = normalize(-light_direction - 2 * (dot(-light_direction, normal)) * normal);
-		ia = ka * (*it)->La;
-		id = kd * max(dot(light_direction, normal),0) * (*it)->Ld;
-		is = ks * pow(max(dot(reflect_direction, camera_direction),0), ALPHA) * (*it)->Ld;
-		color += (*it)->light_color * (ia + id + is);
+		ia = ka * (it)->La;
+		id = kd * max(dot(light_direction, normal),0) * (it)->Ld;
+		is = ks * pow(max(dot(reflect_direction, camera_direction),0), ALPHA) * (it)->Ld;
+		color += (it)->light_color * (ia + id + is);
 	}
 	color = color * shape_color + shape_color * ke;
 
@@ -798,7 +799,7 @@ vec3 Line::GetCoordinates(int x, int y)
 	{
 		C_p1_3d;
 	}
-	const float t = length(vec2(x, y) - p1_2d) / length(p2_2d - p1_2d);
+	const float t = length(vec2(x, y) - p1_2d) / dist;
 	return C_p1_3d * t + (1-t) * C_p2_3d;
 }
 
@@ -808,7 +809,7 @@ void Line::UpdateShape()
 	renderer->Transform(p1_3d, C_p1_3d, P_p1_4d);
 	renderer->Transform(p2_3d, C_p2_3d, P_p2_4d);
 }
-vec3 Line::GetColor(vec3& C_cords, vector<Light*> lights, Shadow shadow, vec3& shape_color)
+vec3 Line::GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow, vec3& shape_color)
 {
 	return 1;
 }
@@ -1159,7 +1160,7 @@ vec2 Renderer::vec4ToVec2(const vec4& ver)
 	return point;
 }
 
-vector<Light*> Renderer::GetLights()
+vector<Light> Renderer::GetLights()
 {
 	return lights;
 }
@@ -1207,7 +1208,7 @@ void Renderer::NormTransform(const vec3& ver, vec3& direction)
 
 void Renderer::ConfigureRenderer(const mat4& projection, const mat4& transform,
 								bool isDrawVertexNormal, bool isDrawFaceNormal, bool isWireFrame, bool isFog, bool isSuperSample,
-								bool isDrawBoundBox, vector<Light*> scene_lights,
+								bool isDrawBoundBox, vector<Light> scene_lights,
 								Shadow scene_shadow)
 {
 	cTransform = transform;
@@ -1365,8 +1366,6 @@ void Renderer::ZBufferScanConvert()
 	int minX, maxX;
 	int fixed_y;
 	vec3 color;
-	//float min_illumination = std::numeric_limits<float>::infinity(); 
-	//float max_illumination = -std::numeric_limits<float>::infinity();
 	for (auto it = shapes.begin(); it != shapes.end(); ++it)
 	{
 		yMin = max(0, (*it)->yMin);
