@@ -10,7 +10,7 @@ using namespace std;
 vec3 LightPosition(mat4& c_transform, mat4& w_transform, mat4& m_transform)
 {
 	vec4 tempVec = c_transform * w_transform * m_transform * vec4(vec3(0));
-	return vec3(tempVec.x / tempVec.w, tempVec.y / tempVec.w, tempVec.z / tempVec.w);
+	return normalize(vec3(tempVec.x / tempVec.w, tempVec.y / tempVec.w, tempVec.z / tempVec.w));
 }
 
 int Scene::loadOBJModel(string fileName)

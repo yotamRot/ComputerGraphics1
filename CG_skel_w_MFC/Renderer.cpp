@@ -646,13 +646,13 @@ vec3 Triangle::GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow, vec
 	{
 		if ((it)->type == PARALLEL_SOURCE)
 		{
-			light_direction = normalize((it)->c_light_position);
+			light_direction = (it)->c_light_position;
 		}
 		else // Point source
 		{
 			light_direction = normalize((it)->c_light_position - C_cords);
 		}
-		camera_direction = normalize(vec3(0) - C_cords);
+		camera_direction = normalize(- C_cords);
 		reflect_direction = normalize(-light_direction - 2 * (dot(-light_direction, normal)) * normal);
 		ia = ka * (it)->La;
 		id = kd * max(dot(light_direction, normal),0) * (it)->Ld;
