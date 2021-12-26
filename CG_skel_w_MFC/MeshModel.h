@@ -27,6 +27,7 @@ public:
 	float ka;// fraction of ambient light reflected from surface = 0.5;
 	float kd;// = 0.8;
 	float ks;// = 1.0;
+	float ke;
 	float alpha;// = 100.0;
 
 	vector<Triangle>* triangles;
@@ -53,6 +54,7 @@ public:
 	GLfloat GetProportionalValue();
 	void UpdateTriangleColor();
 	void UpdateTriangleIlluminationParams();
+	void RandomizePolygons();
 };
 
 class PrimMeshModel : public MeshModel

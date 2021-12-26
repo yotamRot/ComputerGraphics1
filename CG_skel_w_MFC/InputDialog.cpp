@@ -24,13 +24,14 @@
 #define IDC_K_A_EDIT                212
 #define IDC_K_D_EDIT                213
 #define IDC_K_S_EDIT                214
-#define IDC_RED_EDIT                215
-#define IDC_GREEN_EDIT              216
-#define IDC_BLUE_EDIT               217
+#define IDC_K_E_EDIT                215
+#define IDC_RED_EDIT                216
+#define IDC_GREEN_EDIT              217
+#define IDC_BLUE_EDIT               218
 
-#define IDC_L_A_EDIT                218
-#define IDC_L_D_EDIT                219
-#define IDC_L_S_EDIT                220
+#define IDC_L_A_EDIT                219
+#define IDC_L_D_EDIT                220
+#define IDC_L_S_EDIT                221
 
 #define CMD_EDIT_TITLE              "Command"
 #define X_EDIT_TITLE                "X ="
@@ -56,6 +57,7 @@
 #define K_A_EDIT_TITLE              "Ka "
 #define K_D_EDIT_TITLE              "Kd "
 #define K_S_EDIT_TITLE              "Ks "
+#define K_E_EDIT_TITLE              "Ke "
 
 
 vec3 rtf;
@@ -63,7 +65,7 @@ vec3 lbn;
 vec3 l;
 vec3 RGB;
 vec4 ambient_rgbl;
-vec3 k;
+vec4 k;
 
 void SetLbnRtf(vec3& Ilbn, vec3& Irtf)
 {
@@ -89,7 +91,7 @@ void SetRGBLa(vec4& rgbl)
 
 }
 
-void SetColorParam(vec3& colors, vec3& k_params)
+void SetColorParam(vec3& colors, vec4& k_params)
 {
     RGB = colors;
     k = k_params;
@@ -470,15 +472,15 @@ void CPerspDialog::OnPaint()
 // ----------------------
 
 ColorDialog::ColorDialog(CString title)
-    : CInputDialog(title), mKa(k.x), mKd(k.y), mKs(k.z), mRed(RGB.x), mGreen(RGB.y), mBlue(RGB.z)
+    : CInputDialog(title), mKa(k.x), mKd(k.y), mKs(k.z), mKe(k.w), mRed(RGB.x), mGreen(RGB.y), mBlue(RGB.z)
 { }
 
 ColorDialog::~ColorDialog()
 { }
 
-vec3 ColorDialog::GetK()
+vec4 ColorDialog::GetK()
 {
-    return vec3(mKa, mKd, mKs);
+    return vec4(mKa, mKd, mKs, mKe);
 }
 
 vec3 ColorDialog::GetRGB()
@@ -492,6 +494,7 @@ void ColorDialog::DoDataExchange(CDataExchange* pDX)
     DDX_Text(pDX, IDC_K_A_EDIT, mKa);
     DDX_Text(pDX, IDC_K_D_EDIT, mKd);
     DDX_Text(pDX, IDC_K_S_EDIT, mKs);
+    DDX_Text(pDX, IDC_K_E_EDIT, mKe);
     DDX_Text(pDX, IDC_RED_EDIT, mRed);
     DDX_Text(pDX, IDC_GREEN_EDIT, mGreen);
     DDX_Text(pDX, IDC_BLUE_EDIT, mBlue);
@@ -509,10 +512,13 @@ int ColorDialog::OnCreate(LPCREATESTRUCT lpcs)
         CRect(160, 70, 200, 90), this, IDC_K_A_EDIT);
 
     mKdEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
-        CRect(360, 70, 400, 90), this, IDC_K_D_EDIT);
+        CRect(300, 70, 330, 90), this, IDC_K_D_EDIT);
 
     mKsEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
-        CRect(560, 70, 600, 90), this, IDC_K_S_EDIT);
+        CRect(440, 70, 460, 90), this, IDC_K_S_EDIT);
+
+    mKeEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(560, 70, 600, 90), this, IDC_K_E_EDIT);
 
     mRedEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
         CRect(160, 170, 200, 190), this, IDC_RED_EDIT);
@@ -534,11 +540,14 @@ void ColorDialog::OnPaint()
     CRect r_rect(100, 72, 200, 95);
     dc.DrawText(CString(K_A_EDIT_TITLE), -1, &r_rect, DT_SINGLELINE);
 
-    CRect t_rect(250, 72, 400, 95);
+    CRect t_rect(230, 72, 330, 95);
     dc.DrawText(CString(K_D_EDIT_TITLE), -1, &t_rect, DT_SINGLELINE);
 
-    CRect f_rect(500, 72, 600, 95);
+    CRect f_rect(360, 72, 460, 95);
     dc.DrawText(CString(K_S_EDIT_TITLE), -1, &f_rect, DT_SINGLELINE);
+
+    CRect e_rect(500, 72, 600, 95);
+    dc.DrawText(CString(K_E_EDIT_TITLE), -1, &e_rect, DT_SINGLELINE);
 
     CRect l_rect(100, 172, 200, 195);
     dc.DrawText(CString(RED_EDIT_TITLE), -1, &l_rect, DT_SINGLELINE);

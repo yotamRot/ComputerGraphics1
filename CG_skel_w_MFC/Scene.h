@@ -123,7 +123,7 @@ public:
 	Camera* GetActiveCamera();
 	Light* GetActiveLight();
 	vec3 GetModelRGB();
-	vec3 GetModelK();
+	vec4 GetModelK();
 	void ChangeActiveLightL(vec3& l_params);
 	void ChangeAmbientRgbLa(vec4& rgbl);
 	void Zoom(ZoomDirection direction);
@@ -137,7 +137,8 @@ public:
 	vec3 Getrtf();
 	void MaintingCamerasRatios(int oldWidth, int oldHeight, int newWidth, int newHeight);
 	void ChangeModelColorIndex(vec3& rgb);
-	void ChangeModelIlluminationParams(vec3& k);
+	void ChangeModelIlluminationParams(vec4& k);
+	void ApplyCrazyColors();
 	void ChangeShadow(Shadow s);
 	vec4 GetAmbientRGB();
 };

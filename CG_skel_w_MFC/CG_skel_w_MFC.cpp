@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "CG_skel_w_MFC.h"
-
+#include <time.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -44,6 +44,7 @@
 #define WIRE_FRAME					5
 #define FOG							6
 #define SUPER_SAMPLE				7
+#define CRAZY_COLORS				8
 
 #define ORTHOGRPHIC_PARAMETERS		1
 #define PRESPECTIVE_PARAMETERS		2
@@ -263,9 +264,14 @@ void ChangeObjectColor()
 	if (dlg.DoModal() == IDOK) {
 		vec3 rgb = dlg.GetRGB();
 		scene->ChangeModelColorIndex(rgb);
-		vec3 k = dlg.GetK();
+		vec4 k = dlg.GetK();
 		scene->ChangeModelIlluminationParams(k);
 	}
+}
+
+void CreateCrazyModel()
+{
+	scene->ApplyCrazyColors();
 }
 
 void ClearScene()
@@ -573,7 +579,7 @@ void transAxiesMenu(int id)
 	scene->SetTrasformationAxis((TransAxis)id);
 }
 
-void featuresMenu(int id)
+void rendererMenu(int id)
 {
 	switch (id)
 	{
@@ -597,6 +603,9 @@ void featuresMenu(int id)
 			break;
 		case SUPER_SAMPLE:
 			SuperSample();
+			break;
+		case CRAZY_COLORS:
+			CreateCrazyModel();
 			break;
 	}
 	scene->draw();
@@ -706,7 +715,7 @@ void CreateShadowMenu()
 
 void CreateRendererMenu()
 {
-	menuRenderer = glutCreateMenu(featuresMenu);
+	menuRenderer = glutCreateMenu(rendererMenu);
 	glutAddMenuEntry("Show Vertices Normal", SHOW_VERTICES_NORMAL);
 	glutAddMenuEntry("Show Faces Normal", SHOW_FACES_NORMAL);
 	glutAddMenuEntry("Show Bounding Box", SHOW_BOUNDING_BOX);
@@ -714,6 +723,7 @@ void CreateRendererMenu()
 	glutAddMenuEntry("Show Wire Frame", WIRE_FRAME);
 	glutAddMenuEntry("Show Fog", FOG);
 	glutAddMenuEntry("Use SuperSample", SUPER_SAMPLE);
+	glutAddMenuEntry("Apply Crazy Colors", CRAZY_COLORS);
 }
 
 void CreateProjectionMenus()
@@ -817,6 +827,7 @@ using namespace std;
 int main( int argc, char **argv )
 {
 	int nRetCode = 0;
+	srand((unsigned)time(NULL));
 	
 	// initialize MFC and print and error on failure
 	if (!AfxWinInit(::GetModuleHandle(NULL), NULL, ::GetCommandLine(), 0))

@@ -115,7 +115,7 @@ mat4 CreateNormalTransform(mat4& matrix, Transformation T)
 	return normalMatrix;
 }
 
-MeshModel::MeshModel(string fileName):mesh_color(BLUE), ka(0.5), kd(0.8), ks(1.0), alpha(100.0)
+MeshModel::MeshModel(string fileName):mesh_color(BLUE), ka(0.5), kd(0.8), ks(1.0),ke(0), alpha(100.0)
 {
 	loadFile(fileName);
 	bound_box_vertices = CalcBounds();
@@ -323,6 +323,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	ka = 0.5;
 	kd = 0.8;
 	ks = 1.0;
+	ke = 0;
 	triangles = new vector<Triangle>;
 	vec3 p1, p2, p3;
 
@@ -713,10 +714,40 @@ void MeshModel::UpdateTriangleIlluminationParams()
 		(*it).ka = ka;
 		(*it).kd = kd;
 		(*it).ks = ks;
+		(*it).ke = ke;
 	}
 }
 
+void MeshModel::RandomizePolygons()
+{
+	int third = triangles->size() / 3;
+	float step = (float) 3 / triangles->size();
+	vec3 black = vec3(0);
+	for (auto it = triangles->begin(); it != triangles->end(); ++it)
+	{
+		(*it).ka = (float)rand() / RAND_MAX;
+		(*it).kd = (float)rand() / RAND_MAX;
+		(*it).ks = (float)rand() / RAND_MAX;
+		(*it).shape_color = black;
+	}
 
+	for (int i = 0; i < third; i++)
+	{
+		triangles->at(i).shape_color.x = step * i;
+	}
+
+	for (int i = third; i < 2* third; i++)
+	{
+		triangles->at(i).shape_color.y = step * i;
+	}
+
+	for (int i = 2* third; i < triangles->size(); i++)
+	{
+		triangles->at(i).shape_color.z = step * i;
+	}
+
+	
+}
 
 mat4 MeshModel::manipulateModel(Transformation T, TransformationDirection direction,
 								TransAxis axis, float power)

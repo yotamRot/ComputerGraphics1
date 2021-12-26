@@ -52,10 +52,10 @@ vec3 Scene::GetModelRGB()
 	return curModel->mesh_color;
 }
 
-vec3 Scene::GetModelK()
+vec4 Scene::GetModelK()
 {
 	MeshModel* curModel = (MeshModel*)models.at(activeModel);
-	return vec3(curModel->ka, curModel->kd, curModel->ks) ;
+	return vec4(curModel->ka, curModel->kd, curModel->ks, curModel->ke) ;
 }
 
 void Scene::ChangeActiveLightL(vec3& l_params)
@@ -480,14 +480,22 @@ void Scene::ChangeModelColorIndex(vec3& rgb)
 }
 
 
-void Scene::ChangeModelIlluminationParams(vec3& k)
+void Scene::ChangeModelIlluminationParams(vec4& k)
 {
 	MeshModel* cur_model = (MeshModel*)models.at(activeModel);
 	cur_model->ka = k.x;
 	cur_model->kd = k.y;
 	cur_model->ks = k.z;
+	cur_model->ke = k.w;
 	cur_model->UpdateTriangleIlluminationParams();
 }
+
+void Scene::ApplyCrazyColors()
+{
+	MeshModel* cur_model = (MeshModel*)models.at(activeModel);
+	cur_model->RandomizePolygons();
+}
+
 
 void Scene::ChangeShadow(Shadow s)
 {

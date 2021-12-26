@@ -205,6 +205,7 @@ public:
 	float ka;
 	float kd;
 	float ks;
+	float ke;
 
 	float p1_illumination;
 	float p2_illumination;

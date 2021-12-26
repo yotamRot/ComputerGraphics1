@@ -656,9 +656,9 @@ vec3 Triangle::GetColor(vec3& C_cords, vector<Light*> lights, Shadow shadow, vec
 		ia = ka * (*it)->La;
 		id = kd * max(dot(light_direction, normal),0) * (*it)->Ld;
 		is = ks * pow(max(dot(reflect_direction, camera_direction),0), ALPHA) * (*it)->Ld;
-		color += (*it)->light_color *(ia + id + is);
+		color += (*it)->light_color * (ia + id + is);
 	}
-	color = color * shape_color;
+	color = color * shape_color + shape_color * ke;
 
 	//apply fog
 	if (renderer->isFog)
