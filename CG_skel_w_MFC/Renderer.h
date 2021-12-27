@@ -108,7 +108,7 @@ public:
 	virtual vec3  GetCoordinates(int x, int y) =0;
 	virtual void  Rasterize() =0;
 	virtual void  UpdateShape() = 0;
-	virtual vec3 GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow, vec3& shape_color) = 0;
+	virtual vec3 GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow) = 0;
 	virtual void Clip() = 0;
 
 	bool is_light;
@@ -148,7 +148,7 @@ public:
 	void Clip() override;
 	void ClipFace(Face face);
 
-	vec3 GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow, vec3& shape_color) override;
+	vec3 GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow) override;
 
 
 
@@ -216,7 +216,7 @@ public:
 	void UpdateShape() override;
 	void Clip() override;
 	bool ShouldDraw();
-	vec3 GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow, vec3& shape_color) override;
+	vec3 GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow) override;
 	float GetGouruad(vec3& C_cords);
 	vec3 GetPhong(vec3& C_cords);
 	int ClipFace(Triangle& triangle1, Triangle& triangle2, Face face);

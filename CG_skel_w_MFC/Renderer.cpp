@@ -606,7 +606,7 @@ int Triangle::ClipFace(Triangle& triangle1, Triangle& triangle2, Face face)
 	return 0;
 }
 
-vec3 Triangle::GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow, vec3& shape_color)
+vec3 Triangle::GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow)
 {
 	float ia, id, is;
 	vec3 light_direction;
@@ -815,9 +815,9 @@ void Line::UpdateShape()
 	renderer->Transform(p1_3d, C_p1_3d, P_p1_4d);
 	renderer->Transform(p2_3d, C_p2_3d, P_p2_4d);
 }
-vec3 Line::GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow, vec3& shape_color)
+vec3 Line::GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow)
 {
-	return 1;
+	return shape_color;
 }
 
 void Normal::UpdateShape()
@@ -1022,24 +1022,34 @@ bool CustomCompareYmin::operator()( Shape* shape1,  Shape* shape2) const
 
 void Renderer::ClipModel(vector<Triangle>* triangles, vector<Line>* boundBoxLines)
 {
-	RendererActions action =shouldDrawModel(boundBoxLines);
-	if (action != NotDraw)
+	RendererActions action = shouldDrawModel(boundBoxLines);
+	if (action == NotDraw)
+	{
+		return;
+
+	}
+	else if (action == Clip)
 	{
 		for (auto it = triangles->begin(); it != triangles->end(); ++it)
 		{
 			it->UpdateShape();
 			if (it->should_draw)
 			{
-				if (action == Clip)
-				{
-					it->Clip();
-				}
-				else
-				{
-					triangulation_triangles.push_back(*it);
-				}
+				it->Clip();
 			}
 			
+		}
+	}
+	else
+	{
+		for (auto it = triangles->begin(); it != triangles->end(); ++it)
+		{
+			it->UpdateShape();
+			if (it->should_draw)
+			{
+				triangulation_triangles.push_back(*it);
+			}
+
 		}
 	}
 
@@ -1398,7 +1408,7 @@ void Renderer::ZBufferScanConvert()
 					}
 					else if ((lights.size() > 0) && ((*it)->is_light == false))
 					{
-						color = (*it)->GetColor(C_cords, lights, shadow, (*it)->shape_color);
+						color = (*it)->GetColor(C_cords, lights, shadow);
 						DrawPixel(i, y, color);
 					}
 					else
