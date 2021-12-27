@@ -21,6 +21,23 @@ double inline __declspec (naked) __fastcall sqrt14(double n)
     _asm ret 8
 }
 
+float inline Q_rsqrt(float number)
+{
+    long i;
+    float x2, y;
+    const float threehalfs = 1.5F;
+
+    x2 = number * 0.5F;
+    y = number;
+    i = *(long*)&y;                       // evil floating point bit level hacking
+    i = 0x5f3759df - (i >> 1);               // what the fuck? 
+    y = *(float*)&i;
+    y = y * (threehalfs - (x2 * y * y));   // 1st iteration
+//	y  = y * ( threehalfs - ( x2 * y * y ) );   // 2nd iteration, this can be removed
+
+    return y;
+}
+
 struct vec2 {
 
     GLfloat  x;
@@ -135,7 +152,7 @@ GLfloat dot( const vec2& u, const vec2& v )
 inline
 GLfloat length( const vec2& v ) 
 {
-    return std::sqrt(std::pow(v.x, 2) + std::pow(v.y, 2)); /*FIXED*/
+    return sqrt14(std::pow(v.x, 2) + std::pow(v.y, 2)); /*FIXED*/
 }
 
 inline
@@ -292,12 +309,12 @@ GLfloat dot( const vec3& u, const vec3& v ) {
 
 inline
 GLfloat length( const vec3& v ) {
-    return std::sqrt( dot(v,v) );
+    return sqrt14( dot(v,v) );
 }
 
 inline
 vec3 normalize( const vec3& v ) {
-    return v / length(v);
+    return v * Q_rsqrt(dot(v, v));
 }
 
 inline
@@ -434,12 +451,12 @@ GLfloat dot( const vec4& u, const vec4& v ) {
 
 inline
 GLfloat length( const vec4& v ) {
-    return std::sqrt( dot(v,v) );
+    return sqrt14( dot(v,v) );
 }
 
 inline
 vec4 normalize( const vec4& v ) {
-    return v / length(v);
+    return v * Q_rsqrt(dot(v, v));
 }
 
 inline

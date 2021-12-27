@@ -398,6 +398,15 @@ void Triangle::UpdateShape()
 	renderer->Transform(p2_3d, C_p2_3d, P_p2_4d);
 	renderer->Transform(p3_3d, C_p3_3d, P_p3_4d);
 
+	if (normal.is_valid)
+	{
+		normal.UpdateShape();
+	}
+
+	if (!ShouldDraw())
+	{
+		return;
+	}
 	vec3 p1_light_direction, p2_light_direction, p3_light_direction;
 	vec3 p1_camera_direction, p2_camera_direction, p3_camera_direction;
 	vec3 p1_reflect_direction, p2_reflect_direction, p3_reflect_direction;
@@ -439,12 +448,6 @@ void Triangle::UpdateShape()
 		}
 	}
 	
-
-	if (normal.is_valid)
-	{
-		normal.UpdateShape();
-	}
-
 	if (p1_normal.is_valid)
 	{
 		p1_normal.UpdateShape();
@@ -740,16 +743,6 @@ void Line::ClipFace(Face face)
 
 void Triangle::Clip()
 {
-
-#if DRAW_OPEN_MODELS
-	if (dot(normal.C_p2_3d - normal.C_p1_3d, -(normal.C_p1_3d)) < 0)
-	{
-		should_draw = false;
-		return;
-	}
-#endif
-
-
 	//first clip normals because we might need them clipped in new triangle
 	if (normal.is_valid && renderer->isShowFacesNormals)
 	{
@@ -790,6 +783,19 @@ void Triangle::Clip()
 	}
 	renderer->triangulation_triangles.insert(renderer->triangulation_triangles.end() ,newTriangles.begin(), newTriangles.end());
 
+}
+
+bool Triangle::ShouldDraw()
+{
+#if DRAW_OPEN_MODELS
+	if (dot(normal.C_p2_3d - normal.C_p1_3d, -(normal.C_p1_3d)) < 0)
+	{
+		should_draw = false;
+		return false;
+	}
+#endif
+	should_draw = true;
+	return true;
 }
 
 vec3 Line::GetCoordinates(int x, int y)
@@ -1022,14 +1028,18 @@ void Renderer::ClipModel(vector<Triangle>* triangles, vector<Line>* boundBoxLine
 		for (auto it = triangles->begin(); it != triangles->end(); ++it)
 		{
 			it->UpdateShape();
-			if (action == Clip)
+			if (it->should_draw)
 			{
-				it->Clip();
+				if (action == Clip)
+				{
+					it->Clip();
+				}
+				else
+				{
+					triangulation_triangles.push_back(*it);
+				}
 			}
-			else
-			{
-				triangulation_triangles.push_back(*it);
-			}
+			
 		}
 	}
 

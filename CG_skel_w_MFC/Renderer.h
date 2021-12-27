@@ -215,6 +215,7 @@ public:
 	vec3 GetCoordinates(int x, int y) override ;
 	void UpdateShape() override;
 	void Clip() override;
+	bool ShouldDraw();
 	vec3 GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow, vec3& shape_color) override;
 	float GetGouruad(vec3& C_cords);
 	vec3 GetPhong(vec3& C_cords);
