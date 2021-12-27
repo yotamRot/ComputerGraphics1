@@ -124,7 +124,7 @@ public:
 	Light& GetActiveLight();
 	vec3 GetModelRGB();
 	vec4 GetModelK();
-	void ChangeActiveLightL(vec3& l_params);
+	void ChangeActiveLightL(vec4& l_params);
 	void ChangeAmbientRgbLa(vec4& rgbl);
 	void Zoom(ZoomDirection direction);
 	int activeModel;

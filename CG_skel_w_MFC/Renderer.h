@@ -82,6 +82,7 @@ public:
 	float La;
 	float Ld;
 	float Ls;
+	float l_alpha;
 	int modelId;
 	vec3 c_light_position;
 	vec3 light_color;
@@ -89,7 +90,7 @@ public:
 	LightType type;
 
 	Light(int modelId, Model* model);
-	vec3 GetL();
+	vec4 GetL(); // return L and alpha
 };
 
 

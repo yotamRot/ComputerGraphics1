@@ -115,7 +115,7 @@ mat4 CreateNormalTransform(mat4& matrix, Transformation T)
 	return normalMatrix;
 }
 
-MeshModel::MeshModel(string fileName):mesh_color(BLUE), ka(0.5), kd(0.8), ks(1.0),ke(0), alpha(100.0)
+MeshModel::MeshModel(string fileName):mesh_color(BLUE), ka(0.5), kd(0.8), ks(1.0),ke(0)
 {
 	loadFile(fileName);
 	bound_box_vertices = CalcBounds();
@@ -494,12 +494,26 @@ LightModel::LightModel(int lightIndex) : lightIndex(lightIndex)
 	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 1, 0), false, face_normal);
 	curTriangle = Triangle(p1, p2, p3, mesh_color, true, curFaceNormal);
 	triangles->push_back(curTriangle);
+	// first triangle other side
+	p1 = vec3(0.1, 0, 0); // bottom left
+	p2 = vec3(-0.1, 0, 0); // top left
+	p3 = vec3(0, 0, -0.1); // bottom right
+	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, -1, 0), false, face_normal);
+	curTriangle = Triangle(p1, p2, p3, mesh_color, true, curFaceNormal);
+	triangles->push_back(curTriangle);
 
 	// second triangle
 	p1 = vec3(0, 0.1, 0); // bottom left
 	p2 = vec3(0, -0.1, 0); // top left
 	p3 = vec3(0, 0, -0.1); // bottom right
 	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(1, 0, 0), false, face_normal);
+	curTriangle = Triangle(p1, p2, p3, mesh_color, true, curFaceNormal);
+	triangles->push_back(curTriangle);
+	// second triangle other side
+	p1 = vec3(0, 0.1, 0); // bottom left
+	p2 = vec3(0, -0.1, 0); // top left
+	p3 = vec3(0, 0, -0.1); // bottom right
+	curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(-1, 0, 0), false, face_normal);
 	curTriangle = Triangle(p1, p2, p3, mesh_color, true, curFaceNormal);
 	triangles->push_back(curTriangle);
 

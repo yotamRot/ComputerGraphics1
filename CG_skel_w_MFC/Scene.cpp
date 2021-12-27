@@ -58,11 +58,12 @@ vec4 Scene::GetModelK()
 	return vec4(curModel->ka, curModel->kd, curModel->ks, curModel->ke) ;
 }
 
-void Scene::ChangeActiveLightL(vec3& l_params)
+void Scene::ChangeActiveLightL(vec4& l_params)
 {
 	lights.at(activeLight).La = l_params.x;
 	lights.at(activeLight).Ld = l_params.y;
 	lights.at(activeLight).Ls = l_params.z;
+	lights.at(activeLight).l_alpha = l_params.w;
 }
 
 void Scene::ChangeAmbientRgbLa(vec4 & rgbl)

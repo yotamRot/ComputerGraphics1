@@ -95,6 +95,7 @@ std::string lightPrefix = "Light Source ";
  
 int mainMenuId;
 int menuObjectsId;
+int menuLookAtObjects;
 int menuSwitchToCameraId;
 int menuSwitchToLightId;
 int menuSwitchLightType;
@@ -168,9 +169,9 @@ void ChangeAmbientColors()
 void ChangeLightLParams()
 {
 	SetLightL(scene->GetActiveLight().GetL());
-	LDialog dlg;
-	if (dlg.DoModal() == IDOK) {
-		vec3 l_params = dlg.GetL();
+	LDialog adlg;
+	if (adlg.DoModal() == IDOK) {
+		vec4 l_params = adlg.GetL();// l params and alpha
 		scene->ChangeActiveLightL(l_params);
 	}
 }
@@ -282,6 +283,12 @@ void ClearScene()
 	{
 		glutRemoveMenuItem(1);
 	}
+	glutSetMenu(menuLookAtObjects);
+	tmp = glutGet(GLUT_MENU_NUM_ITEMS);
+	for (int i = 1; i <= tmp; i++)
+	{
+		glutRemoveMenuItem(1);
+	}
 	glutSetMenu(menuLookAtCameraId);
 	tmp = glutGet(GLUT_MENU_NUM_ITEMS);
 	for (int i = 1; i <= tmp; i++)
@@ -343,6 +350,8 @@ void OpenFile()
 		newModelId = scene->loadOBJModel(path);
 		std::string name = (LPCTSTR)dlg.GetFileName();
 		glutAddMenuEntry(name.c_str(), newModelId);
+		glutSetMenu(menuLookAtObjects);
+		glutAddMenuEntry(name.c_str(), newModelId);
 		scene->lookAtModel(scene->activeModel);
 	}
 	else
@@ -355,6 +364,8 @@ void AddCube()
 {
 	glutSetMenu(menuObjectsId);
 	newModelId = scene->loadCubeModel();
+	glutAddMenuEntry("Cube", newModelId);
+	glutSetMenu(menuLookAtObjects);
 	glutAddMenuEntry("Cube", newModelId);
 	scene->lookAtModel(scene->activeModel);
 }
@@ -492,6 +503,13 @@ void motion(int x, int y)
 
 
 void objectsMenu(int id)
+{
+	scene->activeModel = scene->modelMenuIdToVectorId(id);
+	scene->draw();
+}
+
+
+void lookAtObjectMenu(int id)
 {
 	scene->lookAtModel(scene->modelMenuIdToVectorId(id));
 	scene->draw();
@@ -746,13 +764,15 @@ void CreateProjectionMenus()
 void CreateMainMenu()
 {
 	menuObjectsId = glutCreateMenu(objectsMenu);
+	menuLookAtObjects = glutCreateMenu(lookAtObjectMenu);
 	mainMenuId = glutCreateMenu(mainMenu);
 	glutAddSubMenu("Load", menuFile);
 	glutAddSubMenu("Transformations", menuTramsformation);
 	glutAddSubMenu("Transformations axis", menuTransformationAxies);
 	glutAddSubMenu("Projection", menuProjections);
 	glutAddSubMenu("Renderer", menuRenderer);
-	glutAddSubMenu("Objects", menuObjectsId);
+	glutAddSubMenu("Look At Object", menuLookAtObjects);
+	glutAddSubMenu("Select Object",menuObjectsId);
 	glutAddMenuEntry("Clear Screen", CLEAR);
 	glutAddSubMenu("Cameras", menuCameras);
 	glutAddSubMenu("Light Sources", menuLights);

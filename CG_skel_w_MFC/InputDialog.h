@@ -7,7 +7,7 @@ using std::string;
 #include "vec.h"
 
 void SetLbnRtf(vec3& Ilbn, vec3& Irtf);
-void SetLightL(vec3& l_params);
+void SetLightL(vec4& l_params);
 void SetColorParam(vec3& colors, vec4& k_params);
 void SetRGBLa(vec4& rgbl);
 // ------------------------
@@ -219,15 +219,17 @@ public:
     LDialog(CString title = "Input Dialog");
     virtual ~LDialog();
 
-    vec3 GetL();
+    vec4 GetL();
 
 protected:
     float mLa;
     float mLd;
     float mLs;
+    int mAlpha;
     CEdit mLaEdit;
     CEdit mLdEdit;
     CEdit mLsEdit;
+    CEdit mAlphaEdit;
 
     virtual void DoDataExchange(CDataExchange* pDX);
 

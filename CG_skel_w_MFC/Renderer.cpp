@@ -10,7 +10,6 @@
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 #define ZINDEX(width,x,y) (x+y*width)
 #define DRAW_OPEN_MODELS 1
-#define ALPHA 2
 
 
 #define SUPER_SAMPLE_FACTOR 2
@@ -58,13 +57,13 @@ Normal::Normal(vec3& p1_3d, vec3& p2_3d, bool is_light, NormalKind normal_kind, 
 	x_min = NULL;
 }
 
-Light::Light(int modelId, Model* model) : modelId(modelId), model(model), La(0.3), Ld(0.3), Ls(0.3), type(POINT_SOURCE), light_color(vec3(1,1,1))
+Light::Light(int modelId, Model* model) : modelId(modelId), model(model), La(0.3), Ld(0.3), Ls(0.3), type(POINT_SOURCE), light_color(vec3(1,1,1)), l_alpha(2)
 {
 }
 
-vec3 Light::GetL()
+vec4 Light::GetL()
 {
-	return vec3(La, Ld, Ls);
+	return vec4(La, Ld, Ls, l_alpha);
 }
 
 // gives the maximum in array
@@ -438,13 +437,13 @@ void Triangle::UpdateShape()
 			p3_reflect_direction = normalize(-p3_light_direction - 2 * (max(dot(-p3_light_direction, p3_normal.normal_direction), 0)) * p3_normal.normal_direction);
 			p1_illumination += /*ia*/ka * (it)->La +
 				/*id*/kd * max(dot(p1_light_direction, p1_normal.normal_direction), 0) * (it)->Ld +
-				/*is*/ks * pow(max(dot(p1_reflect_direction, p1_camera_direction), 0), ALPHA) * (it)->Ls;
+				/*is*/ks * pow(max(dot(p1_reflect_direction, p1_camera_direction), 0), (it)->l_alpha) * (it)->Ls;
 			p2_illumination += /*ia*/ka * (it)->La +
 				/*id*/kd * max(dot(p2_light_direction, p2_normal.normal_direction), 0) * (it)->Ld +
-				/*is*/ks * pow(max(dot(p2_reflect_direction, p2_camera_direction), 0), ALPHA) * (it)->Ls;
+				/*is*/ks * pow(max(dot(p2_reflect_direction, p2_camera_direction), 0), (it)->l_alpha) * (it)->Ls;
 			p3_illumination += /*ia*/ka * (it)->La +
 				/*id*/kd * max(dot(p3_light_direction, p3_normal.normal_direction), 0) * (it)->Ld +
-				/*is*/ks * pow(max(dot(p3_reflect_direction, p3_camera_direction), 0), ALPHA) * (it)->Ls;
+				/*is*/ks * pow(max(dot(p3_reflect_direction, p3_camera_direction), 0), (it)->l_alpha) * (it)->Ls;
 		}
 	}
 	
@@ -659,7 +658,7 @@ vec3 Triangle::GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow)
 		reflect_direction = normalize(-light_direction - 2 * (dot(-light_direction, normal)) * normal);
 		ia = ka * (it)->La;
 		id = kd * max(dot(light_direction, normal),0) * (it)->Ld;
-		is = ks * pow(max(dot(reflect_direction, camera_direction),0), ALPHA) * (it)->Ls;
+		is = ks * pow(max(dot(reflect_direction, camera_direction),0), (it)->l_alpha) * (it)->Ls;
 		color += (it)->light_color * (ia + id + is);
 	}
 	color = color * shape_color + shape_color * ke;

@@ -32,6 +32,7 @@
 #define IDC_L_A_EDIT                219
 #define IDC_L_D_EDIT                220
 #define IDC_L_S_EDIT                221
+#define IDC_ALPHA_EDIT                222
 
 #define CMD_EDIT_TITLE              "Command"
 #define X_EDIT_TITLE                "X ="
@@ -40,6 +41,7 @@
 #define L_A_EDIT_TITLE              "La ="
 #define L_D_EDIT_TITLE              "Ld ="
 #define L_S_EDIT_TITLE              "Ls ="
+#define ALPHA_EDIT_TITLE            "a ="
 
 
 #define R_EDIT_TITLE                "Right ="
@@ -62,7 +64,7 @@
 
 vec3 rtf;
 vec3 lbn;
-vec3 l;
+vec4 l; //la,ld,ls,alpha
 vec3 RGB;
 vec4 ambient_rgbl;
 vec4 k;
@@ -80,7 +82,7 @@ void SetLbnRtf(vec3& Ilbn, vec3& Irtf)
     lbn.z = float(round(Ilbn.z) / 100);
 }
 
-void SetLightL(vec3& l_params)
+void SetLightL(vec4& l_params)
 {
     l = l_params;
 }
@@ -566,15 +568,15 @@ void ColorDialog::OnPaint()
 // ----------------------
 
 LDialog::LDialog(CString title)
-    : CInputDialog(title), mLa(l.x), mLd(l.y), mLs(l.z)
+    : CInputDialog(title), mLa(l.x), mLd(l.y), mLs(l.z), mAlpha(l.w)
 { }
 
 LDialog::~LDialog()
 { }
 
-vec3 LDialog::GetL()
+vec4 LDialog::GetL()
 {
-    return vec3(mLa, mLd, mLs);
+    return vec4(mLa, mLd, mLs, mAlpha);
 }
 
 void LDialog::DoDataExchange(CDataExchange* pDX)
@@ -583,6 +585,7 @@ void LDialog::DoDataExchange(CDataExchange* pDX)
     DDX_Text(pDX, IDC_L_A_EDIT, mLa);
     DDX_Text(pDX, IDC_L_D_EDIT, mLd);
     DDX_Text(pDX, IDC_L_S_EDIT, mLs);
+    DDX_Text(pDX, IDC_ALPHA_EDIT, mAlpha);
 }
 
 // LDialog message handlers
@@ -602,6 +605,9 @@ int LDialog::OnCreate(LPCREATESTRUCT lpcs)
     mLsEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
         CRect(130, 210, 340, 230), this, IDC_L_S_EDIT);
 
+    mAlphaEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(130, 280, 340, 300), this, IDC_ALPHA_EDIT);
+
     return 0;
 }
 
@@ -618,6 +624,9 @@ void LDialog::OnPaint()
 
     CRect z_rect(100, 212, 450, 230);
     dc.DrawText(CString(L_S_EDIT_TITLE), -1, &z_rect, DT_SINGLELINE);
+
+    CRect w_rect(100, 282, 450, 300);
+    dc.DrawText(CString(ALPHA_EDIT_TITLE), -1, &w_rect, DT_SINGLELINE);
 
     mLaEdit.SetFocus();
 }

@@ -24,11 +24,11 @@ protected :
 	vec3 center;
 
 public:	
-	float ka;// fraction of ambient light reflected from surface = 0.5;
-	float kd;// = 0.8;
-	float ks;// = 1.0;
+	float ka;// fraction of ambient light reflected from surface 
+	float kd;
+	float ks;
 	float ke;
-	float alpha;// = 100.0;
+
 
 	vector<Triangle>* triangles;
 	vector<Line>* bound_box_vertices;
