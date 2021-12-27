@@ -21,8 +21,8 @@ class Renderer;
 
 // fog params
 #define FOG_COLOR				vec3(0.5,0.5,0.5)
-#define FOG_MIN					1
-#define FOG_MAX					20
+#define FOG_MIN					2
+#define FOG_MAX					45
 
 enum Face
 {

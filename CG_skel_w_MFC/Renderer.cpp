@@ -655,7 +655,7 @@ vec3 Triangle::GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow, vec
 		{
 			light_direction = normalize((it)->c_light_position - C_cords);
 		}
-		camera_direction = normalize(vec3(0) - C_cords);
+		camera_direction = normalize(-C_cords);
 		reflect_direction = normalize(-light_direction - 2 * (dot(-light_direction, normal)) * normal);
 		ia = ka * (it)->La;
 		id = kd * max(dot(light_direction, normal),0) * (it)->Ld;
@@ -1022,7 +1022,7 @@ bool CustomCompareYmin::operator()( Shape* shape1,  Shape* shape2) const
 
 void Renderer::ClipModel(vector<Triangle>* triangles, vector<Line>* boundBoxLines)
 {
-	RendererActions action = shouldDrawModel(boundBoxLines);
+	RendererActions action =shouldDrawModel(boundBoxLines);
 	if (action != NotDraw)
 	{
 		for (auto it = triangles->begin(); it != triangles->end(); ++it)
