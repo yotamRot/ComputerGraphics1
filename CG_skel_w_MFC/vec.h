@@ -13,6 +13,14 @@
 #include <cmath>
 #include "GL/glew.h"
 #define M_PI 3.14159265358979323846264338327
+
+double inline __declspec (naked) __fastcall sqrt14(double n)
+{
+    _asm fld qword ptr[esp + 4]
+        _asm fsqrt
+    _asm ret 8
+}
+
 struct vec2 {
 
     GLfloat  x;

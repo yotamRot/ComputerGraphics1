@@ -330,9 +330,9 @@ vec3 Triangle::GetCoordinates(int x, int y)
 	vec3 vec0 = vec3(p1_2d - cord, 0);
 	vec3 vec1 = vec3(p2_2d - cord, 0);
 	vec3 vec2 = vec3(p3_2d - cord, 0);
-	A1 = length(cross(vec1, vec2));
-	A2 = length(cross(vec2, vec0));
-	A3 = length(cross(vec0, vec1));
+	A1 = abs(cross(vec1, vec2).z);
+	A2 = abs(cross(vec2, vec0).z);
+	A3 = abs(cross(vec0, vec1).z);
 	float normalFactor = A1 + A2 + A3;
 	if (normalFactor == 0)
 	{
@@ -797,7 +797,7 @@ vec3 Line::GetCoordinates(int x, int y)
 	float dist = length(p2_2d - p1_2d);
 	if (dist == 0)
 	{
-		C_p1_3d;
+		return C_p1_3d;
 	}
 	const float t = length(vec2(x, y) - p1_2d) / dist;
 	return C_p1_3d * t + (1-t) * C_p2_3d;
