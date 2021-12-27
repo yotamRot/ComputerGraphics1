@@ -9,7 +9,7 @@
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 #define ZINDEX(width,x,y) (x+y*width)
-#define DRAW_OPEN_MODELS 0 
+#define DRAW_OPEN_MODELS 1
 #define ALPHA 2
 
 
@@ -58,7 +58,7 @@ Normal::Normal(vec3& p1_3d, vec3& p2_3d, bool is_light, NormalKind normal_kind, 
 	x_min = NULL;
 }
 
-Light::Light(int modelId, Model* model) : modelId(modelId), model(model), La(0.5), Ld(0.5), Ls(0.5), type(PARALLEL_SOURCE), light_color(vec3(1,1,1))
+Light::Light(int modelId, Model* model) : modelId(modelId), model(model), La(0.3), Ld(0.3), Ls(0.3), type(POINT_SOURCE), light_color(vec3(1,1,1))
 {
 }
 
@@ -330,9 +330,9 @@ vec3 Triangle::GetCoordinates(int x, int y)
 	vec3 vec0 = vec3(p1_2d - cord, 0);
 	vec3 vec1 = vec3(p2_2d - cord, 0);
 	vec3 vec2 = vec3(p3_2d - cord, 0);
-	A1 = abs(cross(vec1, vec2).z);
-	A2 = abs(cross(vec2, vec0).z);
-	A3 = abs(cross(vec0, vec1).z);
+	A1 = fabs(cross(vec1, vec2).z);
+	A2 = fabs(cross(vec2, vec0).z);
+	A3 = fabs(cross(vec0, vec1).z);
 	float normalFactor = A1 + A2 + A3;
 	if (normalFactor == 0)
 	{
@@ -649,17 +649,17 @@ vec3 Triangle::GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow, vec
 	{
 		if ((it)->type == PARALLEL_SOURCE)
 		{
-			light_direction = (it)->c_light_position;
+			light_direction = normalize((it)->c_light_position);
 		}
 		else // Point source
 		{
 			light_direction = normalize((it)->c_light_position - C_cords);
 		}
-		camera_direction = normalize(- C_cords);
+		camera_direction = normalize(vec3(0) - C_cords);
 		reflect_direction = normalize(-light_direction - 2 * (dot(-light_direction, normal)) * normal);
 		ia = ka * (it)->La;
 		id = kd * max(dot(light_direction, normal),0) * (it)->Ld;
-		is = ks * pow(max(dot(reflect_direction, camera_direction),0), ALPHA) * (it)->Ld;
+		is = ks * pow(max(dot(reflect_direction, camera_direction),0), ALPHA) * (it)->Ls;
 		color += (it)->light_color * (ia + id + is);
 	}
 	color = color * shape_color + shape_color * ke;
@@ -832,7 +832,7 @@ void Shape::RasterizeLine(vec2 ver1, vec2 ver2)
 {
 	float dX = ver2.x - ver1.x;
 	float dY = ver2.y - ver1.y;
-	if (abs(dY) < abs(dX) )
+	if (fabs(dY) < fabs(dX) )
 	{
 		if (dX * dY > 0)
 		{
@@ -1177,7 +1177,7 @@ vector<Light> Renderer::GetLights()
 
 void Renderer::addFog(vec3& color, float z)
 {
-	float clamped_z = max(min(abs(z), FOG_MAX), FOG_MIN);
+	float clamped_z = max(min(fabs(z), FOG_MAX), FOG_MIN);
 	float fogFactor = (FOG_MAX - clamped_z) /(FOG_MAX - FOG_MIN);
 	color = color * fogFactor + (1 - fogFactor) * FOG_COLOR;
 }
@@ -1388,10 +1388,10 @@ void Renderer::ZBufferScanConvert()
 			for (int i = minX; i <= maxX; i++)
 			{
 				C_cords =(*it)->GetCoordinates(i, y);
-				if (abs(C_cords.z) <= m_local_z_buffer[ZINDEX(cur_width, i, y)])
+				if (fabs(C_cords.z) <= m_local_z_buffer[ZINDEX(cur_width, i, y)])
 				{
 					activePixels.push_back(tuple<int,int>(i / 2,y / 2));
-					m_local_z_buffer[ZINDEX(cur_width, i, y)] = abs(C_cords.z);
+					m_local_z_buffer[ZINDEX(cur_width, i, y)] = fabs(C_cords.z);
 					if (is_wire_frame && (i == maxX || i == minX))
 					{
 						DrawPixel(i, y, WHITE);

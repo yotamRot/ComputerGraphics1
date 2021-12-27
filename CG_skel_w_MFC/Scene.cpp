@@ -341,9 +341,6 @@ void Scene::drawDemo()
 Scene::Scene(Renderer *renderer) : m_renderer(renderer), current_shadow(FLAT)
 {	
 	InitScene();
-	lights.at(0).Ld = 0;
-	lights.at(0).Ls = 0;
-	lights.at(0).La = 1;
 	activeModel = ILLEGAL_ACTIVE_MOVEL;
 	proj = FRUSTUM;
 	setActiveCameraProjection(proj);
@@ -362,6 +359,9 @@ void Scene::InitScene()
 	activeCamera = addCamera();
 	// add ambient Light with id 0 and set Ld & Ls to 0
 	activeLight = addLight();
+	lights.at(0).Ld = 0;
+	lights.at(0).Ls = 0;
+	lights.at(0).La = 0.4;
 
 }
 void Scene::manipulateActiveModel(Transformation T, TransformationDirection direction

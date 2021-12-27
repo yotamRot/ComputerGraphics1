@@ -302,7 +302,7 @@ void ClearScene()
 	{
 		glutRemoveMenuItem(1);
 	}
-	glutSetMenu(menuLights);
+	glutSetMenu(menuSwitchToLightId);
 	tmp = glutGet(GLUT_MENU_NUM_ITEMS);
 	for (int i = 1; i <= tmp; i++)
 	{
@@ -339,9 +339,10 @@ void OpenFile()
 	if (dlg.DoModal() == IDOK)
 	{
 		glutSetMenu(menuObjectsId);
-		std::string s((LPCTSTR)dlg.GetPathName());
-		newModelId = scene->loadOBJModel((LPCTSTR)dlg.GetPathName());
-		glutAddMenuEntry((LPCTSTR)dlg.GetFileName(), newModelId);
+		std::string path = ((LPCTSTR)dlg.GetPathName());
+		newModelId = scene->loadOBJModel(path);
+		std::string name = (LPCTSTR)dlg.GetFileName();
+		glutAddMenuEntry(name.c_str(), newModelId);
 		scene->lookAtModel(scene->activeModel);
 	}
 	else
