@@ -139,6 +139,7 @@ public:
 	void ChangeModelColorIndex(vec3& rgb);
 	void ChangeModelIlluminationParams(vec4& k);
 	void ApplyCrazyColors();
+	void ApplyNonUniform();
 	void ChangeShadow(Shadow s);
 	vec4 GetAmbientRGB();
 };

@@ -117,10 +117,10 @@ mat4 CreateNormalTransform(mat4& matrix, Transformation T)
 
 MeshModel::MeshModel(string fileName):mesh_color(BLUE), ka(0.5), kd(0.8), ks(1.0),ke(0)
 {
+	is_non_unfiorm = false;
 	loadFile(fileName);
 	bound_box_vertices = CalcBounds();
 	_world_transform[2][3] = -5;
-	
 }
 
 MeshModel::~MeshModel(void)
@@ -324,6 +324,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	kd = 0.8;
 	ks = 1.0;
 	ke = 0;
+	is_non_unfiorm = false;
 	triangles = new vector<Triangle>;
 	vec3 p1, p2, p3;
 
@@ -442,6 +443,8 @@ CameraModel::CameraModel(int cameraIndex) : cameraIndex(cameraIndex)
 	ka = 0.5;
 	kd = 0.8;
 	ks = 1.0;
+	ke = 1.0;
+	is_non_unfiorm = false;
 	triangles = new vector<Triangle>;
 	Normal curFaceNormal;
 	vec3 p1, p2, p3;
@@ -477,6 +480,8 @@ LightModel::LightModel(int lightIndex) : lightIndex(lightIndex)
 	ka = 1;
 	kd = 1;
 	ks = 1;
+	ke = 1;
+	is_non_unfiorm = false;
 	mesh_color = WHITE;
 	triangles = new vector<Triangle>;
 	Normal curFaceNormal;
@@ -721,21 +726,10 @@ void MeshModel::UpdateTriangleColor()
 	}
 }
 
-void MeshModel::UpdateTriangleIlluminationParams()
-{
-	for (auto it = triangles->begin(); it != triangles->end(); ++it)
-	{
-		(*it).ka = ka;
-		(*it).kd = kd;
-		(*it).ks = ks;
-		(*it).ke = ke;
-	}
-}
-
 void MeshModel::RandomizePolygons()
 {
 	int third = triangles->size() / 3;
-	float step = (float) 3 / triangles->size();
+	float step = (float)3 / triangles->size();
 	vec3 black = vec3(0);
 	for (auto it = triangles->begin(); it != triangles->end(); ++it)
 	{
@@ -744,23 +738,36 @@ void MeshModel::RandomizePolygons()
 		(*it).ks = (float)rand() / RAND_MAX;
 		(*it).shape_color = black;
 	}
-
+	
 	for (int i = 0; i < third; i++)
 	{
 		triangles->at(i).shape_color.x = step * i;
 	}
-
-	for (int i = third; i < 2* third; i++)
-	{
+	
+	for (int i = third; i < 2 * third; i++)
+		{
 		triangles->at(i).shape_color.y = step * i;
 	}
-
-	for (int i = 2* third; i < triangles->size(); i++)
+	
+	for (int i = 2 * third; i < triangles->size(); i++)
 	{
 		triangles->at(i).shape_color.z = step * i;
 	}
-
 	
+		
+}
+
+
+void MeshModel::UpdateTriangleIlluminationParams()
+{
+	for (auto it = triangles->begin(); it != triangles->end(); ++it)
+	{
+		(*it).ka = ka;
+		(*it).kd = kd;
+		(*it).ks = ks;
+		(*it).ke = ke;
+		(*it).is_non_uniform = this->is_non_unfiorm;
+	}
 }
 
 mat4 MeshModel::manipulateModel(Transformation T, TransformationDirection direction,

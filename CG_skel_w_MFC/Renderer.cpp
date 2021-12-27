@@ -38,6 +38,7 @@ Triangle::Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d, vec3 rgb, bool is_ligh
 	this->is_light = is_light;
 	x_max = NULL;
 	x_min = NULL;
+	is_non_uniform = false;
 }
 
 Line::Line(vec3& p1_3d, vec3& p2_3d, bool is_light) :p1_3d(p1_3d), p2_3d(p2_3d)
@@ -615,6 +616,8 @@ vec3 Triangle::GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow)
 	vec3 color;
 	color = vec3(0);
 	int printCounter = 0;
+
+	
 	switch (shadow)
 	{
 	case FLAT:
@@ -623,6 +626,13 @@ vec3 Triangle::GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow)
 	case GOURAUD:		
 		if (this->p1_normal.is_valid)
 		{
+			if (this->is_non_uniform)
+			{
+				for (auto it = lights.begin(); it != lights.end(); ++it)
+				{
+					return (it)->light_color * ((float)rand() / (3 * RAND_MAX) + (float)rand() / (3 * RAND_MAX) + (float)rand() / (3 * RAND_MAX));
+				}
+			}
 			return (GetGouruad(C_cords) * shape_color);
 		}
 		else // there isn't normal for the vertex
@@ -644,24 +654,37 @@ vec3 Triangle::GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow)
 			break;
 		}
 	}
-	for (auto it = lights.begin(); it != lights.end(); ++it)
+	if (this->is_non_uniform)
 	{
-		if ((it)->type == PARALLEL_SOURCE)
+		for (auto it = lights.begin(); it != lights.end(); ++it)
 		{
-			light_direction = normalize((it)->c_light_position);
-		}
-		else // Point source
-		{
-			light_direction = normalize((it)->c_light_position - C_cords);
-		}
-		camera_direction = normalize(-C_cords);
-		reflect_direction = normalize(-light_direction - 2 * (dot(-light_direction, normal)) * normal);
-		ia = ka * (it)->La;
-		id = kd * max(dot(light_direction, normal),0) * (it)->Ld;
-		is = ks * pow(max(dot(reflect_direction, camera_direction),0), (it)->l_alpha) * (it)->Ls;
-		color += (it)->light_color * (ia + id + is);
+			color += (it)->light_color * (vec3(0.2 + (float)rand() / (3 * RAND_MAX)), 0.2 + (float)rand() / (3 * RAND_MAX), 0.2 + (float)rand() / (3 * RAND_MAX));
+		}	
+		color = color * shape_color;
 	}
-	color = color * shape_color + shape_color * ke;
+	else
+	{
+		for (auto it = lights.begin(); it != lights.end(); ++it)
+		{
+			if ((it)->type == PARALLEL_SOURCE)
+			{
+				light_direction = normalize((it)->c_light_position);
+			}
+			else // Point source
+			{
+				light_direction = normalize((it)->c_light_position - C_cords);
+			}
+			camera_direction = normalize(-C_cords);
+			reflect_direction = normalize(-light_direction - 2 * (dot(-light_direction, normal)) * normal);
+			ia = ka * (it)->La;
+			id = kd * max(dot(light_direction, normal), 0) * (it)->Ld;
+			is = ks * pow(max(dot(reflect_direction, camera_direction), 0), (it)->l_alpha) * (it)->Ls;
+			color += (it)->light_color * (ia + id + is);
+		}
+		color = color * shape_color + shape_color * ke;
+	}
+	
+	
 
 	//apply fog
 	if (renderer->isFog)

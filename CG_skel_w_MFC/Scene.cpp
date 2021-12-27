@@ -513,6 +513,15 @@ void Scene::ApplyCrazyColors()
 }
 
 
+void Scene::ApplyNonUniform()
+{
+	MeshModel* cur_model = (MeshModel*)models.at(activeModel);
+	cur_model->is_non_unfiorm = !cur_model->is_non_unfiorm;
+	cur_model->UpdateTriangleIlluminationParams();
+}
+
+
+
 void Scene::ChangeShadow(Shadow s)
 {
 	current_shadow = s;

@@ -212,6 +212,8 @@ public:
 	float p2_illumination;
 	float p3_illumination;
 
+	bool is_non_uniform;
+
 	void Rasterize() override;
 	vec3 GetCoordinates(int x, int y) override ;
 	void UpdateShape() override;

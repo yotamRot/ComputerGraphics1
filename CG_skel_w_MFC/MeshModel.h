@@ -28,7 +28,7 @@ public:
 	float kd;
 	float ks;
 	float ke;
-
+	bool is_non_unfiorm;
 
 	vector<Triangle>* triangles;
 	vector<Line>* bound_box_vertices;

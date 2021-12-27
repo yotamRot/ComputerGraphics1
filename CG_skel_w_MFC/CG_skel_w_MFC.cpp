@@ -45,6 +45,7 @@
 #define FOG							6
 #define SUPER_SAMPLE				7
 #define CRAZY_COLORS				8
+#define NON_UNIFORM					9
 
 #define ORTHOGRPHIC_PARAMETERS		1
 #define PRESPECTIVE_PARAMETERS		2
@@ -274,6 +275,12 @@ void CreateCrazyModel()
 {
 	scene->ApplyCrazyColors();
 }
+
+void CreateNonUniform()
+{
+	scene->ApplyNonUniform();
+}
+
 
 void ClearScene()
 {
@@ -626,6 +633,9 @@ void rendererMenu(int id)
 		case CRAZY_COLORS:
 			CreateCrazyModel();
 			break;
+		case NON_UNIFORM:
+			CreateNonUniform();
+			break;
 	}
 	scene->draw();
 }
@@ -743,6 +753,7 @@ void CreateRendererMenu()
 	glutAddMenuEntry("Show Fog", FOG);
 	glutAddMenuEntry("Use SuperSample", SUPER_SAMPLE);
 	glutAddMenuEntry("Apply Crazy Colors", CRAZY_COLORS);
+	glutAddMenuEntry("Apply Non Uniform", NON_UNIFORM);
 }
 
 void CreateProjectionMenus()
