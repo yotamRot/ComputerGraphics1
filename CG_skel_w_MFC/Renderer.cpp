@@ -630,8 +630,9 @@ vec3 Triangle::GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow)
 			{
 				for (auto it = lights.begin(); it != lights.end(); ++it)
 				{
-					return (it)->light_color * ((float)rand() / (3 * RAND_MAX) + (float)rand() / (3 * RAND_MAX) + (float)rand() / (3 * RAND_MAX));
+					color += (it)->light_color * (vec3(0.2 + (float)rand() / (3 * RAND_MAX)), 0.2 + (float)rand() / (3 * RAND_MAX), 0.2 + (float)rand() / (3 * RAND_MAX));
 				}
+				return color * shape_color;
 			}
 			return (GetGouruad(C_cords) * shape_color);
 		}
