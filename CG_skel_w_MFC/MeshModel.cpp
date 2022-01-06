@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <map>
 
 using namespace std;
 
@@ -13,6 +14,7 @@ struct FaceIdcs
 	int v[4];
 	int vn[4];
 	int vt[4];
+	
 
 	FaceIdcs()
 	{
@@ -127,6 +129,18 @@ MeshModel::~MeshModel(void)
 {
 }
 
+
+int check_key(map<int, int> &m, int key, int val)
+{
+	// Key is not present
+	if (m.find(key) == m.end())
+	{
+		m[key] = val;
+		return val;
+	}
+		
+	return m[key];
+}
 void MeshModel::loadFile(string fileName)
 {
 	ifstream ifile(fileName.c_str());
@@ -135,6 +149,7 @@ void MeshModel::loadFile(string fileName)
 	vector<vec3> v_normals;
 	vec3 curCenter;
 	vec3 curNormalEnd;
+	std::map<int, int> u;
 
 	vec3 p1, p2 , p3;
 
@@ -197,13 +212,13 @@ void MeshModel::loadFile(string fileName)
 		if (v_normals.size() != 0)
 		{
 			//Create Normals
-			curNormalEnd = normalize(v_normals.at(it->vn[0] - 1) - curTriangle.p1_3d);
+			curNormalEnd = normalize(v_normals.at(check_key(u, it->v[0] - 1, it->vn[0] - 1)));
 			curVertex1Normal = Normal(curTriangle.p1_3d, curNormalEnd, false, vertix_normal);
 
-			curNormalEnd = normalize(v_normals.at(it->vn[1] - 1) - curTriangle.p2_3d);
+			curNormalEnd = normalize(v_normals.at(check_key(u, it->v[1] - 1, it->vn[1] - 1)));
 			curVertex2Normal = Normal(curTriangle.p2_3d, curNormalEnd, false, vertix_normal);
 
-			curNormalEnd = normalize(v_normals.at(it->vn[2] - 1) - curTriangle.p3_3d);
+			curNormalEnd = normalize(v_normals.at(check_key(u, it->v[2] - 1, it->vn[2] - 1)));
 			curVertex3Normal = Normal(curTriangle.p3_3d, curNormalEnd, false, vertix_normal);
 
 			curTriangle = Triangle(p1, p2, p3, mesh_color, false ,curFaceNormal, curVertex1Normal, curVertex2Normal, curVertex3Normal);

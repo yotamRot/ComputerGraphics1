@@ -9,7 +9,7 @@
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 #define ZINDEX(width,x,y) (x+y*width)
-#define DRAW_OPEN_MODELS 1
+#define DRAW_OPEN_MODELS 0
 
 
 #define SUPER_SAMPLE_FACTOR 2
