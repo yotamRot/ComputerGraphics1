@@ -291,9 +291,9 @@ void Scene::draw()
 {
 	// 1. Send the renderer the current camera transform and the projection
 	// 2. Tell all models to draw themselves
-	drawDemo();
-	return;
+
 	int cameraIndex = 0;
+	
 	mat4 curProjection = cameras[activeCamera]->projection;
 	CameraModel* curCameraModel = (CameraModel*)(cameras[activeCamera]->model);
 	mat4 curCameraInv = curCameraModel->_w_TransformInv * curCameraModel->_m_TransformInv;
@@ -303,6 +303,13 @@ void Scene::draw()
 	{
 		(it)->c_light_position = LightPosition(curCameraInv, (it)->model->_world_transform, (it)->model->_model_transform);
 	}
+
+
+	GLuint program = InitShader("minimal_vshader.glsl",
+		"minimal_fshader.glsl");
+
+	glUseProgram(program);
+
 	for (vector<Model*>::iterator it = models.begin(); it != models.end(); ++it)
 	{
 		curModel = (MeshModel*)(*it);
@@ -311,7 +318,7 @@ void Scene::draw()
 		{
 			if (isRenderCameras && cameraIndex!= activeCamera) //dont want to draw active camera
 			{
-				(*it)->draw(m_renderer); // draw camera
+				(*it)->draw(); // draw camera
 			}
 			cameraIndex++;
 		}
@@ -323,17 +330,17 @@ void Scene::draw()
 			}
 			else
 			{
-				(*it)->draw(m_renderer);// draw models
+				(*it)->draw();// draw models
 			}
 		}
 		else
 		{
-			(*it)->draw(m_renderer);// draw models
+			(*it)->draw();// draw models
 		}
 	}
-	m_renderer->DrawTriangles();
-	m_renderer->ZBufferScanConvert();
-	m_renderer->SwapBuffers();
+	//m_renderer->DrawTriangles();
+	//m_renderer->ZBufferScanConvert();
+	//m_renderer->SwapBuffers();
 }
 
 void Scene::drawDemo()
@@ -344,7 +351,6 @@ void Scene::drawDemo()
 		{0.1f, -0.1f, 0.0f,1.0f},
 		{0.0f,  0.1f, 0.0f,1.0f}
 	};
-
 	GLuint program = InitShader("minimal_vshader.glsl",
 		"minimal_fshader.glsl");
 

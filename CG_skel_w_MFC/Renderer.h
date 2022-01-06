@@ -71,7 +71,7 @@ class Model {
 public:
 	mat4 _model_transform;
 	mat4 _world_transform;
-	void virtual draw(Renderer* renderer) = 0;
+	void virtual draw() = 0;
 	vec3 virtual CenteringTranslation(TransAxis axis) = 0;
 protected:
 	virtual ~Model() {}

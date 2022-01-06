@@ -8,6 +8,17 @@
 
 using namespace std;
 
+struct Texture {
+	unsigned int id;
+	string type;
+};
+
+struct Vertex {
+	vec3 Position;
+	vec3 Normal;
+	vec2 TexCoords;
+};
+
 class MeshModel : public Model
 {
 protected :
@@ -29,8 +40,14 @@ public:
 	float ks;
 	float ke;
 	bool is_non_unfiorm;
+	unsigned int VAO, VBO, EBO;
 
-	vector<Triangle>* triangles;
+
+	vector<Vertex>       vertices;
+	vector<vec4>       tempo;
+	vector<unsigned int> indices;
+	vector<Texture>      textures;
+
 	vector<Line>* bound_box_vertices;
 
 	vec3 mesh_color;
@@ -39,7 +56,7 @@ public:
 	MeshModel(string fileName);
 	~MeshModel(void);
 	void loadFile(string fileName);
-	void draw(Renderer* renderer);
+	void draw();
 	vec3 CenteringTranslation(TransAxis axis);
 	vector<Line>* CalcBounds();
 	vec3 GetCenter();
@@ -55,6 +72,9 @@ public:
 	void UpdateTriangleColor();
 	void UpdateTriangleIlluminationParams();
 	void RandomizePolygons();
+	void  SetBoundingBoxVertices(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat lenX, GLfloat lenY, GLfloat lenZ);
+	void SetupMesh();
+
 };
 
 class PrimMeshModel : public MeshModel
