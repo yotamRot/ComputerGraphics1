@@ -56,7 +56,7 @@ public:
 	MeshModel(string fileName);
 	~MeshModel(void);
 	void loadFile(string fileName);
-	void draw();
+	void draw(GLuint program);
 	vec3 CenteringTranslation(TransAxis axis);
 	vector<Line>* CalcBounds();
 	vec3 GetCenter();

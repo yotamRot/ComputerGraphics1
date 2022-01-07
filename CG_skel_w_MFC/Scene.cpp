@@ -287,13 +287,14 @@ bool Scene::toggleSuperSample()
 	return isSuperSample;
 }
 
-void Scene::draw()
+void Scene::draw(GLuint program)
 {
 	// 1. Send the renderer the current camera transform and the projection
 	// 2. Tell all models to draw themselves
 
 	int cameraIndex = 0;
-	
+	glClear(GL_COLOR_BUFFER_BIT);
+
 	mat4 curProjection = cameras[activeCamera]->projection;
 	CameraModel* curCameraModel = (CameraModel*)(cameras[activeCamera]->model);
 	mat4 curCameraInv = curCameraModel->_w_TransformInv * curCameraModel->_m_TransformInv;
@@ -304,12 +305,6 @@ void Scene::draw()
 		(it)->c_light_position = LightPosition(curCameraInv, (it)->model->_world_transform, (it)->model->_model_transform);
 	}
 
-
-	GLuint program = InitShader("minimal_vshader.glsl",
-		"minimal_fshader.glsl");
-
-	glUseProgram(program);
-
 	for (vector<Model*>::iterator it = models.begin(); it != models.end(); ++it)
 	{
 		curModel = (MeshModel*)(*it);
@@ -318,7 +313,7 @@ void Scene::draw()
 		{
 			if (isRenderCameras && cameraIndex!= activeCamera) //dont want to draw active camera
 			{
-				(*it)->draw(); // draw camera
+				(*it)->draw(program); // draw camera
 			}
 			cameraIndex++;
 		}
@@ -330,17 +325,18 @@ void Scene::draw()
 			}
 			else
 			{
-				(*it)->draw();// draw models
+				(*it)->draw(program);// draw models
 			}
 		}
 		else
 		{
-			(*it)->draw();// draw models
+			(*it)->draw(program);// draw models
 		}
 	}
 	//m_renderer->DrawTriangles();
 	//m_renderer->ZBufferScanConvert();
-	//m_renderer->SwapBuffers();
+	glutSwapBuffers();
+
 }
 
 void Scene::drawDemo()
@@ -381,6 +377,23 @@ void Scene::drawDemo()
 	glutSwapBuffers();
 
 
+}
+
+
+Scene::Scene() : current_shadow(FLAT)
+{
+	InitScene();
+	activeModel = ILLEGAL_ACTIVE_MOVEL;
+	proj = FRUSTUM;
+	setActiveCameraProjection(proj);
+	isShowVerticsNormals = false;
+	isShowFacesNormals = false;
+	isRenderCameras = false;
+	isDrawBoundBox = false;
+	isShowFog = false;
+	isShowWireFrame = false;
+	isSuperSample = false;
+	axis = MODEL;
 }
 
 Scene::Scene(Renderer *renderer) : m_renderer(renderer), current_shadow(FLAT)

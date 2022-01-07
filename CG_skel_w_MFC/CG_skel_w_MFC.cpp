@@ -86,6 +86,7 @@
 
 Scene *scene;
 Renderer *renderer;
+GLuint program;
 
 int last_x,last_y;
 int oldWidth,oldHeight;
@@ -122,19 +123,19 @@ bool prv_lb_down = false;
 void switchToCameraMenu(int id)
 {
 	scene->switchToCamera(id);
-	scene->draw();
+	scene->draw(program);
 }
 
 void lookAtCameraMenu(int id)
 {
 	scene->lookAtCamera(id);
-	scene->draw();
+	scene->draw(program);
 }
 
 void switchToLightMenu(int id)
 {
 	scene->controlLight(id);
-	scene->draw();
+	scene->draw(program);
 }
 
 void switchLightTypeMenu(int id)
@@ -147,14 +148,14 @@ void switchLightTypeMenu(int id)
 	{
 		scene->GetActiveLight().type = POINT_SOURCE;
 	}
-	scene->draw();
+	scene->draw(program);
 }
 
 
 void lookAtLightMenu(int id)
 {
 	scene->lookAtLight(id);
-	scene->draw();
+	scene->draw(program);
 }
 
 void ChangeAmbientColors()
@@ -410,7 +411,7 @@ void OrthoFrustrumParameters(int id)
 
 void display( void )
 {
-	scene->draw();
+	scene->draw(program);
 }
 
 void reshape( int width, int height )
@@ -453,7 +454,7 @@ void keyboard( unsigned char key, int x, int y )
 		return;
 	}
 	scene->manipulateActiveModel(curTramsformation, axis,scene->GetTrasformationAxis(),10);
-	scene->draw();
+	scene->draw(program);
 }
 
 void mouse(int button, int state, int x, int y)
@@ -482,7 +483,7 @@ void mouse(int button, int state, int x, int y)
 			break;
 	}
 	// add your code
-	scene->draw();
+	scene->draw(program);
 }
 
 void motion(int x, int y)
@@ -499,7 +500,7 @@ void motion(int x, int y)
 		scene->manipulateActiveModel(ROTATE, Y, MODEL, dx);
 		scene->manipulateActiveModel(ROTATE, X, MODEL, dy);
 		//scene->rotateAroundActiveModel(dx, dy);
-		scene->draw();
+		scene->draw(program);
 	}
 	else
 	{
@@ -512,14 +513,14 @@ void motion(int x, int y)
 void objectsMenu(int id)
 {
 	scene->activeModel = scene->modelMenuIdToVectorId(id);
-	scene->draw();
+	scene->draw(program);
 }
 
 
 void lookAtObjectMenu(int id)
 {
 	scene->lookAtModel(scene->modelMenuIdToVectorId(id));
-	scene->draw();
+	scene->draw(program);
 }
 
 void camerasMenu(int id)
@@ -536,7 +537,7 @@ void camerasMenu(int id)
 			scene->ControlActiveCamera();
 			break;
 	}
-	scene->draw();
+	scene->draw(program);
 }
 
 
@@ -558,7 +559,7 @@ void lightsMenu(int id)
 			ChangeAmbientColors();
 			break;
 	}
-	scene->draw();
+	scene->draw(program);
 }
 
 void shadowMenu(int id)
@@ -575,13 +576,12 @@ void shadowMenu(int id)
 		scene->ChangeShadow(PHONG);
 		break;
 	}
-	scene->draw();
+	scene->draw(program);
 }
 
 
 void fileMenu(int id)
 {
-
 	switch (id)
 	{
 		case FILE_OPEN:
@@ -591,7 +591,7 @@ void fileMenu(int id)
 			AddCube();
 			break;
 	}
-	scene->draw();
+	scene->draw(program);
 }
 
 
@@ -637,19 +637,19 @@ void rendererMenu(int id)
 			CreateNonUniform();
 			break;
 	}
-	scene->draw();
+	scene->draw(program);
 }
 
 void projectionMenu(int id)
 {
 	scene->setActiveCameraProjection((Projection)id);
-	scene->draw();
+	scene->draw(program);
 }
 
 void projectionChooseMenu(int id)
 {
 	scene->setActiveCameraProjection((Projection)id);
-	scene->draw();
+	scene->draw(program);
 }
 
 void ProjParameresMenu(int id)
@@ -663,7 +663,7 @@ void ProjParameresMenu(int id)
 	{
 		OrthoFrustrumParameters(id);
 	}
-	scene->draw();
+	scene->draw(program);
 }
 
 void mainMenu(int id)
@@ -676,7 +676,7 @@ void mainMenu(int id)
 		break;
 	case CLEAR:
 		ClearScene();
-		scene->draw();
+		scene->draw(program);
 		break;
 	}
 }
@@ -835,6 +835,11 @@ int my_main( int argc, char **argv )
 	oldHeight = 512;
 	renderer = new Renderer(512,512);
 	scene = new Scene(renderer);
+
+	program = InitShader("minimal_vshader.glsl",
+		"minimal_fshader.glsl");
+
+	glUseProgram(program);
 	//----------------------------------------------------------------------------
 	// Initialize Callbacks
 

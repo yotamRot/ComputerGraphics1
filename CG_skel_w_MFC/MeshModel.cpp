@@ -325,16 +325,12 @@ vec3 MeshModel::GetBoundsLength()
 }
 
 
-void MeshModel::draw()
+void MeshModel::draw(GLuint program)
 {	
 	const int pnum = tempo.size();
 	static const vec4 * points = &tempo[0];
 
-	GLuint program = InitShader("minimal_vshader.glsl",
-		"minimal_fshader.glsl");
-
-	glUseProgram(program);
-
+	
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
@@ -354,10 +350,8 @@ void MeshModel::draw()
 	glVertexAttribPointer(loc, 4, GL_FLOAT, GL_FALSE, 0, 0);
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 
-	glClear(GL_COLOR_BUFFER_BIT);
 	glDrawArrays(GL_LINE_LOOP, 0, tempo.size());
 	glFlush();
-	glutSwapBuffers();
 
 }
 

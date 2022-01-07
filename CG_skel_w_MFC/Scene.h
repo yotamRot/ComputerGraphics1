@@ -91,7 +91,7 @@ class Scene {
 public:
 	vector<int> modelToVectorId;
 	vector<Model*> models;
-	Scene() {};
+	Scene();
 	Scene(Renderer* renderer);
 	void InitScene();
 	int loadOBJModel(string fileName);
@@ -117,7 +117,7 @@ public:
 	bool toggleShowFog();
 	bool toggleShowWireFrame();
 	bool toggleSuperSample();
-	void draw();
+	void draw(GLuint program);
 	void drawDemo();
 	int modelMenuIdToVectorId(int menuId);
 	Camera* GetActiveCamera();
