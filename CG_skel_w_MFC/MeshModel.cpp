@@ -119,11 +119,11 @@ mat4 CreateNormalTransform(mat4& matrix, Transformation T)
 	return normalMatrix;
 }
 
-MeshModel::MeshModel(string fileName):mesh_color(BLUE), ka(0.5), kd(0.8), ks(1.0),ke(0)
+MeshModel::MeshModel(string fileName, int modelId):mesh_color(BLUE), ka(0.5), kd(0.8), ks(1.0),ke(0), modelId(modelId)
 {
 	is_non_unfiorm = false;
 	loadFile(fileName);
-	//SetupMesh();
+	SetupMesh();
 	_world_transform[2][3] = -5;
 }
 
@@ -238,30 +238,39 @@ void MeshModel::loadFile(string fileName)
 
 void MeshModel::SetupMesh()
 {
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
+	//glGenVertexArrays(1, &VAO);
+	//glGenBuffers(1, &VBO);
+	//glGenBuffers(1, &EBO);
 
+	//glBindVertexArray(VAO);
+	//glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+	//glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
+	//	&indices[0], GL_STATIC_DRAW);
+
+	//// vertex positions
+	//glEnableVertexAttribArray(0);
+	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+	//// vertex normals
+	//glEnableVertexAttribArray(1);
+	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
+	//// vertex texture coords
+	//glEnableVertexAttribArray(2);
+	//glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
+
+	//glBindVertexArray(0);
+
+	glGenVertexArrays(modelId, &VAO);
 	glBindVertexArray(VAO);
+
+
+	glGenBuffers(modelId, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
-		&indices[0], GL_STATIC_DRAW);
-
-	// vertex positions
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-	// vertex normals
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
-	// vertex texture coords
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
-
-	glBindVertexArray(0);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vec4)*tempo.size(),
+		&tempo[0], GL_STATIC_DRAW);
 
 }
 
@@ -330,7 +339,7 @@ vec3 MeshModel::GetBoundsLength()
 }
 
 
-void MeshModel::draw(GLuint program)
+int MeshModel::draw(GLuint program)
 {	
 	const int pnum = tempo.size();
 	static const vec4 * points = &tempo[0];
@@ -346,17 +355,9 @@ void MeshModel::draw(GLuint program)
 	MattoArr(modelMatrix, modelTrans);
 	glUniformMatrix4fv(umM, 1, GL_FALSE, modelMatrix);
 
-	GLuint vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
 
-
-	GLuint buffer;
-	glGenBuffers(1, &buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vec4)*tempo.size(),
-		points, GL_STATIC_DRAW);
-
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
 
 
@@ -364,9 +365,9 @@ void MeshModel::draw(GLuint program)
 	glEnableVertexAttribArray(loc);
 	glVertexAttribPointer(loc, 4, GL_FLOAT, GL_FALSE, 0, 0);
 	glClearColor(1.0, 1.0, 1.0, 1.0);
-
 	glDrawArrays(GL_TRIANGLES, 0, tempo.size());
 	glFlush();
+	return tempo.size();
 
 }
 

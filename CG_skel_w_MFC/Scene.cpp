@@ -44,8 +44,9 @@ vec3 LightPosition(mat4& c_transform, mat4& w_transform, mat4& m_transform)
 
 int Scene::loadOBJModel(string fileName)
 {
-	MeshModel *model = new MeshModel(fileName);
 	activeModel = models.size();
+
+	MeshModel *model = new MeshModel(fileName, activeModel);
 	modelToVectorId.push_back(activeModel);
 	models.push_back(model);
 	return modelToVectorId.size() - 1; // new model index
@@ -343,7 +344,6 @@ void Scene::draw(GLuint program)
 	{
 		(it)->c_light_position = LightPosition(curCameraInv, (it)->model->_world_transform, (it)->model->_model_transform);
 	}*/
-
 	for (vector<Model*>::iterator it = models.begin(); it != models.end(); ++it)
 	{
 		curModel = (MeshModel*)(*it);
@@ -374,6 +374,7 @@ void Scene::draw(GLuint program)
 	}
 	//m_renderer->DrawTriangles();
 	//m_renderer->ZBufferScanConvert();
+	
 	glutSwapBuffers();
 
 }

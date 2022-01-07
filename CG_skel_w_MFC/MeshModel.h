@@ -33,6 +33,7 @@ protected :
 	float y_bound_lenght;
 	float z_bound_lenght;
 	vec3 center;
+	int modelId;
 
 public:	
 	float ka;// fraction of ambient light reflected from surface 
@@ -53,10 +54,10 @@ public:
 	vec3 mesh_color;
 	vec3 matirials; // x - emissive, y - diffuse, z - specular
 
-	MeshModel(string fileName);
+	MeshModel(string fileName, int modelId);
 	~MeshModel(void);
 	void loadFile(string fileName);
-	void draw(GLuint program);
+	int draw(GLuint program);
 	vec3 CenteringTranslation(TransAxis axis);
 	vector<Line>* CalcBounds();
 	vec3 GetCenter();
