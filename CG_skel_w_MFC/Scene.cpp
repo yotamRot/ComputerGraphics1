@@ -8,6 +8,34 @@
 #include "GL\freeglut.h"
 using namespace std;
 
+
+
+mat4 LookAt(const vec4& eye, const vec4& at, const vec4& up)
+{
+	vec4 n = normalize(eye - at);
+	n.w = 0;
+	vec4 u = normalize(cross(up, n));
+	u.w = 0;
+	vec4 v = normalize(cross(n, u));
+	v.w = 0;
+	vec4 t = vec4(0.0, 0.0, 0.0, 1.0);
+	mat4 c = mat4(u, v, n, t);
+	return c * Translate(-eye);
+}
+
+mat4 Frustum(const float left, const float right,
+	const float bottom, const float top,
+	const float zNear, const float zFar)
+{
+	vec3 lbn = vec3(left, bottom, zNear);
+	vec3 rtf = vec3(right, top, zFar);
+	return  mat4(
+		(2 * zNear) / (right - left), 0, 0, 0,
+		0, (2 * zNear) / (top - bottom), 0, 0,
+		(right + left) / (right - left), (top + bottom) / (top - bottom), (-1) * ((zFar + zNear) / (zFar - zNear)), -1,
+		0, 0, (-1) * (2 * zNear * zFar) / (zFar - zNear), 0);
+}
+
 vec3 LightPosition(mat4& c_transform, mat4& w_transform, mat4& m_transform)
 {
 	vec4 tempVec = c_transform * w_transform * m_transform * vec4(vec3(0));
@@ -292,25 +320,29 @@ void Scene::draw(GLuint program)
 	// 1. Send the renderer the current camera transform and the projection
 	// 2. Tell all models to draw themselves
 
-	mat4 curProjection = cameras[activeCamera]->projection;
+	//this->drawDemo();
+	//return;
+	GLfloat curProjection[16];
+	MattoArr(curProjection, cameras[activeCamera]->projection);
 	CameraModel* curCameraModel = (CameraModel*)(cameras[activeCamera]->model);
-	mat4 curCameraInv = curCameraModel->_w_TransformInv * curCameraModel->_m_TransformInv;
+	GLfloat curCameraInv[16];
+	MattoArr(curCameraInv, curCameraModel->_w_TransformInv * curCameraModel->_m_TransformInv);
 	int cameraIndex = 0;
 	glClear(GL_COLOR_BUFFER_BIT);
 	GLint umV = glGetUniformLocation(program, "modelViewMatrix"); // Find the mM variable
-	glUniformMatrix4fv(umV, 1, GL_FALSE, &curCameraInv[0][0]);
+	glUniformMatrix4fv(umV, 1, GL_FALSE, curCameraInv);
 
 	GLint umP = glGetUniformLocation(program, "projectionMatrix"); // Find the mM variable
-	glUniformMatrix4fv(umP, 1, GL_FALSE, &curProjection[0][0]);
+	glUniformMatrix4fv(umP, 1, GL_FALSE, curProjection);
 
-
-	
-	m_renderer->ConfigureRenderer(curProjection, curCameraInv, isShowVerticsNormals, isShowFacesNormals, isShowWireFrame,isShowFog,isSuperSample, isDrawBoundBox, lights, current_shadow);
 	MeshModel* curModel;
+	
+	//m_renderer->ConfigureRenderer(curProjection, curCameraInv, isShowVerticsNormals, isShowFacesNormals, isShowWireFrame,isShowFog,isSuperSample, isDrawBoundBox, lights, current_shadow);
+	/*
 	for (auto it = lights.begin(); it != lights.end(); ++it)
 	{
 		(it)->c_light_position = LightPosition(curCameraInv, (it)->model->_world_transform, (it)->model->_model_transform);
-	}
+	}*/
 
 	for (vector<Model*>::iterator it = models.begin(); it != models.end(); ++it)
 	{
@@ -350,14 +382,15 @@ void Scene::drawDemo()
 {
 	const int pnum = 3;
 	static const GLfloat points[pnum][4] = {
-		{-0.1, -0.1f, 0.0f,1.0f},
-		{0.1f, -0.1f, 0.0f,1.0f},
-		{0.0f,  0.1f, 0.0f,1.0f}
+		{-1.1, -1.1f, 0.0f,1.0f},
+		{1.1f, -1.1f, 0.0f,1.0f},
+		{0.0f,  1.1f, 0.0f,1.0f}
 	};
 	GLuint program = InitShader("minimal_vshader.glsl",
 		"minimal_fshader.glsl");
 
 	glUseProgram(program);
+
 
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
@@ -372,11 +405,32 @@ void Scene::drawDemo()
 
 
 
-
 	GLuint loc = glGetAttribLocation(program, "vPosition");
 	glEnableVertexAttribArray(loc);
 	glVertexAttribPointer(loc, 4, GL_FLOAT, GL_FALSE, 0, 0);
 	glClearColor(1.0, 1.0, 1.0, 1.0);
+
+	GLint umM = glGetUniformLocation(program, "modelMatrix"); // Find the mM variable
+	mat4 modelTrans = Translate(5, 0, -1);
+	GLfloat ModelMatrix[16];
+	MattoArr(ModelMatrix, modelTrans);
+	glUniformMatrix4fv(umM, 1, GL_FALSE, ModelMatrix);
+
+	GLint umC = glGetUniformLocation(program, "modelViewMatrix"); // Find the mM variable
+	mat4 camera = LookAt(vec4(0,0,0,1) ,vec4(0,0,-1,1), normalize(vec4(0, 1, 0, 1)));
+	GLfloat CameraMatrix[16];
+	MattoArr(CameraMatrix, camera);
+	glUniformMatrix4fv(umC, 1, GL_FALSE, CameraMatrix);
+
+	GLint umP = glGetUniformLocation(program, "projectionMatrix"); // Find the mM variable
+	mat4 projection = Frustum(-2, 2, -2, 2, 0.1, 20);
+	GLfloat ProjMatrix[16];
+	MattoArr(ProjMatrix, projection);
+	glUniformMatrix4fv(umP, 1, GL_FALSE, ProjMatrix);
+
+	vec3 check = getXYZ(projection * camera * modelTrans * vec4(-1.1, -1.1f, 0.0f, 1.0f));
+	vec3 check1 = getXYZ(projection * camera * modelTrans * vec4(1.1, -1.1f, 0.0f, 1.0f));
+	vec3 check2 = getXYZ(projection * camera * modelTrans * vec4(0, 1.1f, 0.0f, 1.0f));
 
 	glClear(GL_COLOR_BUFFER_BIT);
 	glDrawArrays(GL_TRIANGLES, 0, pnum);
@@ -491,6 +545,19 @@ mat4 Camera::Perspective(const float fovy, const float aspect,
 	const float left = -right;
 	Frustum(left, right, bottom, top, zNear, zFar);
 	return projection;
+}
+
+
+
+mat4 Perspective(const float fovy, const float aspect,
+	const float zNear, const float zFar)
+{
+	const float radian = M_PI * fovy / 180;
+	const float top = zNear * tan(radian / 2);
+	const float bottom = -top;
+	const float right = top * aspect;
+	const float left = -right;
+	return	Frustum(left, right, bottom, top, zNear, zFar);
 }
 
 

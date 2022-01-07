@@ -153,7 +153,7 @@ void MeshModel::loadFile(string fileName)
 	vec3 curNormalEnd;
 	std::map<int, int> u;
 
-	Vertex p1, p2 , p3;
+	vec3 p1, p2 , p3;
 
 	Normal curVertex1Normal;
 	Normal curVertex2Normal;
@@ -196,13 +196,13 @@ void MeshModel::loadFile(string fileName)
 	//Then vertex_positions should contain:
 	//vertex_positions={v1,v2,v3,v1,v3,v4}
 		// iterate through all stored faces and create triangles
-	for (vector<vec3>::iterator it = l_vertices.begin(); it != l_vertices.end(); ++it)
-	{
-		//Create Trignagle
-		p1.Position = *it;
-		this->vertices.push_back(p1);
-		this->tempo.push_back(vec4(*it));
-	}
+	//for (vector<vec3>::iterator it = l_vertices.begin(); it != l_vertices.end(); ++it)
+	//{
+	//	//Create Trignagle
+	//	p1.Position = *it;
+	//	this->vertices.push_back(p1);
+	//	
+	//}
 
 	// iterate through all stored faces and create triangles
 	for (vector<FaceIdcs>::iterator it = faces.begin(); it != faces.end(); ++it)
@@ -212,21 +212,26 @@ void MeshModel::loadFile(string fileName)
 		if (v_normals.size() != 0)
 		{
 			//Create Normals
-			p1 = this->vertices[it->v[0] - 1];
-			p1.Normal = (normalize(v_normals.at(check_key(u, it->v[0] - 1, it->vn[0] - 1))));
+			p1 = l_vertices[it->v[0] - 1];
+			/*p1.Normal = (normalize(v_normals.at(check_key(u, it->v[0] - 1, it->vn[0] - 1))));
 			this->vertices[it->v[0] - 1] = p1;
-			this->indices.push_back(it->v[0] - 1);
+			this->indices.push_back(it->v[0] - 1);*/
+			this->tempo.push_back(vec4(p1));
 
-			p2 = this->vertices[it->v[0] - 1];
-			p2.Normal = (normalize(v_normals.at(check_key(u, it->v[1] - 1, it->vn[1] - 1))));
-			this->vertices[it->v[1] - 1] = p2;
+			p2 = l_vertices[it->v[1] - 1];
+			/*p2.Normal = (normalize(v_normals.at(check_key(u, it->v[1] - 1, it->vn[1] - 1))));
+			this->vertices[it->v[1] - 1] = p2;*/
 			this->indices.push_back(it->v[1] - 1);
+			this->tempo.push_back(vec4(p2));
 
 
-			p3 = this->vertices[it->v[2] - 1];
-			p3.Normal = (normalize(v_normals.at(check_key(u, it->v[2] - 1, it->vn[2] - 1))));
-			this->vertices[it->v[2] - 1] = p3;
+
+			p3 = l_vertices[it->v[2] - 1];
+			/*p3.Normal = (normalize(v_normals.at(check_key(u, it->v[2] - 1, it->vn[2] - 1))));
+			this->vertices[it->v[2] - 1] = p3;*/
 			this->indices.push_back(it->v[2] - 1);
+			this->tempo.push_back(vec4(p3));
+
 		}
 	}
 }
@@ -330,13 +335,16 @@ void MeshModel::draw(GLuint program)
 	const int pnum = tempo.size();
 	static const vec4 * points = &tempo[0];
 
-	
+
 	GLint my_color_location = glGetUniformLocation(program, "color");
 	glUniform3f(my_color_location, mesh_color.x, mesh_color.y, mesh_color.z);
+
 	GLint umM = glGetUniformLocation(program, "modelMatrix"); // Find the mM variable
 	//GLint umP = glGetUniformLocation(program, "projectionMatrix"); // Find the mP variable
 	mat4 modelTrans = this->_world_transform * this->_model_transform;
-	glUniformMatrix4fv(umM, 1, GL_FALSE, &modelTrans[0][0]);
+	GLfloat modelMatrix[16];
+	MattoArr(modelMatrix, modelTrans);
+	glUniformMatrix4fv(umM, 1, GL_FALSE, modelMatrix);
 
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
@@ -616,7 +624,7 @@ mat4 matrixInverse(mat4& mat , Transformation T)
 mat4 MeshModel::moveModel(TransformationDirection direction, TransAxis axis)
 {
 	mat4 tranlateMatrix;
-	GLfloat move = (x_bound_lenght + y_bound_lenght + z_bound_lenght) / 3;
+	GLfloat move = 0.1; //(x_bound_lenght + y_bound_lenght + z_bound_lenght) / 3;
 	if (dynamic_cast<LightModel*>(this))
 	{
 		move = move * 10;

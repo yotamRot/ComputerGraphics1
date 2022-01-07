@@ -367,9 +367,10 @@ mat3 transpose( const mat3& A )
 
 class mat4 {
 
-    vec4  _m[4];
+  
 
    public:
+       vec4  _m[4];
     //
     //  --- Constructors and Destructors ---
     //
@@ -667,6 +668,21 @@ inline
 mat4 Scale( const vec3& v )
 {
     return Scale( v.x, v.y, v.z );
+}
+
+
+inline
+void MattoArr(GLfloat* floatArr , mat4 mat)
+{
+    int i, j;
+    for (i = 0; i < 4; i++) {
+      
+        for (j = 0; j < 4; j++)
+        {
+            floatArr[4*j+ i] = mat[i][j];
+        }
+
+    }
 }
 
 //----------------------------------------------------------------------------
