@@ -372,7 +372,7 @@ void Scene::drawDemo()
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 
 	glClear(GL_COLOR_BUFFER_BIT);
-	glDrawArrays(GL_LINE_LOOP, 0, pnum);
+	glDrawArrays(GL_TRIANGLES, 0, pnum);
 	glFlush();
 	glutSwapBuffers();
 
