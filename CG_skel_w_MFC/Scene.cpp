@@ -292,12 +292,19 @@ void Scene::draw(GLuint program)
 	// 1. Send the renderer the current camera transform and the projection
 	// 2. Tell all models to draw themselves
 
-	int cameraIndex = 0;
-	glClear(GL_COLOR_BUFFER_BIT);
-
 	mat4 curProjection = cameras[activeCamera]->projection;
 	CameraModel* curCameraModel = (CameraModel*)(cameras[activeCamera]->model);
 	mat4 curCameraInv = curCameraModel->_w_TransformInv * curCameraModel->_m_TransformInv;
+	int cameraIndex = 0;
+	glClear(GL_COLOR_BUFFER_BIT);
+	GLint umV = glGetUniformLocation(program, "modelViewMatrix"); // Find the mM variable
+	glUniformMatrix4fv(umV, 1, GL_FALSE, &curCameraInv[0][0]);
+
+	GLint umP = glGetUniformLocation(program, "projectionMatrix"); // Find the mM variable
+	glUniformMatrix4fv(umP, 1, GL_FALSE, &curProjection[0][0]);
+
+
+	
 	m_renderer->ConfigureRenderer(curProjection, curCameraInv, isShowVerticsNormals, isShowFacesNormals, isShowWireFrame,isShowFog,isSuperSample, isDrawBoundBox, lights, current_shadow);
 	MeshModel* curModel;
 	for (auto it = lights.begin(); it != lights.end(); ++it)

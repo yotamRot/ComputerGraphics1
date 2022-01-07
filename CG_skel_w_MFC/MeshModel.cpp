@@ -334,10 +334,9 @@ void MeshModel::draw(GLuint program)
 	GLint my_color_location = glGetUniformLocation(program, "color");
 	glUniform3f(my_color_location, mesh_color.x, mesh_color.y, mesh_color.z);
 	GLint umM = glGetUniformLocation(program, "modelMatrix"); // Find the mM variable
-	GLint umV = glGetUniformLocation(program, "modelViewMatrix"); // Find the mV variable
 	//GLint umP = glGetUniformLocation(program, "projectionMatrix"); // Find the mP variable
-	glUniformMatrix4fv(umM, 1, GL_FALSE, this->_model_transform);
-	glUniformMatrix4fv(umV, 1, GL_FALSE, this->_world_transform);
+	mat4 modelTrans = this->_world_transform * this->_model_transform;
+	glUniformMatrix4fv(umM, 1, GL_FALSE, &modelTrans[0][0]);
 
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
