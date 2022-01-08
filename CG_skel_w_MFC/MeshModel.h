@@ -106,6 +106,9 @@ class LightModel : public MeshModel
 	public:
 		int lightIndex;
 		vec3 light_color;
+		float La;
+		//float Ld;
+		//float Ls;
 		LightModel(int model_id, int lightIndex, GLuint program);
 };
 

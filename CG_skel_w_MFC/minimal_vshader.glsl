@@ -5,7 +5,7 @@ in  vec4 vPosition;
 
 
 // Out Arguments
-out vec4 vertexColor;
+out vec3 vertexColor;
 
 
 // Uniforms declaration
@@ -18,5 +18,5 @@ uniform mat4 projectionMatrix;
 void main()
 {
     gl_Position = projectionMatrix  * modelViewMatrix * modelMatrix * vPosition;
-    vertexColor = vec4(color,1);
+    vertexColor = color;
 }

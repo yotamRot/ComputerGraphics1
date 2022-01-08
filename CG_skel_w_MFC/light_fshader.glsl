@@ -2,7 +2,7 @@
 
 
 // In Arguments
-in  vec4 lightVertexColor;
+in  vec3 lightVertexColor;
 
 
 // Out Arguments
@@ -12,5 +12,5 @@ out vec4 FragColor;
 
 void main()
 {
-    FragColor =  lightVertexColor;
+    FragColor =  vec4(lightVertexColor,1);
 }

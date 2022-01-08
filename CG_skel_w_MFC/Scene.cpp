@@ -103,7 +103,7 @@ void Scene::ChangeAmbientRgbLa(vec4 & rgbl)
 	light->light_color.x = rgbl.x;
 	light->light_color.y = rgbl.y;
 	light->light_color.z = rgbl.z;
-	//light->La = rgbl.w;
+	light->La = rgbl.w;
 }
 
 
@@ -368,7 +368,9 @@ void Scene::draw()
 			LightModel* light_model = (LightModel*)(*it);
 			glUseProgram(program);
 			GLint my_light_location = glGetUniformLocation(program, "lightColor");
-			glUniform4f(my_light_location, light_model->light_color.x, light_model->light_color.y, light_model->light_color.z, 1);
+			glUniform3f(my_light_location, light_model->light_color.x, light_model->light_color.y, light_model->light_color.z);
+			GLint l_a_location = glGetUniformLocation(program, "La");
+			glUniform1f(l_a_location, light_model->La);
 			//if (light_model->lightIndex == 0) //dont want to draw ambient light
 			//{
 			//	continue;
@@ -675,7 +677,7 @@ void Scene::ChangeShadow(Shadow s)
 vec4 Scene::GetAmbientRGB()
 {
 	LightModel* light = (LightModel*)lights.at(0).model;
-	return vec4(light->light_color, 1); // TODO: should be lights.at(0).La instad of 1
+	return vec4(light->light_color, light->La); 
 }
 
 void Camera::MaintainRatio(float widthRatio, float heightRatio, Projection proj)
