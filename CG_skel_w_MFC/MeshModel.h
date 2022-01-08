@@ -58,7 +58,7 @@ public:
 	MeshModel(string fileName, int modelId, GLuint program);
 	~MeshModel(void);
 	void loadFile(string fileName);
-	int draw();
+	void draw();
 	vec3 CenteringTranslation(TransAxis axis);
 	vector<Line>* CalcBounds();
 	vec3 GetCenter();
@@ -106,7 +106,7 @@ class LightModel : public MeshModel
 	public:
 		int lightIndex;
 		vec3 light_color;
-		LightModel(int lightIndex, GLuint program);
+		LightModel(int model_id, int lightIndex, GLuint program);
 };
 
 mat4 matrixInverse(mat4& mat, Transformation T);

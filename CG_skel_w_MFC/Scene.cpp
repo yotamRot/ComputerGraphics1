@@ -369,14 +369,14 @@ void Scene::draw()
 			glUseProgram(program);
 			GLint my_light_location = glGetUniformLocation(program, "lightColor");
 			glUniform4f(my_light_location, light_model->light_color.x, light_model->light_color.y, light_model->light_color.z, 1);
-			if (light_model->lightIndex == 0) //dont want to draw ambient light
-			{
-				continue;
-			}
-			else
-			{
+			//if (light_model->lightIndex == 0) //dont want to draw ambient light
+			//{
+			//	continue;
+			//}
+			//else
+			//{
 				(*it)->draw();// draw models
-			}
+			//}
 		}
 		else
 		{
@@ -491,10 +491,10 @@ void Scene::InitScene()
 {
 	activeCamera = addCamera();
 	// add ambient Light with id 0 and set Ld & Ls to 0
-	activeLight = addLight();
-	lights.at(0).Ld = 0;
-	lights.at(0).Ls = 0;
-	lights.at(0).La = 0.4;
+	//activeLight = addLight();
+	//lights.at(0).Ld = 0;
+	//lights.at(0).Ls = 0;
+	//lights.at(0).La = 0.4;
 
 }
 void Scene::manipulateActiveModel(Transformation T, TransformationDirection direction
@@ -748,7 +748,7 @@ int Scene::addLight()
 	int newLightIndex = lights.size();
 	activeLight = newLightIndex;
 	activeModel = models.size();
-	LightModel* lightModel = new LightModel(newLightIndex, light_program);
+	LightModel* lightModel = new LightModel(activeModel, newLightIndex, light_program);
 	Light newLight = Light(models.size(), lightModel);
 	lights.push_back(newLight);
 	models.push_back(lightModel);

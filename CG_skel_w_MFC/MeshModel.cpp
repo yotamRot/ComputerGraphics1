@@ -339,7 +339,7 @@ vec3 MeshModel::GetBoundsLength()
 }
 
 
-int MeshModel::draw()
+void MeshModel::draw()
 {	
 	const int pnum = tempo.size();
 	static const vec4 * points = &tempo[0];
@@ -364,10 +364,10 @@ int MeshModel::draw()
 	glEnableVertexAttribArray(loc);
 	glVertexAttribPointer(loc, 4, GL_FLOAT, GL_FALSE, 0, 0);
 	glClearColor(1.0, 1.0, 1.0, 1.0);
+
+
 	glDrawArrays(GL_TRIANGLES, 0, tempo.size());
 	glFlush();
-	return tempo.size();
-
 }
 
 vec3 MeshModel::CenteringTranslation(TransAxis axis)
@@ -546,13 +546,14 @@ CameraModel::CameraModel(int cameraIndex, GLuint program) : cameraIndex(cameraIn
 	//UpdateTriangleIlluminationParams();
 }
 
-LightModel::LightModel(int lightIndex, GLuint program) : lightIndex(lightIndex), light_color(vec3(1,1,1))
+LightModel::LightModel(int model_id, int lightIndex, GLuint program) : lightIndex(lightIndex), light_color(vec3(1,1,1))
 {
 	//ka = 1;
 	//kd = 1;
 	//ks = 1;
 	//ke = 1;
 	//is_non_unfiorm = false;
+	modelId = model_id;
 	my_program = program;
 	mesh_color = RED;
 	//triangles = new vector<Triangle>;
@@ -608,16 +609,8 @@ LightModel::LightModel(int lightIndex, GLuint program) : lightIndex(lightIndex),
 
 	//bound_box_vertices = CalcBounds();
 	//UpdateTriangleIlluminationParams();
+	SetupMesh();
 
-
-	glGenVertexArrays(lightIndex, &VAO);
-	glBindVertexArray(VAO);
-
-
-	glGenBuffers(lightIndex, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vec4) * tempo.size(),
-		&tempo[0], GL_STATIC_DRAW);
 }
 
 mat4 matrixInverse(mat4& mat , Transformation T)
