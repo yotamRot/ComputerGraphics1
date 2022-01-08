@@ -180,7 +180,7 @@ void Scene::lookAtModel(int modelId)
 	float maxModelAxisSize = max(max(max(curModel->GetZBoundLength(), curModel->GetXBoundLength()), curModel->GetYBoundLength()), 0.2);
 	// model in camera cord
 	mat4 toModelTransform = curModel->_world_transform * curModel->_model_transform * Translate(curModel->GetCenter());
-	mat4 fromModelTransform = Translate(0, 0, 3 * maxModelAxisSize) * curModel->_world_transform * curModel->_model_transform * Translate(curModel->GetCenter());
+	mat4 fromModelTransform = Translate(0, 0, 10 * maxModelAxisSize) * curModel->_world_transform * curModel->_model_transform * Translate(curModel->GetCenter());
 	vec4 c_atCenter = toModelTransform * vec4(vec3());
 	vec4 c_from = fromModelTransform * vec4(vec3());
 	vec4 c_atDirection = normalize(c_atCenter/ c_atCenter.w - c_from / c_from.w);
@@ -345,7 +345,6 @@ void Scene::draw()
 
 	MeshModel* curModel;
 	
-	//m_renderer->ConfigureRenderer(curProjection, curCameraInv, isShowVerticsNormals, isShowFacesNormals, isShowWireFrame,isShowFog,isSuperSample, isDrawBoundBox, lights, current_shadow);
 	/*
 	for (auto it = lights.begin(); it != lights.end(); ++it)
 	{
@@ -354,7 +353,6 @@ void Scene::draw()
 	for (vector<Model*>::iterator it = models.begin(); it != models.end(); ++it)
 	{
 		curModel = (MeshModel*)(*it);
-		m_renderer->SetObjectMatrices(curModel->GetObjectMatrix(), curModel->GetNormalMatrix());
 		if (dynamic_cast<CameraModel*>(*it))
 		{
 			if (isRenderCameras && cameraIndex!= activeCamera) //dont want to draw active camera
@@ -385,8 +383,7 @@ void Scene::draw()
 			(*it)->draw();// draw models
 		}
 	}
-	//m_renderer->DrawTriangles();
-	//m_renderer->ZBufferScanConvert();
+
 	
 	glutSwapBuffers();
 
@@ -471,7 +468,7 @@ Scene::Scene() : current_shadow(FLAT)
 	axis = MODEL;
 }
 
-Scene::Scene(Renderer *renderer) : m_renderer(renderer), current_shadow(FLAT)
+Scene::Scene(Renderer *renderer=NULL) : current_shadow(FLAT)
 {	
 	program = InitShader("minimal_vshader.glsl", "minimal_fshader.glsl");
 	light_program = InitShader("light_vshader.glsl", "light_fshader.glsl");

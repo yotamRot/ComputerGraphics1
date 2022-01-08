@@ -24,7 +24,7 @@ enum Axis
 	Z
 };
 
-extern Renderer * renderer;
+Renderer * renderer;
 
 Normal invalid_normal = Normal(vec3(0, 0), vec3(0, 0), false, vertix_normal, 0, false);
 
