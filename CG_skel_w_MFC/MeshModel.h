@@ -55,7 +55,11 @@ public:
 	bool is_non_unfiorm;
 	GLuint my_program;
 	LightType type;
+	GLuint simple_shader;
 	unsigned int VAO, VBO, EBO;
+	unsigned int bounding_box_VAO, bounding_box_VBO, bounding_box_EBO;
+	unsigned int vertex_normal_VAO, vertex_normal_VBO;
+	unsigned int face_normal_VAO, face_normal_VBO;
 	int modelId;
 
 	//vector<Vertex>       vertices;
@@ -63,17 +67,23 @@ public:
 	vector<unsigned int> indices;
 	vector<Texture>      textures;
 
-	vector<Line>* bound_box_vertices;
+	vector<vec3> bound_box_vertices;
+	vector<unsigned int> bound_box_indices;
+	vector<vec3> vertices_normals;
+	vector<vec3> face_normals;
 
 	vec3 mesh_color;
 	vec3 matirials; // x - emissive, y - diffuse, z - specular
 
-	MeshModel(string fileName, int modelId, GLuint program);
+	MeshModel(string fileName, int modelId, GLuint program, GLuint simpleShader);
 	~MeshModel(void);
 	void loadFile(string fileName);
-	void draw();
+	void draw(bool draw_bounding_box, bool draw_vertix_normals, bool draw_faces_normals);
+	void drawBoundingBox();
+	void drawVerticesNormals();
+	void drawFacesNormals();
 	vec3 CenteringTranslation(TransAxis axis);
-	vector<Line>* CalcBounds();
+	void CalcBounds();
 	vec3 GetCenter();
 	GLfloat GetXBoundLength();
 	GLfloat GetYBoundLength();

@@ -53,40 +53,56 @@ struct FaceIdcs
 
 void  MeshModel::SetBoundingBoxVertices(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat lenX, GLfloat lenY, GLfloat lenZ)
 {
-	//vector<Line>* lines = new vector<Line>;
-	//GLfloat halfX = lenX * 0.5f;
-	//GLfloat halfY = lenY * 0.5f;
-	//GLfloat halfZ = lenZ * 0.5f;
 
-	//// front face points
-	//this->bound_box_vertices->push_back(vec3(posX - halfX, posY + halfY, posZ - halfZ));
-	//vec3 frontTopRight = vec3(posX + halfX, posY + halfY, posZ - halfZ);
-	//vec3 frontBottomLeft = vec3(posX - halfX, posY - halfY, posZ - halfZ);
-	//vec3 frontBottomRight = vec3(posX + halfX, posY - halfY, posZ - halfZ);
+	GLfloat halfX = lenX * 0.5f;
+	GLfloat halfY = lenY * 0.5f;
+	GLfloat halfZ = lenZ * 0.5f;
 
-	//// back face points
-	//vec3 backTopLeft = vec3(posX - halfX, posY + halfY, posZ + halfZ);
-	//vec3 backTopRight = vec3(posX + halfX, posY + halfY, posZ + halfZ);
-	//vec3 backBottomLeft = vec3(posX - halfX, posY - halfY, posZ + halfZ);
-	//vec3 backBottomRight = vec3(posX + halfX, posY - halfY, posZ + halfZ);
+	// front face points
+	vec3 frontTopLeft = vec3(posX - halfX, posY + halfY, posZ - halfZ);
+	vec3 frontTopRight = vec3(posX + halfX, posY + halfY, posZ - halfZ);
+	vec3 frontBottomLeft = vec3(posX - halfX, posY - halfY, posZ - halfZ);
+	vec3 frontBottomRight = vec3(posX + halfX, posY - halfY, posZ - halfZ);
 
-	////lines
-	//lines->push_back(Line(frontTopLeft, frontTopRight, false));
-	//lines->push_back(Line(frontTopLeft, frontBottomLeft, false));
-	//lines->push_back(Line(frontTopLeft, backTopLeft, false));
+	// back face points
+	vec3 backTopLeft = vec3(posX - halfX, posY + halfY, posZ + halfZ);
+	vec3 backTopRight = vec3(posX + halfX, posY + halfY, posZ + halfZ);
+	vec3 backBottomLeft = vec3(posX - halfX, posY - halfY, posZ + halfZ);
+	vec3 backBottomRight = vec3(posX + halfX, posY - halfY, posZ + halfZ);
 
-	//lines->push_back(Line(backTopRight, backTopLeft, false));
-	//lines->push_back(Line(backTopRight, backBottomRight, false));
-	//lines->push_back(Line(backTopRight, frontTopRight, false));
+	//lines
 
-	//lines->push_back(Line(backBottomLeft, backTopLeft, false));
-	//lines->push_back(Line(backBottomLeft, backBottomRight, false));
-	//lines->push_back(Line(backBottomLeft, frontBottomLeft, false));
+	bound_box_vertices.push_back(frontTopLeft);
+	bound_box_vertices.push_back(frontTopRight);
+	bound_box_vertices.push_back(frontTopLeft);
+	bound_box_vertices.push_back(frontBottomLeft);
+	bound_box_vertices.push_back(frontTopLeft);
+	bound_box_vertices.push_back(backTopLeft);
 
-	//lines->push_back(Line(frontBottomRight, frontBottomLeft, false));
-	//lines->push_back(Line(frontBottomRight, frontTopRight, false));
-	//lines->push_back(Line(frontBottomRight, backBottomRight, false));
+	bound_box_vertices.push_back(backTopRight);
+	bound_box_vertices.push_back(backTopLeft);
+	bound_box_vertices.push_back(backTopRight);
+	bound_box_vertices.push_back(backBottomRight);
+	bound_box_vertices.push_back(backTopRight);
+	bound_box_vertices.push_back(frontTopRight);
 
+	bound_box_vertices.push_back(backBottomLeft);
+	bound_box_vertices.push_back(backTopLeft);
+	bound_box_vertices.push_back(backBottomLeft);
+	bound_box_vertices.push_back(backBottomRight);
+	bound_box_vertices.push_back(backBottomLeft);
+	bound_box_vertices.push_back(frontBottomLeft);
+
+	bound_box_vertices.push_back(frontBottomRight);
+	bound_box_vertices.push_back(frontBottomLeft);
+	bound_box_vertices.push_back(frontBottomRight);
+	bound_box_vertices.push_back(frontTopRight);
+	bound_box_vertices.push_back(frontBottomRight);
+	bound_box_vertices.push_back(backBottomRight);
+	for (int i = 0; i < bound_box_vertices.size(); i++)
+	{
+		bound_box_indices.push_back(i);// = i;
+	}
 	//return lines;
 }
 
@@ -119,10 +135,11 @@ mat4 CreateNormalTransform(mat4& matrix, Transformation T)
 	return normalMatrix;
 }
 
-MeshModel::MeshModel(string fileName, int modelId, GLuint program):mesh_color(BLUE), ka(0.5), kd(0.8), ks(1.0),ke(0), modelId(modelId), my_program(program)
+MeshModel::MeshModel(string fileName, int modelId, GLuint program, GLuint simpleShader):mesh_color(BLUE), ka(0.5), kd(0.8), ks(1.0),ke(0), modelId(modelId), my_program(program), simple_shader(simpleShader)
 {
 	is_non_unfiorm = false;
 	loadFile(fileName);
+	CalcBounds();
 	SetupMesh();
 	_world_transform[2][3] = -5;
 }
@@ -211,6 +228,8 @@ void MeshModel::loadFile(string fileName)
 			//Create Normals
 			p1 = l_vertices[it->v[0] - 1];
 			p1_nomral = (normalize(v_normals.at(check_key(u, it->v[0] - 1, it->vn[0] - 1))));
+			vertices_normals.push_back(p1);
+			vertices_normals.push_back(p1 + p1_nomral);
 			tempVertix.Position = p1;
 			tempVertix.V_Normal = p1_nomral;
 			this->vertices[it->v[0] - 1] = tempVertix;
@@ -218,6 +237,8 @@ void MeshModel::loadFile(string fileName)
 
 			p2 = l_vertices[it->v[1] - 1];
 			p2_nomral = (normalize(v_normals.at(check_key(u, it->v[1] - 1, it->vn[1] - 1))));
+			vertices_normals.push_back(p2);
+			vertices_normals.push_back(p2 + p2_nomral);
 			tempVertix.Position = p2;
 			tempVertix.V_Normal = p2_nomral;
 			this->vertices[it->v[1] - 1] = tempVertix;
@@ -225,10 +246,17 @@ void MeshModel::loadFile(string fileName)
 
 			p3 = l_vertices[it->v[2] - 1];
 			p3_nomral = (normalize(v_normals.at(check_key(u, it->v[2] - 1, it->vn[2] - 1))));
+			vertices_normals.push_back(p3);
+			vertices_normals.push_back(p3 + p3_nomral);
 			tempVertix.Position = p3;
 			tempVertix.V_Normal = p3_nomral;
 			this->vertices[it->v[2] - 1] = tempVertix;
 			this->indices.push_back(it->v[2] - 1);
+
+			curCenter = (p1 + p2 + p3) / 3;
+			curNormalEnd = normalize(cross(p2 - p1, p3 - p1));
+			face_normals.push_back(curCenter);
+			face_normals.push_back(curCenter + curNormalEnd);
 		}
 	}
 }
@@ -263,48 +291,82 @@ void MeshModel::SetupMesh()
 	glEnableVertexAttribArray(loc);
 	glVertexAttribPointer(loc, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
 
+
+
+	glUseProgram(simple_shader);
+
+	glGenVertexArrays(1, &bounding_box_VAO);
+	glGenBuffers(1, &bounding_box_VBO);
+	glGenBuffers(1, &bounding_box_EBO);
+
+	glBindVertexArray(bounding_box_VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, bounding_box_VBO);
+
+	glBufferData(GL_ARRAY_BUFFER, bound_box_vertices.size() * sizeof(vec3), &bound_box_vertices[0], GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bounding_box_EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, bound_box_indices.size() * sizeof(unsigned int),
+		&bound_box_indices[0], GL_STATIC_DRAW);
+
+	// vertex positions
+	loc = glGetAttribLocation(simple_shader, "vPosition");
+	glEnableVertexAttribArray(loc);
+	glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
+
+	//glGenVertexArrays(1, &vertex_normal_VAO);
+	//glBindVertexArray(vertex_normal_VAO);
+	//glGenBuffers(1, &vertex_normal_VBO);
+	//glBindBuffer(GL_ARRAY_BUFFER, vertex_normal_VBO);
+	//glBufferData(GL_ARRAY_BUFFER, vertices_normals.size() * sizeof(vec3),
+	//	&vertices_normals[0], GL_STATIC_DRAW);
+
+	//glGenVertexArrays(1, &face_normal_VAO);
+	//glBindVertexArray(face_normal_VAO);
+	//glGenBuffers(1, &face_normal_VBO);
+	//glBindBuffer(GL_ARRAY_BUFFER, face_normal_VBO);
+	//glBufferData(GL_ARRAY_BUFFER, face_normals.size() * sizeof(vec3),
+	//	&face_normals[0], GL_STATIC_DRAW);
+
 }
 
-vector<Line>* MeshModel::CalcBounds()
+void MeshModel::CalcBounds()
 {
-	//vec3 min_bound, max_bound;
-	//float curMaxX, curMinX, curMaxY, curMinY, curMaxZ, curMinZ;
-	//for (auto it = vertices.begin(); it != vertices.end(); ++ it)
-	//{
-	//	// find max
-	//	if (it->x > max_bound.x)
-	//	{lo
-	//		max_bound.x = curMaxX;
-	//	}
-	//	if (it->y > max_bound.y)
-	//	{
-	//		max_bound.y = curMaxY;
-	//	}
-	//	if (it->Position.z > max_bound.z)
-	//	{
-	//		max_bound.z = curMaxZ;
-	//	}
-	//	// find min
-	//	if (it->Position.x < min_bound.x)
-	//	{
-	//		min_bound.x = curMinX;
-	//	}
-	//	if (it->Position.y < min_bound.y)
-	//	{
-	//		min_bound.y = curMinY;
-	//	}
-	//	if (it->Position.z < min_bound.z)
-	//	{
-	//		min_bound.z = curMinZ;
-	//	}
-	//}
-	//
-	//x_bound_lenght = fabs(max_bound.x - min_bound.x);
-	//y_bound_lenght = fabs(max_bound.y - min_bound.y);
-	//z_bound_lenght = fabs(max_bound.z - min_bound.z);
-	//center = (max_bound + min_bound) / 2;
-	//return NULL;//SetRectangleVertices(center.x, center.y, center.z, x_bound_lenght, y_bound_lenght, z_bound_lenght);
-	return NULL;
+	vec3 min_bound, max_bound;
+	for (auto it = vertices.begin(); it != vertices.end(); ++ it)
+	{
+		// find max
+		if (it->Position.x > max_bound.x)
+		{
+			max_bound.x = it->Position.x;
+		}
+		if (it->Position.y > max_bound.y)
+		{
+			max_bound.y = it->Position.y;
+		}
+		if (it->Position.z > max_bound.z)
+		{
+			max_bound.z = it->Position.z;
+		}
+		// find min
+		if (it->Position.x < min_bound.x)
+		{
+			min_bound.x = it->Position.x;
+		}
+		if (it->Position.y < min_bound.y)
+		{
+			min_bound.y = it->Position.y;
+		}
+		if (it->Position.z < min_bound.z)
+		{
+			min_bound.z = it->Position.z;
+		}
+	}
+	
+	x_bound_lenght = fabs(max_bound.x - min_bound.x);
+	y_bound_lenght = fabs(max_bound.y - min_bound.y);
+	z_bound_lenght = fabs(max_bound.z - min_bound.z);
+	center = (max_bound + min_bound) / 2;
+	SetBoundingBoxVertices(center.x, center.y, center.z, x_bound_lenght, y_bound_lenght, z_bound_lenght);
 }
 
 
@@ -331,9 +393,8 @@ vec3 MeshModel::GetBoundsLength()
 }
 
 
-void MeshModel::draw()
+void MeshModel::draw(bool draw_bounding_box, bool draw_vertix_normals, bool draw_faces_normals)
 {	
-
 	glUseProgram(my_program);
 	GLint my_color_location = glGetUniformLocation(my_program, "color");
 	glUniform3f(my_color_location, mesh_color.x, mesh_color.y, mesh_color.z);
@@ -344,14 +405,56 @@ void MeshModel::draw()
 	MattoArr(modelMatrix, modelTrans);
 	glUniformMatrix4fv(umM, 1, GL_FALSE, modelMatrix);
 
-
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 
-
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+	glFlush();
+	if (draw_bounding_box)
+	{
+		drawBoundingBox();
+	}
+
+
+}
+
+void MeshModel::drawBoundingBox()
+{
+	//glUseProgram(simple_shader);
+
+	//GLint my_color_location = glGetUniformLocation(my_program, "color");
+	//glUniform3f(my_color_location, 0, 0, 1);
+
+	//GLint umM = glGetUniformLocation(simple_shader, "modelMatrix"); // Find the modelMatrix variable
+	//mat4 modelTrans = this->_world_transform * this->_model_transform;
+	//GLfloat modelMatrix[16];
+	//MattoArr(modelMatrix, modelTrans);
+	//glUniformMatrix4fv(umM, 1, GL_FALSE, modelMatrix);
+
+
+	//glBindVertexArray(bounding_box_VAO);
+	//glBindBuffer(GL_ARRAY_BUFFER, bounding_box_VBO);
+
+	//glDrawArrays(GL_LINE, 0, bound_box_vertices.size());
+
+	glUseProgram(simple_shader);
+	GLint my_color_location = glGetUniformLocation(simple_shader, "color");
+	glUniform3f(my_color_location, 1,0,0);
+
+	GLint umM = glGetUniformLocation(simple_shader, "modelMatrix"); // Find the modelMatrix variable
+	mat4 modelTrans = this->_world_transform * this->_model_transform;
+	GLfloat modelMatrix[16];
+	MattoArr(modelMatrix, modelTrans);
+	glUniformMatrix4fv(umM, 1, GL_FALSE, modelMatrix);
+
+	glBindVertexArray(bounding_box_VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, bounding_box_VBO);
+
+	glClearColor(1.0, 1.0, 1.0, 1.0);
+
+	glDrawElements(GL_LINES, bound_box_indices.size(), GL_UNSIGNED_INT, 0);
 	glFlush();
 }
 

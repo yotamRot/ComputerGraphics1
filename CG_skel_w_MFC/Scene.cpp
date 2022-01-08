@@ -46,7 +46,7 @@ int Scene::loadOBJModel(string fileName)
 {
 	activeModel = models.size();
 
-	MeshModel *model = new MeshModel(fileName, activeModel, program);
+	MeshModel *model = new MeshModel(fileName, activeModel, program, light_program);
 	modelToVectorId.push_back(activeModel);
 	models.push_back(model);
 	return modelToVectorId.size() - 1; // new model index
@@ -353,9 +353,9 @@ void Scene::draw()
 		curModel = (MeshModel*)(*it);
 		if (dynamic_cast<CameraModel*>(*it))
 		{
-			if (isRenderCameras && cameraIndex!= activeCamera) //dont want to draw active camera
+			if (isRenderCameras && cameraIndex != activeCamera) //dont want to draw active camera
 			{
-				(*it)->draw(); // draw camera
+				(*it)->draw(isDrawBoundBox,isShowVerticsNormals,isShowFacesNormals); // draw camera
 			}
 			cameraIndex++;
 		}
@@ -377,12 +377,12 @@ void Scene::draw()
 			//}
 			//else
 			//{
-				(*it)->draw();// draw models
+				(*it)->draw(isDrawBoundBox, isShowVerticsNormals, isShowFacesNormals);// draw models
 			//}
 		}
 		else
 		{
-			(*it)->draw();// draw models
+			(*it)->draw(isDrawBoundBox, isShowVerticsNormals, isShowFacesNormals);// draw models
 		}
 	}
 
