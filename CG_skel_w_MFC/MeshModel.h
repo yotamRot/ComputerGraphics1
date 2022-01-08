@@ -15,7 +15,7 @@ struct Texture {
 
 struct Vertex {
 	vec3 Position;
-	vec3 Normal;
+	vec3 V_Normal;
 	vec2 TexCoords;
 };
 
@@ -44,9 +44,8 @@ public:
 	GLuint my_program;
 	unsigned int VAO, VBO, EBO;
 
-
+	//vector<Vertex>       vertices;
 	vector<Vertex>       vertices;
-	vector<vec4>       tempo;
 	vector<unsigned int> indices;
 	vector<Texture>      textures;
 

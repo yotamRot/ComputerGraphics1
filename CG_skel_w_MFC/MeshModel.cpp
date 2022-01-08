@@ -153,7 +153,10 @@ void MeshModel::loadFile(string fileName)
 	vec3 curNormalEnd;
 	std::map<int, int> u;
 
+	Vertex tempVertix;
+
 	vec3 p1, p2 , p3;
+	vec3 p1_nomral, p2_nomral, p3_nomral;
 
 	Normal curVertex1Normal;
 	Normal curVertex2Normal;
@@ -196,13 +199,7 @@ void MeshModel::loadFile(string fileName)
 	//Then vertex_positions should contain:
 	//vertex_positions={v1,v2,v3,v1,v3,v4}
 		// iterate through all stored faces and create triangles
-	//for (vector<vec3>::iterator it = l_vertices.begin(); it != l_vertices.end(); ++it)
-	//{
-	//	//Create Trignagle
-	//	p1.Position = *it;
-	//	this->vertices.push_back(p1);
-	//	
-	//}
+	vertices = vector<Vertex>(l_vertices.size(), tempVertix);
 
 	// iterate through all stored faces and create triangles
 	for (vector<FaceIdcs>::iterator it = faces.begin(); it != faces.end(); ++it)
@@ -213,106 +210,101 @@ void MeshModel::loadFile(string fileName)
 		{
 			//Create Normals
 			p1 = l_vertices[it->v[0] - 1];
-			/*p1.Normal = (normalize(v_normals.at(check_key(u, it->v[0] - 1, it->vn[0] - 1))));
-			this->vertices[it->v[0] - 1] = p1;
-			this->indices.push_back(it->v[0] - 1);*/
-			this->tempo.push_back(vec4(p1));
+			p1_nomral = (normalize(v_normals.at(check_key(u, it->v[0] - 1, it->vn[0] - 1))));
+			tempVertix.Position = p1;
+			tempVertix.V_Normal = p1_nomral;
+			this->vertices[it->v[0] - 1] = tempVertix;
+			this->indices.push_back(it->v[0] - 1);
 
 			p2 = l_vertices[it->v[1] - 1];
-			/*p2.Normal = (normalize(v_normals.at(check_key(u, it->v[1] - 1, it->vn[1] - 1))));
-			this->vertices[it->v[1] - 1] = p2;*/
+			p2_nomral = (normalize(v_normals.at(check_key(u, it->v[1] - 1, it->vn[1] - 1))));
+			tempVertix.Position = p2;
+			tempVertix.V_Normal = p2_nomral;
+			this->vertices[it->v[1] - 1] = tempVertix;
 			this->indices.push_back(it->v[1] - 1);
-			this->tempo.push_back(vec4(p2));
-
-
 
 			p3 = l_vertices[it->v[2] - 1];
-			/*p3.Normal = (normalize(v_normals.at(check_key(u, it->v[2] - 1, it->vn[2] - 1))));
-			this->vertices[it->v[2] - 1] = p3;*/
+			p3_nomral = (normalize(v_normals.at(check_key(u, it->v[2] - 1, it->vn[2] - 1))));
+			tempVertix.Position = p3;
+			tempVertix.V_Normal = p3_nomral;
+			this->vertices[it->v[2] - 1] = tempVertix;
 			this->indices.push_back(it->v[2] - 1);
-			this->tempo.push_back(vec4(p3));
-
 		}
 	}
 }
 
 void MeshModel::SetupMesh()
 {
-	//glGenVertexArrays(1, &VAO);
-	//glGenBuffers(1, &VBO);
-	//glGenBuffers(1, &EBO);
-
-	//glBindVertexArray(VAO);
-	//glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-	//glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
-
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
-	//	&indices[0], GL_STATIC_DRAW);
-
-	//// vertex positions
-	//glEnableVertexAttribArray(0);
-	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-	//// vertex normals
-	//glEnableVertexAttribArray(1);
-	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
-	//// vertex texture coords
-	//glEnableVertexAttribArray(2);
-	//glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
-
-	//glBindVertexArray(0);
+	glUseProgram(my_program);
 
 	glGenVertexArrays(modelId, &VAO);
-	glBindVertexArray(VAO);
-
-
 	glGenBuffers(modelId, &VBO);
+	glGenBuffers(modelId, &EBO);
+
+	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vec4)*tempo.size(),
-		&tempo[0], GL_STATIC_DRAW);
+
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
+		&indices[0], GL_STATIC_DRAW);
+
+	// vertex positions
+	GLuint loc = glGetAttribLocation(my_program, "vPosition");
+	glEnableVertexAttribArray(loc);
+	glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+	// vertex normals
+	loc = glGetAttribLocation(my_program, "vNormal");
+	glEnableVertexAttribArray(loc);
+	glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, V_Normal));
+	// vertex texture coords
+	loc = glGetAttribLocation(my_program, "vTexture");
+	glEnableVertexAttribArray(loc);
+	glVertexAttribPointer(loc, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
 
 }
 
 vector<Line>* MeshModel::CalcBounds()
 {
-	vec3 min_bound, max_bound;
-	float curMaxX, curMinX, curMaxY, curMinY, curMaxZ, curMinZ;
-	for (auto it = vertices.begin(); it != vertices.end(); ++ it)
-	{
-		// find max
-		if (it->Position.x > max_bound.x)
-		{
-			max_bound.x = curMaxX;
-		}
-		if (it->Position.y > max_bound.y)
-		{
-			max_bound.y = curMaxY;
-		}
-		if (it->Position.z > max_bound.z)
-		{
-			max_bound.z = curMaxZ;
-		}
-		// find min
-		if (it->Position.x < min_bound.x)
-		{
-			min_bound.x = curMinX;
-		}
-		if (it->Position.y < min_bound.y)
-		{
-			min_bound.y = curMinY;
-		}
-		if (it->Position.z < min_bound.z)
-		{
-			min_bound.z = curMinZ;
-		}
-	}
-	
-	x_bound_lenght = fabs(max_bound.x - min_bound.x);
-	y_bound_lenght = fabs(max_bound.y - min_bound.y);
-	z_bound_lenght = fabs(max_bound.z - min_bound.z);
-	center = (max_bound + min_bound) / 2;
-	return NULL;//SetRectangleVertices(center.x, center.y, center.z, x_bound_lenght, y_bound_lenght, z_bound_lenght);
+	//vec3 min_bound, max_bound;
+	//float curMaxX, curMinX, curMaxY, curMinY, curMaxZ, curMinZ;
+	//for (auto it = vertices.begin(); it != vertices.end(); ++ it)
+	//{
+	//	// find max
+	//	if (it->x > max_bound.x)
+	//	{lo
+	//		max_bound.x = curMaxX;
+	//	}
+	//	if (it->y > max_bound.y)
+	//	{
+	//		max_bound.y = curMaxY;
+	//	}
+	//	if (it->Position.z > max_bound.z)
+	//	{
+	//		max_bound.z = curMaxZ;
+	//	}
+	//	// find min
+	//	if (it->Position.x < min_bound.x)
+	//	{
+	//		min_bound.x = curMinX;
+	//	}
+	//	if (it->Position.y < min_bound.y)
+	//	{
+	//		min_bound.y = curMinY;
+	//	}
+	//	if (it->Position.z < min_bound.z)
+	//	{
+	//		min_bound.z = curMinZ;
+	//	}
+	//}
+	//
+	//x_bound_lenght = fabs(max_bound.x - min_bound.x);
+	//y_bound_lenght = fabs(max_bound.y - min_bound.y);
+	//z_bound_lenght = fabs(max_bound.z - min_bound.z);
+	//center = (max_bound + min_bound) / 2;
+	//return NULL;//SetRectangleVertices(center.x, center.y, center.z, x_bound_lenght, y_bound_lenght, z_bound_lenght);
+	return NULL;
 }
 
 
@@ -341,8 +333,6 @@ vec3 MeshModel::GetBoundsLength()
 
 void MeshModel::draw()
 {	
-	const int pnum = tempo.size();
-	static const vec4 * points = &tempo[0];
 
 	glUseProgram(my_program);
 	GLint my_color_location = glGetUniformLocation(my_program, "color");
@@ -358,15 +348,10 @@ void MeshModel::draw()
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-
-
-	GLuint loc = glGetAttribLocation(my_program, "vPosition");
-	glEnableVertexAttribArray(loc);
-	glVertexAttribPointer(loc, 4, GL_FLOAT, GL_FALSE, 0, 0);
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 
 
-	glDrawArrays(GL_TRIANGLES, 0, tempo.size());
+	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 	glFlush();
 }
 
@@ -564,45 +549,58 @@ LightModel::LightModel(int model_id, int lightIndex, GLuint program) : lightInde
 	//Triangle curTriangle;
 	//_world_transform[2][3] = -2; //initialized same as camera regarding location
 
-
+	Vertex temp;
 	// first triangle
 	p1 = vec3(0.1, 0, 0); // bottom left
+	temp.Position = p1;
+	vertices.push_back(temp);
+
 	p2 = vec3(-0.1, 0, 0); // top left
+	temp.Position = p2;
+	vertices.push_back(temp);
 	p3 = vec3(0, 0, -0.1); // bottom right
-	tempo.push_back(vec4(p1));
-	tempo.push_back(vec4(p2));
-	tempo.push_back(vec4(p3));
+	temp.Position = p3;
+	vertices.push_back(temp);
 	//curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 1, 0), false, face_normal);
 	//curTriangle = Triangle(p1, p2, p3, mesh_color, true, curFaceNormal);
 	//triangles->push_back(curTriangle);
 	// first triangle other side
 	p1 = vec3(0.1, 0, 0); // bottom left
+	temp.Position = p1;
+	vertices.push_back(temp);
 	p2 = vec3(-0.1, 0, 0); // top left
+	temp.Position = p2;
+	vertices.push_back(temp);
 	p3 = vec3(0, 0, -0.1); // bottom right
-	tempo.push_back(vec4(p1));
-	tempo.push_back(vec4(p2));
-	tempo.push_back(vec4(p3));
+	temp.Position = p3;
+	vertices.push_back(temp);
 	//curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, -1, 0), false, face_normal);
 	//curTriangle = Triangle(p1, p2, p3, mesh_color, true, curFaceNormal);
 	//triangles->push_back(curTriangle);
 
 	// second triangle
 	p1 = vec3(0, 0.1, 0); // bottom left
+	temp.Position = p1;
+	vertices.push_back(temp);
 	p2 = vec3(0, -0.1, 0); // top left
+	temp.Position = p2;
+	vertices.push_back(temp);
 	p3 = vec3(0, 0, -0.1); // bottom right
-	tempo.push_back(vec4(p1));
-	tempo.push_back(vec4(p2));
-	tempo.push_back(vec4(p3));
+	temp.Position = p3;
+	vertices.push_back(temp);
 	//curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(1, 0, 0), false, face_normal);
 	//curTriangle = Triangle(p1, p2, p3, mesh_color, true, curFaceNormal);
 	//triangles->push_back(curTriangle);
 	// second triangle other side
 	p1 = vec3(0, 0.1, 0); // bottom left
+	temp.Position = p1;
+	vertices.push_back(temp);
 	p2 = vec3(0, -0.1, 0); // top left
+	temp.Position = p2;
+	vertices.push_back(temp);
 	p3 = vec3(0, 0, -0.1); // bottom right
-	tempo.push_back(vec4(p1));
-	tempo.push_back(vec4(p2));
-	tempo.push_back(vec4(p3));
+	temp.Position = p3;
+	vertices.push_back(temp);
 	//curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(-1, 0, 0), false, face_normal);
 	//curTriangle = Triangle(p1, p2, p3, mesh_color, true, curFaceNormal);
 	//triangles->push_back(curTriangle);
