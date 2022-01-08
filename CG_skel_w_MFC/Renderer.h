@@ -71,7 +71,7 @@ class Model {
 public:
 	mat4 _model_transform;
 	mat4 _world_transform;
-	int virtual draw(GLuint program) = 0;
+	void virtual draw() = 0;
 	vec3 virtual CenteringTranslation(TransAxis axis) = 0;
 protected:
 	virtual ~Model() {}
@@ -85,7 +85,6 @@ public:
 	float l_alpha;
 	int modelId;
 	vec3 c_light_position;
-	vec3 light_color;
 	Model* model;
 	LightType type;
 

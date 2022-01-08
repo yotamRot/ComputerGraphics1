@@ -91,7 +91,7 @@ public:
 	vector<int> modelToVectorId;
 	vector<Model*> models;
 	Scene();
-	Scene(Renderer* renderer);
+	//Scene(Renderer* renderer);
 	void InitScene();
 	int loadOBJModel(string fileName);
 	int loadCubeModel();
@@ -116,7 +116,7 @@ public:
 	bool toggleShowFog();
 	bool toggleShowWireFrame();
 	bool toggleSuperSample();
-	void draw(GLuint program);
+	void draw();
 	void drawDemo();
 	int modelMenuIdToVectorId(int menuId);
 	Camera* GetActiveCamera();
@@ -141,4 +141,6 @@ public:
 	void ApplyNonUniform();
 	void ChangeShadow(Shadow s);
 	vec4 GetAmbientRGB();
+	GLuint program;
+	GLuint light_program;
 };

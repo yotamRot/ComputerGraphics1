@@ -119,7 +119,7 @@ mat4 CreateNormalTransform(mat4& matrix, Transformation T)
 	return normalMatrix;
 }
 
-MeshModel::MeshModel(string fileName, int modelId):mesh_color(BLUE), ka(0.5), kd(0.8), ks(1.0),ke(0), modelId(modelId)
+MeshModel::MeshModel(string fileName, int modelId, GLuint program):mesh_color(BLUE), ka(0.5), kd(0.8), ks(1.0),ke(0), modelId(modelId), my_program(program)
 {
 	is_non_unfiorm = false;
 	loadFile(fileName);
@@ -339,17 +339,16 @@ vec3 MeshModel::GetBoundsLength()
 }
 
 
-int MeshModel::draw(GLuint program)
+void MeshModel::draw()
 {	
 	const int pnum = tempo.size();
 	static const vec4 * points = &tempo[0];
 
-
-	GLint my_color_location = glGetUniformLocation(program, "color");
+	glUseProgram(my_program);
+	GLint my_color_location = glGetUniformLocation(my_program, "color");
 	glUniform3f(my_color_location, mesh_color.x, mesh_color.y, mesh_color.z);
 
-	GLint umM = glGetUniformLocation(program, "modelMatrix"); // Find the mM variable
-	//GLint umP = glGetUniformLocation(program, "projectionMatrix"); // Find the mP variable
+	GLint umM = glGetUniformLocation(my_program, "modelMatrix"); // Find the modelMatrix variable
 	mat4 modelTrans = this->_world_transform * this->_model_transform;
 	GLfloat modelMatrix[16];
 	MattoArr(modelMatrix, modelTrans);
@@ -361,14 +360,14 @@ int MeshModel::draw(GLuint program)
 
 
 
-	GLuint loc = glGetAttribLocation(program, "vPosition");
+	GLuint loc = glGetAttribLocation(my_program, "vPosition");
 	glEnableVertexAttribArray(loc);
 	glVertexAttribPointer(loc, 4, GL_FLOAT, GL_FALSE, 0, 0);
 	glClearColor(1.0, 1.0, 1.0, 1.0);
+
+
 	glDrawArrays(GL_TRIANGLES, 0, tempo.size());
 	glFlush();
-	return tempo.size();
-
 }
 
 vec3 MeshModel::CenteringTranslation(TransAxis axis)
@@ -510,7 +509,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	//UpdateTriangleIlluminationParams();
 }
 
-CameraModel::CameraModel(int cameraIndex) : cameraIndex(cameraIndex)
+CameraModel::CameraModel(int cameraIndex, GLuint program) : cameraIndex(cameraIndex)
 {
 	//ka = 0.5;
 	//kd = 0.8;
@@ -547,55 +546,71 @@ CameraModel::CameraModel(int cameraIndex) : cameraIndex(cameraIndex)
 	//UpdateTriangleIlluminationParams();
 }
 
-LightModel::LightModel(int lightIndex) : lightIndex(lightIndex)
+LightModel::LightModel(int model_id, int lightIndex, GLuint program) : lightIndex(lightIndex), light_color(vec3(1,1,1)),La(0.5)
 {
 	//ka = 1;
 	//kd = 1;
 	//ks = 1;
 	//ke = 1;
 	//is_non_unfiorm = false;
-	//mesh_color = WHITE;
+	modelId = model_id;
+	my_program = program;
+	mesh_color = RED;
 	//triangles = new vector<Triangle>;
 	//Normal curFaceNormal;
-	//vec3 p1, p2, p3;
+	vec3 p1, p2, p3;
 	////faces_normal_end_positions = new vector<vec3>;
 
 	//Triangle curTriangle;
 	//_world_transform[2][3] = -2; //initialized same as camera regarding location
 
 
-	//// first triangle
-	//p1 = vec3(0.1, 0, 0); // bottom left
-	//p2 = vec3(-0.1, 0, 0); // top left
-	//p3 = vec3(0, 0, -0.1); // bottom right
+	// first triangle
+	p1 = vec3(0.1, 0, 0); // bottom left
+	p2 = vec3(-0.1, 0, 0); // top left
+	p3 = vec3(0, 0, -0.1); // bottom right
+	tempo.push_back(vec4(p1));
+	tempo.push_back(vec4(p2));
+	tempo.push_back(vec4(p3));
 	//curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 1, 0), false, face_normal);
 	//curTriangle = Triangle(p1, p2, p3, mesh_color, true, curFaceNormal);
 	//triangles->push_back(curTriangle);
-	//// first triangle other side
-	//p1 = vec3(0.1, 0, 0); // bottom left
-	//p2 = vec3(-0.1, 0, 0); // top left
-	//p3 = vec3(0, 0, -0.1); // bottom right
+	// first triangle other side
+	p1 = vec3(0.1, 0, 0); // bottom left
+	p2 = vec3(-0.1, 0, 0); // top left
+	p3 = vec3(0, 0, -0.1); // bottom right
+	tempo.push_back(vec4(p1));
+	tempo.push_back(vec4(p2));
+	tempo.push_back(vec4(p3));
 	//curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, -1, 0), false, face_normal);
 	//curTriangle = Triangle(p1, p2, p3, mesh_color, true, curFaceNormal);
 	//triangles->push_back(curTriangle);
 
-	//// second triangle
-	//p1 = vec3(0, 0.1, 0); // bottom left
-	//p2 = vec3(0, -0.1, 0); // top left
-	//p3 = vec3(0, 0, -0.1); // bottom right
+	// second triangle
+	p1 = vec3(0, 0.1, 0); // bottom left
+	p2 = vec3(0, -0.1, 0); // top left
+	p3 = vec3(0, 0, -0.1); // bottom right
+	tempo.push_back(vec4(p1));
+	tempo.push_back(vec4(p2));
+	tempo.push_back(vec4(p3));
 	//curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(1, 0, 0), false, face_normal);
 	//curTriangle = Triangle(p1, p2, p3, mesh_color, true, curFaceNormal);
 	//triangles->push_back(curTriangle);
-	//// second triangle other side
-	//p1 = vec3(0, 0.1, 0); // bottom left
-	//p2 = vec3(0, -0.1, 0); // top left
-	//p3 = vec3(0, 0, -0.1); // bottom right
+	// second triangle other side
+	p1 = vec3(0, 0.1, 0); // bottom left
+	p2 = vec3(0, -0.1, 0); // top left
+	p3 = vec3(0, 0, -0.1); // bottom right
+	tempo.push_back(vec4(p1));
+	tempo.push_back(vec4(p2));
+	tempo.push_back(vec4(p3));
 	//curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(-1, 0, 0), false, face_normal);
 	//curTriangle = Triangle(p1, p2, p3, mesh_color, true, curFaceNormal);
 	//triangles->push_back(curTriangle);
 
 	//bound_box_vertices = CalcBounds();
 	//UpdateTriangleIlluminationParams();
+	SetupMesh();
+
 }
 
 mat4 matrixInverse(mat4& mat , Transformation T)

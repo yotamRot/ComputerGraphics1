@@ -46,7 +46,7 @@ int Scene::loadOBJModel(string fileName)
 {
 	activeModel = models.size();
 
-	MeshModel *model = new MeshModel(fileName, activeModel);
+	MeshModel *model = new MeshModel(fileName, activeModel, program);
 	modelToVectorId.push_back(activeModel);
 	models.push_back(model);
 	return modelToVectorId.size() - 1; // new model index
@@ -98,10 +98,12 @@ void Scene::ChangeActiveLightL(vec4& l_params)
 
 void Scene::ChangeAmbientRgbLa(vec4 & rgbl)
 {
-	lights.at(0).light_color.x = rgbl.x;
-	lights.at(0).light_color.y = rgbl.y;
-	lights.at(0).light_color.z = rgbl.z;
-	lights.at(0).La = rgbl.w;
+	LightModel* light = (LightModel*)lights.at(0).model;
+	
+	light->light_color.x = rgbl.x;
+	light->light_color.y = rgbl.y;
+	light->light_color.z = rgbl.z;
+	light->La = rgbl.w;
 }
 
 
@@ -316,7 +318,7 @@ bool Scene::toggleSuperSample()
 	return isSuperSample;
 }
 
-void Scene::draw(GLuint program)
+void Scene::draw()
 {
 	// 1. Send the renderer the current camera transform and the projection
 	// 2. Tell all models to draw themselves
@@ -330,11 +332,16 @@ void Scene::draw(GLuint program)
 	MattoArr(curCameraInv, curCameraModel->_w_TransformInv * curCameraModel->_m_TransformInv);
 	int cameraIndex = 0;
 	glClear(GL_COLOR_BUFFER_BIT);
-	GLint umV = glGetUniformLocation(program, "modelViewMatrix"); // Find the mM variable
+	glUseProgram(program);
+	GLint umV = glGetUniformLocation(program, "modelViewMatrix"); // Find the modelViewMatrix variable
 	glUniformMatrix4fv(umV, 1, GL_FALSE, curCameraInv);
-
-	GLint umP = glGetUniformLocation(program, "projectionMatrix"); // Find the mM variable
+	GLint umP = glGetUniformLocation(program, "projectionMatrix"); // Find the projectionMatrix variable
 	glUniformMatrix4fv(umP, 1, GL_FALSE, curProjection);
+	glUseProgram(light_program);
+	GLint viewLightLoc = glGetUniformLocation(light_program, "modelViewMatrix"); // Find the modelViewMatrix variable
+	glUniformMatrix4fv(viewLightLoc, 1, GL_FALSE, curCameraInv);
+	GLint projectionLoc = glGetUniformLocation(light_program, "projectionMatrix"); // Find the projectionMatrix variable
+	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, curProjection);
 
 	MeshModel* curModel;
 	
@@ -350,24 +357,30 @@ void Scene::draw(GLuint program)
 		{
 			if (isRenderCameras && cameraIndex!= activeCamera) //dont want to draw active camera
 			{
-				(*it)->draw(program); // draw camera
+				(*it)->draw(); // draw camera
 			}
 			cameraIndex++;
 		}
 		else if(dynamic_cast<LightModel*>(*it))
 		{
-			if (dynamic_cast<LightModel*>(*it)->lightIndex == 0) //dont want to draw ambient light
-			{
-				continue;
-			}
-			else
-			{
-				(*it)->draw(program);// draw models
-			}
+			LightModel* light_model = (LightModel*)(*it);
+			glUseProgram(program);
+			GLint my_light_location = glGetUniformLocation(program, "lightColor");
+			glUniform3f(my_light_location, light_model->light_color.x, light_model->light_color.y, light_model->light_color.z);
+			GLint l_a_location = glGetUniformLocation(program, "La");
+			glUniform1f(l_a_location, light_model->La);
+			//if (light_model->lightIndex == 0) //dont want to draw ambient light
+			//{
+			//	continue;
+			//}
+			//else
+			//{
+				(*it)->draw();// draw models
+			//}
 		}
 		else
 		{
-			(*it)->draw(program);// draw models
+			(*it)->draw();// draw models
 		}
 	}
 
@@ -441,6 +454,8 @@ void Scene::drawDemo()
 
 Scene::Scene() : current_shadow(FLAT)
 {
+	program = InitShader("minimal_vshader.glsl", "minimal_fshader.glsl");
+	light_program = InitShader("light_vshader.glsl", "light_fshader.glsl");
 	InitScene();
 	activeModel = ILLEGAL_ACTIVE_MOVEL;
 	proj = FRUSTUM;
@@ -455,30 +470,32 @@ Scene::Scene() : current_shadow(FLAT)
 	axis = MODEL;
 }
 
-Scene::Scene(Renderer *renderer=NULL) : current_shadow(FLAT)
-{	
-	InitScene();
-	activeModel = ILLEGAL_ACTIVE_MOVEL;
-	proj = FRUSTUM;
-	setActiveCameraProjection(proj);
-	isShowVerticsNormals = false;
-	isShowFacesNormals = false;
-	isRenderCameras = false;
-	isDrawBoundBox = false;
-	isShowFog = false;
-	isShowWireFrame = false;
-	isSuperSample = false;
-	axis = MODEL;
-}
+//Scene::Scene(Renderer *renderer=NULL) : current_shadow(FLAT)
+//{	
+//	program = InitShader("minimal_vshader.glsl", "minimal_fshader.glsl");
+//	light_program = InitShader("light_vshader.glsl", "light_fshader.glsl");
+//	InitScene();
+//	activeModel = ILLEGAL_ACTIVE_MOVEL;
+//	proj = FRUSTUM;
+//	setActiveCameraProjection(proj);
+//	isShowVerticsNormals = false;
+//	isShowFacesNormals = false;
+//	isRenderCameras = false;
+//	isDrawBoundBox = false;
+//	isShowFog = false;
+//	isShowWireFrame = false;
+//	isSuperSample = false;
+//	axis = MODEL;
+//}
 
 void Scene::InitScene()
 {
 	activeCamera = addCamera();
 	// add ambient Light with id 0 and set Ld & Ls to 0
-	activeLight = addLight();
-	lights.at(0).Ld = 0;
-	lights.at(0).Ls = 0;
-	lights.at(0).La = 0.4;
+	//activeLight = addLight();
+	//lights.at(0).Ld = 0;
+	//lights.at(0).Ls = 0;
+	//lights.at(0).La = 0.4;
 
 }
 void Scene::manipulateActiveModel(Transformation T, TransformationDirection direction
@@ -658,7 +675,8 @@ void Scene::ChangeShadow(Shadow s)
 
 vec4 Scene::GetAmbientRGB()
 {
-	return vec4(lights.at(0).light_color,lights.at(0).La);
+	LightModel* light = (LightModel*)lights.at(0).model;
+	return vec4(light->light_color, light->La); 
 }
 
 void Camera::MaintainRatio(float widthRatio, float heightRatio, Projection proj)
@@ -690,7 +708,7 @@ vec3 Camera::Getrtf()
 int Scene::addCamera()
 {
 	int newCameraIndex = cameras.size();
-	CameraModel* cameraModel = new CameraModel(newCameraIndex);
+	CameraModel* cameraModel = new CameraModel(newCameraIndex, program);
 	Camera* newCamera = new Camera(vec3(-2, -2, 0.5), vec3(2, 2, 50), models.size(), cameraModel);
 	cameras.push_back(newCamera);
 	models.push_back(cameraModel);
@@ -731,7 +749,7 @@ int Scene::addLight()
 	int newLightIndex = lights.size();
 	activeLight = newLightIndex;
 	activeModel = models.size();
-	LightModel* lightModel = new LightModel(newLightIndex);
+	LightModel* lightModel = new LightModel(activeModel, newLightIndex, light_program);
 	Light newLight = Light(models.size(), lightModel);
 	lights.push_back(newLight);
 	models.push_back(lightModel);
