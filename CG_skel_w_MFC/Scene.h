@@ -84,7 +84,6 @@ class Scene {
 	bool isShowFog;
 	bool isShowWireFrame;
 	bool isSuperSample;
-	Renderer* m_renderer;
 	TransAxis axis;
 	Shadow current_shadow;
 	void ResetZoom();

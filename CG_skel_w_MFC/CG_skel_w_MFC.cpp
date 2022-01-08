@@ -85,7 +85,6 @@
 
 
 Scene *scene;
-Renderer *renderer;
 GLuint program;
 
 int last_x,last_y;
@@ -417,7 +416,6 @@ void display( void )
 void reshape( int width, int height )
 {
 	//update the renderer's buffers
-	renderer->ResizeBuffers(width, height);
 	glViewport(0, 0, width, height);
 	scene->MaintingCamerasRatios(oldWidth, oldHeight, width, height);
 	oldWidth = width;
@@ -833,8 +831,7 @@ int my_main( int argc, char **argv )
 	
 	oldWidth = 512;
 	oldHeight = 512;
-	renderer = new Renderer(512,512);
-	scene = new Scene(renderer);
+	scene = new Scene();
 
 	program = InitShader("minimal_vshader.glsl",
 		"minimal_fshader.glsl");
@@ -853,7 +850,6 @@ int my_main( int argc, char **argv )
 
 	glutMainLoop();
 	delete scene;
-	delete renderer;
 	return 0;
 }
 
