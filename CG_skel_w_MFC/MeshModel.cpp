@@ -237,9 +237,9 @@ void MeshModel::SetupMesh()
 {
 	glUseProgram(my_program);
 
-	glGenVertexArrays(modelId, &VAO);
-	glGenBuffers(modelId, &VBO);
-	glGenBuffers(modelId, &EBO);
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
 
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -531,7 +531,7 @@ CameraModel::CameraModel(int cameraIndex, GLuint program) : cameraIndex(cameraIn
 	//UpdateTriangleIlluminationParams();
 }
 
-LightModel::LightModel(int model_id, int lightIndex, GLuint program) : lightIndex(lightIndex), light_color(vec3(1,1,1)),La(0.5)
+LightModel::LightModel(int model_id, int lightIndex, GLuint program) : lightIndex(lightIndex), light_color(vec3(1,1,1)),La(0.5),Ld(0.8),Ls(1.0)
 {
 	//ka = 1;
 	//kd = 1;
@@ -553,6 +553,7 @@ LightModel::LightModel(int model_id, int lightIndex, GLuint program) : lightInde
 	// first triangle
 	p1 = vec3(0.1, 0, 0); // bottom left
 	temp.Position = p1;
+
 	vertices.push_back(temp);
 
 	p2 = vec3(-0.1, 0, 0); // top left
@@ -605,10 +606,20 @@ LightModel::LightModel(int model_id, int lightIndex, GLuint program) : lightInde
 	//curTriangle = Triangle(p1, p2, p3, mesh_color, true, curFaceNormal);
 	//triangles->push_back(curTriangle);
 
+	for (int i = 0; i < vertices.size(); i++)
+	{
+		indices.push_back(i);
+	}
+
 	//bound_box_vertices = CalcBounds();
 	//UpdateTriangleIlluminationParams();
 	SetupMesh();
 
+}
+
+vec4 LightModel::GetL()
+{
+	return vec4();
 }
 
 mat4 matrixInverse(mat4& mat , Transformation T)
@@ -645,22 +656,22 @@ mat4 MeshModel::moveModel(TransformationDirection direction, TransAxis axis)
 	}
 	switch (direction)
 	{
-		case X:
+		case X_dir:
 			tranlateMatrix = Translate(move*0.1, 0, 0);
 			break;
-		case Xn:
+		case Xn_dir:
 			tranlateMatrix = Translate(-move * 0.1, 0, 0);
 			break;
-		case Y:
+		case Y_dir:
 			tranlateMatrix = Translate(0, move *0.1, 0);
 			break;
-		case Yn:
+		case Yn_dir:
 			tranlateMatrix = Translate(0, -move * 0.1, 0);
 			break;
-		case Z:
+		case Z_dir:
 			tranlateMatrix = Translate(0, 0, move * 0.1);
 			break;
-		case Zn:
+		case Zn_dir:
 			tranlateMatrix = Translate(0, 0, -move * 0.1);
 			break;
 		default:
@@ -685,22 +696,22 @@ mat4 MeshModel::rotateModel(TransformationDirection direction, int angle, TransA
 	vec3 centeringVec;
 	switch (direction)
 	{
-	case X:
+	case X_dir:
 		rotateMatrix = RotateX(angle);
 		break;
-	case Xn:
+	case Xn_dir:
 		rotateMatrix = RotateX(-angle);
 		break;
-	case Y:
+	case Y_dir:
 		rotateMatrix = RotateY(angle);
 		break;
-	case Yn:
+	case Yn_dir:
 		rotateMatrix = RotateY(-angle);
 		break;
-	case Z:
+	case Z_dir:
 		rotateMatrix = RotateZ(angle);
 		break;
-	case Zn:
+	case Zn_dir:
 		rotateMatrix = RotateZ(-angle);
 		break;
 	default:
@@ -745,22 +756,22 @@ mat4 MeshModel::scaleModel(TransformationDirection direction, TransAxis axis)
 	vec3 centeringVec;
 	switch (direction)
 	{
-	case X:
+	case X_dir:
 		scaleMatrix = Scale(2, 1, 1);
 		break;
-	case Xn:
+	case Xn_dir:
 		scaleMatrix = Scale(0.5, 1, 1);
 		break;
-	case Y:
+	case Y_dir:
 		scaleMatrix = Scale(1, 2, 1);
 		break;
-	case Yn:
+	case Yn_dir:
 		scaleMatrix = Scale(1, 0.5, 1);
 		break;
-	case Z:
+	case Z_dir:
 		scaleMatrix = Scale(1, 1, 2);
 		break;
-	case Zn:
+	case Zn_dir:
 		scaleMatrix = Scale(1, 1, 0.5);
 		break;
 	default:

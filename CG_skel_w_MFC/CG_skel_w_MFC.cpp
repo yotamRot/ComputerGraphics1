@@ -140,11 +140,11 @@ void switchLightTypeMenu(int id)
 {
 	if (id == PARALLEL_SOURCE)
 	{
-		scene->GetActiveLight().type = PARALLEL_SOURCE;
+		scene->GetActiveLight()->type = PARALLEL_SOURCE;
 	}
 	else //  PARALLEL SOURCE need to switch to POINT SOURCE
 	{
-		scene->GetActiveLight().type = POINT_SOURCE;
+		scene->GetActiveLight()->type = POINT_SOURCE;
 	}
 	scene->draw();
 }
@@ -168,7 +168,7 @@ void ChangeAmbientColors()
 
 void ChangeLightLParams()
 {
-	SetLightL(scene->GetActiveLight().GetL());
+	SetLightL(scene->GetActiveLight()->GetL());
 	LDialog adlg;
 	if (adlg.DoModal() == IDOK) {
 		vec4 l_params = adlg.GetL();// l params and alpha
@@ -429,22 +429,22 @@ void keyboard( unsigned char key, int x, int y )
 		exit( EXIT_SUCCESS );
 		break;
 	case LEFT:			//a
-		axis = Xn;
+		axis = Xn_dir;
 		break;
 	case RIGHT:			//d 
-		axis = X;
+		axis = X_dir;
 		break;
 	case DOWN:			//s
-		axis = Yn;
+		axis = Yn_dir;
 		break;
 	case UP:			//w
-		axis = Y;
+		axis = Y_dir;
 		break;
 	case IN:			//q
-		axis = Zn;
+		axis = Zn_dir;
 		break;
 	case OUT:			//e
-		axis = Z;
+		axis = Z_dir;
 		break;
 	default:
 		AfxMessageBox(_T("Check Language is English and Caps Lock is disable"));
@@ -494,8 +494,8 @@ void motion(int x, int y)
 	
 	if (newRotate)
 	{
-		scene->manipulateActiveModel(ROTATE, Y, MODEL, dx);
-		scene->manipulateActiveModel(ROTATE, X, MODEL, dy);
+		scene->manipulateActiveModel(ROTATE, Y_dir, MODEL, dx);
+		scene->manipulateActiveModel(ROTATE, X_dir, MODEL, dy);
 		//scene->rotateAroundActiveModel(dx, dy);
 		scene->draw();
 	}

@@ -4,40 +4,12 @@
 #include <vector>
 #include <string>
 #include "Renderer.h"
+#include "MeshModel.h"
 using namespace std;
 
 #define ZOOM 2
 #define ILLEGAL_ACTIVE_MOVEL -1
 
-enum TransformationDirection
-{
-	X,
-	Xn,
-	Y,
-	Yn,
-	Z,
-	Zn
-};
-
-enum Transformation
-{
-	SCALE,
-	MOVE,
-	ROTATE,
-};
-
-enum Projection
-{
-	ORTHOGRAPHIC,
-	PERSPECTIVE,
-	FRUSTUM
-};
-
-enum ZoomDirection
-{
-	ZOOM_IN,
-	ZOOM_OUT
-};
 
 
 
@@ -75,7 +47,7 @@ public:
 class Scene {
 
 	vector<Camera*> cameras;
-	vector<Light> lights;
+	vector<LightModel*> lights;
 	Projection proj;
 	bool isShowVerticsNormals;
 	bool isShowFacesNormals;
@@ -120,7 +92,7 @@ public:
 	void drawDemo();
 	int modelMenuIdToVectorId(int menuId);
 	Camera* GetActiveCamera();
-	Light& GetActiveLight();
+	LightModel*  GetActiveLight();
 	vec3 GetModelRGB();
 	vec4 GetModelK();
 	void ChangeActiveLightL(vec4& l_params);

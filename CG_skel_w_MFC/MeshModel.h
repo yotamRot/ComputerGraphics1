@@ -1,12 +1,24 @@
 #pragma once
-#include "scene.h"
 #include "vec.h"
 #include "mat.h"
 #include <string>
 #include <set>
 #include <tuple>
+#include <vector>
+#include "Renderer.h"
 
 using namespace std;
+
+enum TransformationDirection
+{
+	X_dir,
+	Xn_dir,
+	Y_dir,
+	Yn_dir,
+	Z_dir,
+	Zn_dir
+};
+
 
 struct Texture {
 	unsigned int id;
@@ -33,7 +45,7 @@ protected :
 	float y_bound_lenght;
 	float z_bound_lenght;
 	vec3 center;
-	int modelId;
+
 
 public:	
 	float ka;// fraction of ambient light reflected from surface 
@@ -42,7 +54,9 @@ public:
 	float ke;
 	bool is_non_unfiorm;
 	GLuint my_program;
+	LightType type;
 	unsigned int VAO, VBO, EBO;
+	int modelId;
 
 	//vector<Vertex>       vertices;
 	vector<Vertex>       vertices;
@@ -106,9 +120,11 @@ class LightModel : public MeshModel
 		int lightIndex;
 		vec3 light_color;
 		float La;
-		//float Ld;
-		//float Ls;
+		float Ld;
+		float Ls;
+		float l_alpha;
 		LightModel(int model_id, int lightIndex, GLuint program);
+		vec4 GetL();
 };
 
 mat4 matrixInverse(mat4& mat, Transformation T);

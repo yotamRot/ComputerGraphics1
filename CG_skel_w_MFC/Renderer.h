@@ -66,6 +66,33 @@ enum RendererActions
 	Clip
 };
 
+enum Axis
+{
+	X,
+	Y,
+	Z
+};
+
+enum Transformation
+{
+	SCALE,
+	MOVE,
+	ROTATE,
+};
+
+enum Projection
+{
+	ORTHOGRAPHIC,
+	PERSPECTIVE,
+	FRUSTUM
+};
+
+enum ZoomDirection
+{
+	ZOOM_IN,
+	ZOOM_OUT
+};
+
 
 class Model {
 public:
@@ -77,20 +104,20 @@ protected:
 	virtual ~Model() {}
 };
 
-class Light {
-public:
-	float La;
-	float Ld;
-	float Ls;
-	float l_alpha;
-	int modelId;
-	vec3 c_light_position;
-	Model* model;
-	LightType type;
-
-	Light(int modelId, Model* model);
-	vec4 GetL(); // return L and alpha
-};
+//class Light {
+//public:
+//	float La;
+//	float Ld;
+//	float Ls;
+//	float l_alpha;
+//	int modelId;
+//	vec3 c_light_position;
+//	Model* model;
+//	LightType type;
+//
+//	Light(int modelId, Model* model);
+//	vec4 GetL(); // return L and alpha
+//};
 
 
 class Shape
@@ -108,7 +135,7 @@ public:
 	virtual vec3  GetCoordinates(int x, int y) =0;
 	virtual void  Rasterize() =0;
 	virtual void  UpdateShape() = 0;
-	virtual vec3 GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow) = 0;
+	//virtual vec3 GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow) = 0;
 	virtual void Clip() = 0;
 
 	bool is_light;
@@ -148,7 +175,7 @@ public:
 	void Clip() override;
 	void ClipFace(Face face);
 
-	vec3 GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow) override;
+	//vec3 GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow) override;
 
 
 
@@ -174,60 +201,60 @@ public:
 
 extern Normal invalid_normal;
 
-class Triangle : public virtual Shape
-{
-	
-public:
-	Triangle();
-	//~Triangle();
-	vec3 p1_3d;
-	vec3 p2_3d;
-	vec3 p3_3d;
-
-	vec3 C_p1_3d;
-	vec3 C_p2_3d;
-	vec3 C_p3_3d;
-
-	vec4 P_p1_4d;
-	vec4 P_p2_4d;
-	vec4 P_p3_4d;
-	
-	vec2 p1_2d;
-	vec2 p2_2d;
-	vec2 p3_2d;
-	
-	Normal p1_normal;
-	Normal p2_normal;
-	Normal p3_normal;
-
-	Normal normal;
-
-	float ka;
-	float kd;
-	float ks;
-	float ke;
-
-	float p1_illumination;
-	float p2_illumination;
-	float p3_illumination;
-
-	bool is_non_uniform;
-
-	void Rasterize() override;
-	vec3 GetCoordinates(int x, int y) override ;
-	void UpdateShape() override;
-	void Clip() override;
-	bool ShouldDraw();
-	vec3 GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow) override;
-	float GetGouruad(vec3& C_cords);
-	vec3 GetPhong(vec3& C_cords);
-	int ClipFace(Triangle& triangle1, Triangle& triangle2, Face face);
-
-
-	Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d, vec3 rgb, bool is_light, Normal& normal,
-		Normal& p1_normal=invalid_normal, Normal& p2_normal=invalid_normal,
-		Normal& p3_normal=invalid_normal);
-};
+//class Triangle : public virtual Shape
+//{
+//	
+//public:
+//	Triangle();
+//	//~Triangle();
+//	vec3 p1_3d;
+//	vec3 p2_3d;
+//	vec3 p3_3d;
+//
+//	vec3 C_p1_3d;
+//	vec3 C_p2_3d;
+//	vec3 C_p3_3d;
+//
+//	vec4 P_p1_4d;
+//	vec4 P_p2_4d;
+//	vec4 P_p3_4d;
+//	
+//	vec2 p1_2d;
+//	vec2 p2_2d;
+//	vec2 p3_2d;
+//	
+//	Normal p1_normal;
+//	Normal p2_normal;
+//	Normal p3_normal;
+//
+//	Normal normal;
+//
+//	float ka;
+//	float kd;
+//	float ks;
+//	float ke;
+//
+//	float p1_illumination;
+//	float p2_illumination;
+//	float p3_illumination;
+//
+//	bool is_non_uniform;
+//
+//	void Rasterize() override;
+//	vec3 GetCoordinates(int x, int y) override ;
+//	void UpdateShape() override;
+//	void Clip() override;
+//	bool ShouldDraw();
+//	//vec3 GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow) override;
+//	float GetGouruad(vec3& C_cords);
+//	vec3 GetPhong(vec3& C_cords);
+//	int ClipFace(Triangle& triangle1, Triangle& triangle2, Face face);
+//
+//
+//	Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d, vec3 rgb, bool is_light, Normal& normal,
+//		Normal& p1_normal=invalid_normal, Normal& p2_normal=invalid_normal,
+//		Normal& p3_normal=invalid_normal);
+//};
 
 struct CustomCompareYmin
 {
@@ -279,14 +306,14 @@ public:
 	~Renderer(void);
 	void Init();
 	void DrawTriangles();
-	void ClipModel(vector<Triangle>* triangles, vector<Line>* boundBoxLines);
+	//void ClipModel(vector<Triangle>* triangles, vector<Line>* boundBoxLines);
 	void DrawBoundingBox(vector<Line>* lines);
 	void DrawPixel(int x, int y, vec3& rgb);
 	vec3 GetPixel(int x, int y);
-	void Renderer::ConfigureRenderer(const mat4& projection, const mat4& transform,
-								bool isDrawVertexNormal, bool isDrawFaceNormal, bool isWireFrame, bool isFog,bool isSuperSample,
-								bool isDrawBoundBox, vector<Light> scene_lights,
-								Shadow scene_shadow);
+	//void Renderer::ConfigureRenderer(const mat4& projection, const mat4& transform,
+	//							bool isDrawVertexNormal, bool isDrawFaceNormal, bool isWireFrame, bool isFog,bool isSuperSample,
+	//							bool isDrawBoundBox, vector<Light> scene_lights,
+	//							Shadow scene_shadow);
 	void SetObjectMatrices(const mat4& oTransform, const mat4& nTransform);
 	void SwapBuffers();
 	void ClearColorBuffer();
@@ -304,9 +331,9 @@ public:
 	bool isFog;
 	mat4 cProjection;
 	Shadow shadow;
-	vector<Light> lights;
-	vector<Light> GetLights();
-	vector<Triangle> triangulation_triangles;
+	//vector<Light> lights;
+	//vector<Light> GetLights();
+	//vector<Triangle> triangulation_triangles;
 	void addFog(vec3& color, float z);
 	void superSampling();
 	vector<tuple<int,int>> activePixels;

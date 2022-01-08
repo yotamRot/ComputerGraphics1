@@ -17,29 +17,23 @@
 
 #define EPSILON 0.01
 
-enum Axis
-{
-	X,
-	Y,
-	Z
-};
 
 Renderer * renderer;
 
 Normal invalid_normal = Normal(vec3(0, 0), vec3(0, 0), false, vertix_normal, 0, false);
 
-Triangle::Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d, vec3 rgb, bool is_light,
-	Normal& normal, Normal& p1_normal, Normal& p2_normal, Normal& p3_normal)
-	: p1_3d(p1_3d), p2_3d(p2_3d), p3_3d(p3_3d) ,normal(normal),
-	p1_normal(p1_normal), p2_normal(p2_normal) , p3_normal(p3_normal)
-{
-	should_draw = true;
-	shape_color = rgb;
-	this->is_light = is_light;
-	x_max = NULL;
-	x_min = NULL;
-	is_non_uniform = false;
-}
+//Triangle::Triangle(vec3& p1_3d, vec3& p2_3d, vec3& p3_3d, vec3 rgb, bool is_light,
+//	Normal& normal, Normal& p1_normal, Normal& p2_normal, Normal& p3_normal)
+//	: p1_3d(p1_3d), p2_3d(p2_3d), p3_3d(p3_3d) ,normal(normal),
+//	p1_normal(p1_normal), p2_normal(p2_normal) , p3_normal(p3_normal)
+//{
+//	should_draw = true;
+//	shape_color = rgb;
+//	this->is_light = is_light;
+//	x_max = NULL;
+//	x_min = NULL;
+//	is_non_uniform = false;
+//}
 
 Line::Line(vec3& p1_3d, vec3& p2_3d, bool is_light) :p1_3d(p1_3d), p2_3d(p2_3d)
 {
@@ -58,14 +52,14 @@ Normal::Normal(vec3& p1_3d, vec3& p2_3d, bool is_light, NormalKind normal_kind, 
 	x_min = NULL;
 }
 
-Light::Light(int modelId, Model* model) : modelId(modelId), model(model), La(0.3), Ld(0.3), Ls(0.3), type(POINT_SOURCE), l_alpha(2)
-{
-}
-
-vec4 Light::GetL()
-{
-	return vec4(La, Ld, Ls, l_alpha);
-}
+//Light::Light(int modelId, Model* model) : modelId(modelId), model(model), La(0.3), Ld(0.3), Ls(0.3), type(POINT_SOURCE), l_alpha(2)
+//{
+//}
+//
+//vec4 Light::GetL()
+//{
+//	return vec4(La, Ld, Ls, l_alpha);
+//}
 
 // gives the maximum in array
 float maxi(float arr[], int n) {
@@ -303,172 +297,172 @@ Shape::Shape(const Shape& a)
 }
 
 
+//
+//void Triangle::Rasterize()
+//{
+//	p1_2d = renderer->vec4ToVec2(P_p1_4d);
+//	p2_2d = renderer->vec4ToVec2(P_p2_4d);
+//	p3_2d = renderer->vec4ToVec2(P_p3_4d);
+//	yMax = max(max(p1_2d.y, p2_2d.y), p3_2d.y);
+//	yMin = min(min(p1_2d.y, p2_2d.y), p3_2d.y);
+//	renderer->yMin = min(yMin, renderer->yMin);
+//	renderer->yMax = max(yMax, renderer->yMax);
+//	x_max = new int[yMax - yMin + 1]();
+//	x_min = new int[yMax - yMin + 1]();
+//	std::fill_n(x_max, yMax - yMin + 1, -1);
+//	std::fill_n(x_min, yMax - yMin + 1, -1);
+//
+//	RasterizeLine(p1_2d, p2_2d);
+//	RasterizeLine(p2_2d, p3_2d);
+//	RasterizeLine(p3_2d, p1_2d);
+//}
+//
+//vec3 Triangle::GetCoordinates(int x, int y)
+//{
+//	float A1, A2, A3;
+//	vec2 cord = vec2(x, y);
+//	vec3 vec0 = vec3(p1_2d - cord, 0);
+//	vec3 vec1 = vec3(p2_2d - cord, 0);
+//	vec3 vec2 = vec3(p3_2d - cord, 0);
+//	A1 = fabs(cross(vec1, vec2).z);
+//	A2 = fabs(cross(vec2, vec0).z);
+//	A3 = fabs(cross(vec0, vec1).z);
+//	float normalFactor = A1 + A2 + A3;
+//	if (normalFactor == 0)
+//	{
+//		float line_len = length(p2_2d - p1_2d);
+//		if (line_len == 0)
+//		{
+//			return C_p1_3d;
+//		}
+//		const float t = length(cord - p1_2d) / line_len;
+//		return C_p1_3d * t + (1 - t) * C_p2_3d;
+//	}
+//	return (A1 * C_p1_3d + A2 * C_p2_3d + A3 * C_p3_3d) / normalFactor;
+//}
+//
+//float Triangle::GetGouruad(vec3& C_cord)
+//{
+//	float A1, A2, A3;
+//	vec3 vec_0 = C_p1_3d - C_cord;
+//	vec3 vec_1 = C_p2_3d - C_cord;
+//	vec3 vec_2 = C_p3_3d - C_cord;
+//	A1 = length(cross(vec_1, vec_2));
+//	A2 = length(cross(vec_2, vec_0));
+//	A3 = length(cross(vec_0, vec_1));
+//	float normalFactor = A1 + A2 + A3;
+//	if (normalFactor == 0)
+//	{
+//		if (length(p2_2d - p1_2d) == 0)
+//		{
+//			return p1_illumination;
+//		}
+//		const float t = length(vec2(C_cord.x,C_cord.y) - p1_2d) / length(p2_2d - p1_2d);
+//		return p1_illumination * t + (1 - t) * p2_illumination;
+//	}
+//	return ((A1 * p1_illumination + A2 * p2_illumination + A3 * p3_illumination) / normalFactor);
+//}
+//
+//vec3 Triangle::GetPhong(vec3& C_cord)
+//{
+//	float A1, A2, A3;
+//	vec3 vec_0 = C_p1_3d - C_cord;
+//	vec3 vec_1 = C_p2_3d - C_cord;
+//	vec3 vec_2 = C_p3_3d - C_cord;
+//	A1 = length(cross(vec_1, vec_2));
+//	A2 = length(cross(vec_2, vec_0));
+//	A3 = length(cross(vec_0, vec_1));
+//	float normalFactor = A1 + A2 + A3;
+//	if (normalFactor == 0)
+//	{
+//		if (length(p2_2d - p1_2d) == 0)
+//		{
+//			return p1_normal.normal_direction;
+//		}
+//		const float t = length(vec2(C_cord.x, C_cord.y) - p1_2d) / length(p2_2d - p1_2d);
+//		return p1_normal.normal_direction * t + (1 - t) * p2_normal.normal_direction;
+//	}
+//	return ((A1 * p1_normal.normal_direction + A2 * p2_normal.normal_direction + A3 * p3_normal.normal_direction) / normalFactor);
+//}
 
-void Triangle::Rasterize()
-{
-	p1_2d = renderer->vec4ToVec2(P_p1_4d);
-	p2_2d = renderer->vec4ToVec2(P_p2_4d);
-	p3_2d = renderer->vec4ToVec2(P_p3_4d);
-	yMax = max(max(p1_2d.y, p2_2d.y), p3_2d.y);
-	yMin = min(min(p1_2d.y, p2_2d.y), p3_2d.y);
-	renderer->yMin = min(yMin, renderer->yMin);
-	renderer->yMax = max(yMax, renderer->yMax);
-	x_max = new int[yMax - yMin + 1]();
-	x_min = new int[yMax - yMin + 1]();
-	std::fill_n(x_max, yMax - yMin + 1, -1);
-	std::fill_n(x_min, yMax - yMin + 1, -1);
-
-	RasterizeLine(p1_2d, p2_2d);
-	RasterizeLine(p2_2d, p3_2d);
-	RasterizeLine(p3_2d, p1_2d);
-}
-
-vec3 Triangle::GetCoordinates(int x, int y)
-{
-	float A1, A2, A3;
-	vec2 cord = vec2(x, y);
-	vec3 vec0 = vec3(p1_2d - cord, 0);
-	vec3 vec1 = vec3(p2_2d - cord, 0);
-	vec3 vec2 = vec3(p3_2d - cord, 0);
-	A1 = fabs(cross(vec1, vec2).z);
-	A2 = fabs(cross(vec2, vec0).z);
-	A3 = fabs(cross(vec0, vec1).z);
-	float normalFactor = A1 + A2 + A3;
-	if (normalFactor == 0)
-	{
-		float line_len = length(p2_2d - p1_2d);
-		if (line_len == 0)
-		{
-			return C_p1_3d;
-		}
-		const float t = length(cord - p1_2d) / line_len;
-		return C_p1_3d * t + (1 - t) * C_p2_3d;
-	}
-	return (A1 * C_p1_3d + A2 * C_p2_3d + A3 * C_p3_3d) / normalFactor;
-}
-
-float Triangle::GetGouruad(vec3& C_cord)
-{
-	float A1, A2, A3;
-	vec3 vec_0 = C_p1_3d - C_cord;
-	vec3 vec_1 = C_p2_3d - C_cord;
-	vec3 vec_2 = C_p3_3d - C_cord;
-	A1 = length(cross(vec_1, vec_2));
-	A2 = length(cross(vec_2, vec_0));
-	A3 = length(cross(vec_0, vec_1));
-	float normalFactor = A1 + A2 + A3;
-	if (normalFactor == 0)
-	{
-		if (length(p2_2d - p1_2d) == 0)
-		{
-			return p1_illumination;
-		}
-		const float t = length(vec2(C_cord.x,C_cord.y) - p1_2d) / length(p2_2d - p1_2d);
-		return p1_illumination * t + (1 - t) * p2_illumination;
-	}
-	return ((A1 * p1_illumination + A2 * p2_illumination + A3 * p3_illumination) / normalFactor);
-}
-
-vec3 Triangle::GetPhong(vec3& C_cord)
-{
-	float A1, A2, A3;
-	vec3 vec_0 = C_p1_3d - C_cord;
-	vec3 vec_1 = C_p2_3d - C_cord;
-	vec3 vec_2 = C_p3_3d - C_cord;
-	A1 = length(cross(vec_1, vec_2));
-	A2 = length(cross(vec_2, vec_0));
-	A3 = length(cross(vec_0, vec_1));
-	float normalFactor = A1 + A2 + A3;
-	if (normalFactor == 0)
-	{
-		if (length(p2_2d - p1_2d) == 0)
-		{
-			return p1_normal.normal_direction;
-		}
-		const float t = length(vec2(C_cord.x, C_cord.y) - p1_2d) / length(p2_2d - p1_2d);
-		return p1_normal.normal_direction * t + (1 - t) * p2_normal.normal_direction;
-	}
-	return ((A1 * p1_normal.normal_direction + A2 * p2_normal.normal_direction + A3 * p3_normal.normal_direction) / normalFactor);
-}
-
-
-void Triangle::UpdateShape()
-{
-	renderer->Transform(p1_3d, C_p1_3d, P_p1_4d);
-	renderer->Transform(p2_3d, C_p2_3d, P_p2_4d);
-	renderer->Transform(p3_3d, C_p3_3d, P_p3_4d);
-
-	if (normal.is_valid)
-	{
-		normal.UpdateShape();
-	}
-
-	if (!ShouldDraw())
-	{
-		return;
-	}
-	vec3 p1_light_direction, p2_light_direction, p3_light_direction;
-	vec3 p1_camera_direction, p2_camera_direction, p3_camera_direction;
-	vec3 p1_reflect_direction, p2_reflect_direction, p3_reflect_direction;
-	float i, ia, id, is;
-	float l_ka, l_kd, l_ks;
-	p1_illumination = p2_illumination = p3_illumination = 0;
-	if (renderer->shadow == GOURAUD)
-	{
-		for (auto it = renderer->lights.begin(); it != renderer->lights.end(); ++it)
-		{
-			
-			if ((it)->type == PARALLEL_SOURCE)
-			{
-				normalize((it)->c_light_position);
-				p1_light_direction = (it)->c_light_position;
-				p2_light_direction = (it)->c_light_position;
-				p3_light_direction = (it)->c_light_position;
-			}
-			else // Point source
-			{
-				p1_light_direction = normalize((it)->c_light_position - C_p1_3d);
-				p2_light_direction = normalize((it)->c_light_position - C_p2_3d);
-				p3_light_direction = normalize((it)->c_light_position - C_p3_3d);
-			}
-			p1_camera_direction = normalize(-C_p1_3d);
-			p2_camera_direction = normalize(-C_p2_3d);
-			p3_camera_direction = normalize(-C_p3_3d);
-			p1_reflect_direction = normalize(-p1_light_direction - 2 * (max(dot(-p1_light_direction, p1_normal.normal_direction), 0)) * p1_normal.normal_direction);
-			p2_reflect_direction = normalize(-p2_light_direction - 2 * (max(dot(-p2_light_direction, p2_normal.normal_direction), 0)) * p2_normal.normal_direction);
-			p3_reflect_direction = normalize(-p3_light_direction - 2 * (max(dot(-p3_light_direction, p3_normal.normal_direction), 0)) * p3_normal.normal_direction);
-			if (this->is_non_uniform)
-			{
-				l_ka = (float)rand() / (3 * RAND_MAX);
-				l_kd = (float)rand() / (3 * RAND_MAX);
-				l_ks = (float)rand() / (3 * RAND_MAX);
-			}
-			else
-			{
-				l_ka = ka;
-				l_kd = kd;
-				l_ks = ks;
-			}
-
-			p1_illumination += /*ia*/l_ka * (it)->La +
-				/*id*/l_kd * max(dot(p1_light_direction, p1_normal.normal_direction), 0) * (it)->Ld +
-				/*is*/ks * pow(max(dot(p1_reflect_direction, p1_camera_direction), 0), (it)->l_alpha) * (it)->Ls;
-			p2_illumination += /*ia*/l_ka * (it)->La +
-				/*id*/l_kd * max(dot(p2_light_direction, p2_normal.normal_direction), 0) * (it)->Ld +
-				/*is*/l_ks * pow(max(dot(p2_reflect_direction, p2_camera_direction), 0), (it)->l_alpha) * (it)->Ls;
-			p3_illumination += /*ia*/l_ka * (it)->La +
-				/*id*/l_kd * max(dot(p3_light_direction, p3_normal.normal_direction), 0) * (it)->Ld +
-				/*is*/l_ks * pow(max(dot(p3_reflect_direction, p3_camera_direction), 0), (it)->l_alpha) * (it)->Ls;
-		}
-	}
-	
-	if (p1_normal.is_valid)
-	{
-		p1_normal.UpdateShape();
-		p2_normal.UpdateShape();
-		p3_normal.UpdateShape();
-	}
-}
+//
+//void Triangle::UpdateShape()
+//{
+//	renderer->Transform(p1_3d, C_p1_3d, P_p1_4d);
+//	renderer->Transform(p2_3d, C_p2_3d, P_p2_4d);
+//	renderer->Transform(p3_3d, C_p3_3d, P_p3_4d);
+//
+//	if (normal.is_valid)
+//	{
+//		normal.UpdateShape();
+//	}
+//
+//	if (!ShouldDraw())
+//	{
+//		return;
+//	}
+//	vec3 p1_light_direction, p2_light_direction, p3_light_direction;
+//	vec3 p1_camera_direction, p2_camera_direction, p3_camera_direction;
+//	vec3 p1_reflect_direction, p2_reflect_direction, p3_reflect_direction;
+//	float i, ia, id, is;
+//	float l_ka, l_kd, l_ks;
+//	p1_illumination = p2_illumination = p3_illumination = 0;
+//	if (renderer->shadow == GOURAUD)
+//	{
+//		for (auto it = renderer->lights.begin(); it != renderer->lights.end(); ++it)
+//		{
+//			
+//			if ((it)->type == PARALLEL_SOURCE)
+//			{
+//				normalize((it)->c_light_position);
+//				p1_light_direction = (it)->c_light_position;
+//				p2_light_direction = (it)->c_light_position;
+//				p3_light_direction = (it)->c_light_position;
+//			}
+//			else // Point source
+//			{
+//				p1_light_direction = normalize((it)->c_light_position - C_p1_3d);
+//				p2_light_direction = normalize((it)->c_light_position - C_p2_3d);
+//				p3_light_direction = normalize((it)->c_light_position - C_p3_3d);
+//			}
+//			p1_camera_direction = normalize(-C_p1_3d);
+//			p2_camera_direction = normalize(-C_p2_3d);
+//			p3_camera_direction = normalize(-C_p3_3d);
+//			p1_reflect_direction = normalize(-p1_light_direction - 2 * (max(dot(-p1_light_direction, p1_normal.normal_direction), 0)) * p1_normal.normal_direction);
+//			p2_reflect_direction = normalize(-p2_light_direction - 2 * (max(dot(-p2_light_direction, p2_normal.normal_direction), 0)) * p2_normal.normal_direction);
+//			p3_reflect_direction = normalize(-p3_light_direction - 2 * (max(dot(-p3_light_direction, p3_normal.normal_direction), 0)) * p3_normal.normal_direction);
+//			if (this->is_non_uniform)
+//			{
+//				l_ka = (float)rand() / (3 * RAND_MAX);
+//				l_kd = (float)rand() / (3 * RAND_MAX);
+//				l_ks = (float)rand() / (3 * RAND_MAX);
+//			}
+//			else
+//			{
+//				l_ka = ka;
+//				l_kd = kd;
+//				l_ks = ks;
+//			}
+//
+//			p1_illumination += /*ia*/l_ka * (it)->La +
+//				/*id*/l_kd * max(dot(p1_light_direction, p1_normal.normal_direction), 0) * (it)->Ld +
+//				/*is*/ks * pow(max(dot(p1_reflect_direction, p1_camera_direction), 0), (it)->l_alpha) * (it)->Ls;
+//			p2_illumination += /*ia*/l_ka * (it)->La +
+//				/*id*/l_kd * max(dot(p2_light_direction, p2_normal.normal_direction), 0) * (it)->Ld +
+//				/*is*/l_ks * pow(max(dot(p2_reflect_direction, p2_camera_direction), 0), (it)->l_alpha) * (it)->Ls;
+//			p3_illumination += /*ia*/l_ka * (it)->La +
+//				/*id*/l_kd * max(dot(p3_light_direction, p3_normal.normal_direction), 0) * (it)->Ld +
+//				/*is*/l_ks * pow(max(dot(p3_reflect_direction, p3_camera_direction), 0), (it)->l_alpha) * (it)->Ls;
+//		}
+//	}
+//	
+//	if (p1_normal.is_valid)
+//	{
+//		p1_normal.UpdateShape();
+//		p2_normal.UpdateShape();
+//		p3_normal.UpdateShape();
+//	}
+//}
 
 
 
@@ -516,194 +510,194 @@ int trueCounter(bool first, bool second, bool third)
 	return counter;
 }
 
+//
+//// num of triangles after clip 0/1/2
+//int Triangle::ClipFace(Triangle& triangle1, Triangle& triangle2, Face face)
+//{
+//	bool p1Cond, p2Cond, p3Cond;
+//	P_p1_4d = P_p1_4d;
+//	P_p2_4d = P_p2_4d;
+//	P_p3_4d = P_p3_4d;
+//	switch (face)
+//	{
+//	case Down:
+//		p1Cond = P_p1_4d.y > -P_p1_4d.w;
+//		p2Cond = P_p2_4d.y > -P_p2_4d.w;
+//		p3Cond = P_p3_4d.y > -P_p3_4d.w;
+//		break;
+//	case Up:
+//		p1Cond = P_p1_4d.y < P_p1_4d.w;
+//		p2Cond = P_p2_4d.y < P_p2_4d.w;
+//		p3Cond = P_p3_4d.y < P_p3_4d.w;
+//		break;
+//	case Left:
+//		p1Cond = P_p1_4d.x > -P_p1_4d.w;
+//		p2Cond = P_p2_4d.x > -P_p2_4d.w;
+//		p3Cond = P_p3_4d.x > -P_p3_4d.w;
+//		break;
+//	case Right:
+//		p1Cond = P_p1_4d.x < P_p1_4d.w;
+//		p2Cond = P_p2_4d.x < P_p2_4d.w;
+//		p3Cond = P_p3_4d.x < P_p3_4d.w;
+//		break;
+//	case Far:
+//		p1Cond = P_p1_4d.z < P_p1_4d.w;
+//		p2Cond = P_p2_4d.z < P_p2_4d.w;
+//		p3Cond = P_p3_4d.z < P_p3_4d.w;
+//		break;
+//	case Near:
+//		p1Cond = P_p1_4d.z > -P_p1_4d.w ;
+//		p2Cond = P_p2_4d.z > -P_p2_4d.w ;
+//		p3Cond = P_p3_4d.z > -P_p3_4d.w ;
+//		break;
+//	default:
+//		break;
+//	}
+//	int insideCounter = trueCounter(p1Cond, p2Cond, p3Cond);
+//	if (insideCounter == 3) // all inside no need clip
+//	{
+//		triangle1 = *this;
+//		return 1;
+//	}
+//
+//	if (insideCounter == 2) // one outside need to clip and tirangulate ):
+//	{
+//		triangle1 = *this;
+//		triangle2 = *this;
+//		if (!p1Cond) // p1 is out
+//		{
+//			ClipLinePoints(getXYZ(P_p2_4d), getXYZ(P_p1_4d), C_p2_3d, C_p1_3d, triangle1.P_p1_4d, triangle1.C_p1_3d, face);
+//			ClipLinePoints(getXYZ(P_p3_4d), getXYZ(P_p1_4d),C_p3_3d, C_p1_3d, triangle2.P_p1_4d, triangle2.C_p1_3d, face);
+//			triangle2.C_p2_3d = triangle1.C_p1_3d;
+//			triangle2.P_p2_4d = triangle1.P_p1_4d;
+//		}
+//		else if (!p2Cond) // p2 is out
+//		{
+//			ClipLinePoints(getXYZ(P_p1_4d), getXYZ(P_p2_4d), C_p1_3d, C_p2_3d, triangle1.P_p2_4d, triangle1.C_p2_3d, face);
+//			ClipLinePoints(getXYZ(P_p3_4d), getXYZ(P_p2_4d), C_p3_3d, C_p2_3d, triangle2.P_p2_4d, triangle2.C_p2_3d, face);
+//			triangle2.C_p1_3d = triangle1.C_p2_3d;
+//			triangle2.P_p1_4d = triangle1.P_p2_4d;
+//		}
+//		else // p3 is out
+//		{
+//			ClipLinePoints(getXYZ(P_p2_4d), getXYZ(P_p3_4d), C_p2_3d, C_p3_3d, triangle1.P_p3_4d , triangle1.C_p3_3d , face);
+//			ClipLinePoints(getXYZ(P_p1_4d), getXYZ(P_p3_4d), C_p1_3d, C_p3_3d, triangle2.P_p3_4d, triangle2.C_p3_3d, face);
+//			triangle2.C_p2_3d = triangle1.C_p3_3d;
+//			triangle2.P_p2_4d = triangle1.P_p3_4d;
+//		}
+//		return 2;
+//	}
+//
+//	if (insideCounter == 1) // one inside need to clip ):
+//	{
+//		triangle1 = *this;
+//		if (p1Cond) // p1 is in
+//		{
+//			ClipLinePoints(getXYZ(P_p1_4d), getXYZ(P_p2_4d), C_p1_3d, C_p2_3d, triangle1.P_p2_4d, triangle1.C_p2_3d, face);
+//			ClipLinePoints(getXYZ(P_p1_4d), getXYZ(P_p3_4d), C_p1_3d, C_p3_3d, triangle1.P_p3_4d, triangle1.C_p3_3d, face);
+//		}
+//		else if (p2Cond) // p2 is in
+//		{
+//			ClipLinePoints(getXYZ(P_p2_4d), getXYZ(P_p1_4d), C_p2_3d, C_p1_3d, triangle1.P_p1_4d, triangle1.C_p1_3d, face);
+//			ClipLinePoints(getXYZ(P_p2_4d), getXYZ(P_p3_4d), C_p2_3d, C_p3_3d, triangle1.P_p3_4d, triangle1.C_p3_3d, face);
+//		}
+//		else // (this->C_p3_3d.y < 1)
+//		{
+//			ClipLinePoints(getXYZ(P_p3_4d), getXYZ(P_p1_4d), C_p3_3d, C_p1_3d, triangle1.P_p1_4d, triangle1.C_p1_3d, face);
+//			ClipLinePoints(getXYZ(P_p3_4d), getXYZ(P_p2_4d), C_p3_3d, C_p2_3d, triangle1.P_p2_4d, triangle1.C_p2_3d, face);
+//		}
+//		
+//		return 1;
+//	}
+//	// trianle is out
+//	triangle1.should_draw = false;
+//	return 0;
+//}
 
-// num of triangles after clip 0/1/2
-int Triangle::ClipFace(Triangle& triangle1, Triangle& triangle2, Face face)
-{
-	bool p1Cond, p2Cond, p3Cond;
-	P_p1_4d = P_p1_4d;
-	P_p2_4d = P_p2_4d;
-	P_p3_4d = P_p3_4d;
-	switch (face)
-	{
-	case Down:
-		p1Cond = P_p1_4d.y > -P_p1_4d.w;
-		p2Cond = P_p2_4d.y > -P_p2_4d.w;
-		p3Cond = P_p3_4d.y > -P_p3_4d.w;
-		break;
-	case Up:
-		p1Cond = P_p1_4d.y < P_p1_4d.w;
-		p2Cond = P_p2_4d.y < P_p2_4d.w;
-		p3Cond = P_p3_4d.y < P_p3_4d.w;
-		break;
-	case Left:
-		p1Cond = P_p1_4d.x > -P_p1_4d.w;
-		p2Cond = P_p2_4d.x > -P_p2_4d.w;
-		p3Cond = P_p3_4d.x > -P_p3_4d.w;
-		break;
-	case Right:
-		p1Cond = P_p1_4d.x < P_p1_4d.w;
-		p2Cond = P_p2_4d.x < P_p2_4d.w;
-		p3Cond = P_p3_4d.x < P_p3_4d.w;
-		break;
-	case Far:
-		p1Cond = P_p1_4d.z < P_p1_4d.w;
-		p2Cond = P_p2_4d.z < P_p2_4d.w;
-		p3Cond = P_p3_4d.z < P_p3_4d.w;
-		break;
-	case Near:
-		p1Cond = P_p1_4d.z > -P_p1_4d.w ;
-		p2Cond = P_p2_4d.z > -P_p2_4d.w ;
-		p3Cond = P_p3_4d.z > -P_p3_4d.w ;
-		break;
-	default:
-		break;
-	}
-	int insideCounter = trueCounter(p1Cond, p2Cond, p3Cond);
-	if (insideCounter == 3) // all inside no need clip
-	{
-		triangle1 = *this;
-		return 1;
-	}
-
-	if (insideCounter == 2) // one outside need to clip and tirangulate ):
-	{
-		triangle1 = *this;
-		triangle2 = *this;
-		if (!p1Cond) // p1 is out
-		{
-			ClipLinePoints(getXYZ(P_p2_4d), getXYZ(P_p1_4d), C_p2_3d, C_p1_3d, triangle1.P_p1_4d, triangle1.C_p1_3d, face);
-			ClipLinePoints(getXYZ(P_p3_4d), getXYZ(P_p1_4d),C_p3_3d, C_p1_3d, triangle2.P_p1_4d, triangle2.C_p1_3d, face);
-			triangle2.C_p2_3d = triangle1.C_p1_3d;
-			triangle2.P_p2_4d = triangle1.P_p1_4d;
-		}
-		else if (!p2Cond) // p2 is out
-		{
-			ClipLinePoints(getXYZ(P_p1_4d), getXYZ(P_p2_4d), C_p1_3d, C_p2_3d, triangle1.P_p2_4d, triangle1.C_p2_3d, face);
-			ClipLinePoints(getXYZ(P_p3_4d), getXYZ(P_p2_4d), C_p3_3d, C_p2_3d, triangle2.P_p2_4d, triangle2.C_p2_3d, face);
-			triangle2.C_p1_3d = triangle1.C_p2_3d;
-			triangle2.P_p1_4d = triangle1.P_p2_4d;
-		}
-		else // p3 is out
-		{
-			ClipLinePoints(getXYZ(P_p2_4d), getXYZ(P_p3_4d), C_p2_3d, C_p3_3d, triangle1.P_p3_4d , triangle1.C_p3_3d , face);
-			ClipLinePoints(getXYZ(P_p1_4d), getXYZ(P_p3_4d), C_p1_3d, C_p3_3d, triangle2.P_p3_4d, triangle2.C_p3_3d, face);
-			triangle2.C_p2_3d = triangle1.C_p3_3d;
-			triangle2.P_p2_4d = triangle1.P_p3_4d;
-		}
-		return 2;
-	}
-
-	if (insideCounter == 1) // one inside need to clip ):
-	{
-		triangle1 = *this;
-		if (p1Cond) // p1 is in
-		{
-			ClipLinePoints(getXYZ(P_p1_4d), getXYZ(P_p2_4d), C_p1_3d, C_p2_3d, triangle1.P_p2_4d, triangle1.C_p2_3d, face);
-			ClipLinePoints(getXYZ(P_p1_4d), getXYZ(P_p3_4d), C_p1_3d, C_p3_3d, triangle1.P_p3_4d, triangle1.C_p3_3d, face);
-		}
-		else if (p2Cond) // p2 is in
-		{
-			ClipLinePoints(getXYZ(P_p2_4d), getXYZ(P_p1_4d), C_p2_3d, C_p1_3d, triangle1.P_p1_4d, triangle1.C_p1_3d, face);
-			ClipLinePoints(getXYZ(P_p2_4d), getXYZ(P_p3_4d), C_p2_3d, C_p3_3d, triangle1.P_p3_4d, triangle1.C_p3_3d, face);
-		}
-		else // (this->C_p3_3d.y < 1)
-		{
-			ClipLinePoints(getXYZ(P_p3_4d), getXYZ(P_p1_4d), C_p3_3d, C_p1_3d, triangle1.P_p1_4d, triangle1.C_p1_3d, face);
-			ClipLinePoints(getXYZ(P_p3_4d), getXYZ(P_p2_4d), C_p3_3d, C_p2_3d, triangle1.P_p2_4d, triangle1.C_p2_3d, face);
-		}
-		
-		return 1;
-	}
-	// trianle is out
-	triangle1.should_draw = false;
-	return 0;
-}
-
-vec3 Triangle::GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow)
-{
-	float ia, id, is;
-	float l_ka, l_kd, l_ks;
-	vec3 light_direction;
-	vec3 camera_direction;
-	vec3 reflect_direction;
-	vec3 normal;
-	vec3 color;
-	color = vec3(0);
-	int printCounter = 0;
-
-	
-	switch (shadow)
-	{
-	case FLAT:
-		normal = this->normal.normal_direction;
-		break;
-	case GOURAUD:		
-		if (this->p1_normal.is_valid)
-		{
-			return (GetGouruad(C_cords) * shape_color);
-		}
-		else // there isn't normal for the vertex
-		{
-			// lets do flat shading
-			normal = this->normal.normal_direction;
-			break;
-		}
-	case PHONG:
-		if (this->p1_normal.is_valid)
-		{
-			normal = GetPhong(C_cords);
-			break;
-		}
-		else // there isn't normal for the vertex
-		{
-			// lets do flat shading
-			normal = this->normal.normal_direction;
-			break;
-		}
-	}
-	if (this->is_non_uniform)
-	{
-		l_ka = (float)rand() / (3 * RAND_MAX);
-		l_kd = (float)rand() / (3 * RAND_MAX);
-		l_ks = (float)rand() / (3 * RAND_MAX);
-	}
-	else
-	{
-		l_ka = ka;
-		l_kd = kd;
-		l_ks = ks;
-	}
-
-	for (auto it = lights.begin(); it != lights.end(); ++it)
-	{
-		if ((it)->type == PARALLEL_SOURCE)
-		{
-			light_direction = normalize((it)->c_light_position);
-		}
-		else // Point source
-		{
-			light_direction = normalize((it)->c_light_position - C_cords);
-		}
-		camera_direction = normalize(-C_cords);
-		reflect_direction = normalize(-light_direction - 2 * (dot(-light_direction, normal)) * normal);
-		ia = l_ka * (it)->La;
-		id = l_kd * max(dot(light_direction, normal), 0) * (it)->Ld;
-		is = l_ks * pow(max(dot(reflect_direction, camera_direction), 0), (it)->l_alpha) * (it)->Ls;
-		//color += (it)->light_color * (ia + id + is);
-	}
-	color = color * shape_color + shape_color * ke;
-
-	
-	
-
-	//apply fog
-	if (renderer->isFog)
-	{
-		renderer->addFog(color, C_cords.z);
-	}
-	return color;
-}
+//vec3 Triangle::GetColor(vec3& C_cords, vector<LightModel>& lights, Shadow shadow)
+//{
+//	float ia, id, is;
+//	float l_ka, l_kd, l_ks;
+//	vec3 light_direction;
+//	vec3 camera_direction;
+//	vec3 reflect_direction;
+//	vec3 normal;
+//	vec3 color;
+//	color = vec3(0);
+//	int printCounter = 0;
+//
+//	
+//	switch (shadow)
+//	{
+//	case FLAT:
+//		normal = this->normal.normal_direction;
+//		break;
+//	case GOURAUD:		
+//		if (this->p1_normal.is_valid)
+//		{
+//			return (GetGouruad(C_cords) * shape_color);
+//		}
+//		else // there isn't normal for the vertex
+//		{
+//			// lets do flat shading
+//			normal = this->normal.normal_direction;
+//			break;
+//		}
+//	case PHONG:
+//		if (this->p1_normal.is_valid)
+//		{
+//			normal = GetPhong(C_cords);
+//			break;
+//		}
+//		else // there isn't normal for the vertex
+//		{
+//			// lets do flat shading
+//			normal = this->normal.normal_direction;
+//			break;
+//		}
+//	}
+//	if (this->is_non_uniform)
+//	{
+//		l_ka = (float)rand() / (3 * RAND_MAX);
+//		l_kd = (float)rand() / (3 * RAND_MAX);
+//		l_ks = (float)rand() / (3 * RAND_MAX);
+//	}
+//	else
+//	{
+//		l_ka = ka;
+//		l_kd = kd;
+//		l_ks = ks;
+//	}
+//
+//	for (auto it = lights.begin(); it != lights.end(); ++it)
+//	{
+//		if ((it)->type == PARALLEL_SOURCE)
+//		{
+//			light_direction = normalize((it)->c_light_position);
+//		}
+//		else // Point source
+//		{
+//			light_direction = normalize((it)->c_light_position - C_cords);
+//		}
+//		camera_direction = normalize(-C_cords);
+//		reflect_direction = normalize(-light_direction - 2 * (dot(-light_direction, normal)) * normal);
+//		ia = l_ka * (it)->La;
+//		id = l_kd * max(dot(light_direction, normal), 0) * (it)->Ld;
+//		is = l_ks * pow(max(dot(reflect_direction, camera_direction), 0), (it)->l_alpha) * (it)->Ls;
+//		//color += (it)->light_color * (ia + id + is);
+//	}
+//	color = color * shape_color + shape_color * ke;
+//
+//	
+//	
+//
+//	//apply fog
+//	if (renderer->isFog)
+//	{
+//		renderer->addFog(color, C_cords.z);
+//	}
+//	return color;
+//}
 
 void Line::Clip()
 {
@@ -772,64 +766,64 @@ void Line::ClipFace(Face face)
 		should_draw = false;
 	}
 }
-
-
-void Triangle::Clip()
-{
-	//first clip normals because we might need them clipped in new triangle
-	if (normal.is_valid && renderer->isShowFacesNormals)
-	{
-		normal.Clip();
-	}
-
-	if (p1_normal.is_valid && renderer->isShowVerticsNormals)
-	{
-		p1_normal.Clip();
-		p2_normal.Clip();
-		p3_normal.Clip();
-	}
-
-	vector<Triangle> newTriangles;
-	Triangle Newtriangle1;
-	Triangle Newtriangle2;
-	int curNumOfTriangles;
-	int numOfTriangles;
-	newTriangles.push_back(*this);
-	for (int face = Up; face <= Far; face++)
-	{
-		curNumOfTriangles = newTriangles.size();
-		for (int i = 0; i < curNumOfTriangles; ++i)
-		{
-			numOfTriangles = newTriangles.at(0).ClipFace(Newtriangle1, Newtriangle2, (Face)face);
-			newTriangles.erase(newTriangles.begin());
-			if (numOfTriangles == 1)
-			{
-				newTriangles.push_back(Newtriangle1);
-			
-			}
-			else if (numOfTriangles ==2)
-			{
-				newTriangles.push_back(Newtriangle1);
-				newTriangles.push_back(Newtriangle2);
-			}
-		}
-	}
-	renderer->triangulation_triangles.insert(renderer->triangulation_triangles.end() ,newTriangles.begin(), newTriangles.end());
-
-}
-
-bool Triangle::ShouldDraw()
-{
-#if DRAW_OPEN_MODELS
-	if (dot(normal.C_p2_3d - normal.C_p1_3d, -(normal.C_p1_3d)) < 0)
-	{
-		should_draw = false;
-		return false;
-	}
-#endif
-	should_draw = true;
-	return true;
-}
+//
+//
+//void Triangle::Clip()
+//{
+//	//first clip normals because we might need them clipped in new triangle
+//	if (normal.is_valid && renderer->isShowFacesNormals)
+//	{
+//		normal.Clip();
+//	}
+//
+//	if (p1_normal.is_valid && renderer->isShowVerticsNormals)
+//	{
+//		p1_normal.Clip();
+//		p2_normal.Clip();
+//		p3_normal.Clip();
+//	}
+//
+//	vector<Triangle> newTriangles;
+//	Triangle Newtriangle1;
+//	Triangle Newtriangle2;
+//	int curNumOfTriangles;
+//	int numOfTriangles;
+//	newTriangles.push_back(*this);
+//	for (int face = Up; face <= Far; face++)
+//	{
+//		curNumOfTriangles = newTriangles.size();
+//		for (int i = 0; i < curNumOfTriangles; ++i)
+//		{
+//			numOfTriangles = newTriangles.at(0).ClipFace(Newtriangle1, Newtriangle2, (Face)face);
+//			newTriangles.erase(newTriangles.begin());
+//			if (numOfTriangles == 1)
+//			{
+//				newTriangles.push_back(Newtriangle1);
+//			
+//			}
+//			else if (numOfTriangles ==2)
+//			{
+//				newTriangles.push_back(Newtriangle1);
+//				newTriangles.push_back(Newtriangle2);
+//			}
+//		}
+//	}
+//	renderer->triangulation_triangles.insert(renderer->triangulation_triangles.end() ,newTriangles.begin(), newTriangles.end());
+//
+//}
+//
+//bool Triangle::ShouldDraw()
+//{
+//#if DRAW_OPEN_MODELS
+//	if (dot(normal.C_p2_3d - normal.C_p1_3d, -(normal.C_p1_3d)) < 0)
+//	{
+//		should_draw = false;
+//		return false;
+//	}
+//#endif
+//	should_draw = true;
+//	return true;
+//}
 
 vec3 Line::GetCoordinates(int x, int y)
 {
@@ -848,10 +842,10 @@ void Line::UpdateShape()
 	renderer->Transform(p1_3d, C_p1_3d, P_p1_4d);
 	renderer->Transform(p2_3d, C_p2_3d, P_p2_4d);
 }
-vec3 Line::GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow)
-{
-	return shape_color;
-}
+//vec3 Line::GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow)
+//{
+//	return shape_color;
+//}
 
 void Normal::UpdateShape()
 {
@@ -942,12 +936,12 @@ void Shape::RasterizeBig(vec2& ver1, vec2& ver2)
 		UpdateLimits(y, i);
 	}
 }
-
-Triangle::Triangle()
-{
-	this->x_max = NULL;
-	this->x_min = NULL;
-}
+//
+//Triangle::Triangle()
+//{
+//	this->x_max = NULL;
+//	this->x_min = NULL;
+//}
 
 Normal::Normal()
 {
@@ -1052,104 +1046,104 @@ bool CustomCompareYmin::operator()( Shape* shape1,  Shape* shape2) const
 {
 	return shape1->yMin < shape2->yMin;
 }
-
-void Renderer::ClipModel(vector<Triangle>* triangles, vector<Line>* boundBoxLines)
-{
-	RendererActions action = shouldDrawModel(boundBoxLines);
-	if (action == NotDraw)
-	{
-		return;
-
-	}
-	else if (action == Clip)
-	{
-		for (auto it = triangles->begin(); it != triangles->end(); ++it)
-		{
-			it->UpdateShape();
-			if (it->should_draw)
-			{
-				it->Clip();
-			}
-			
-		}
-	}
-	else
-	{
-		for (auto it = triangles->begin(); it != triangles->end(); ++it)
-		{
-			it->UpdateShape();
-			if (it->should_draw)
-			{
-				triangulation_triangles.push_back(*it);
-			}
-
-		}
-	}
-
-	if (isShowBoundBox)
-	{
-		DrawBoundingBox(boundBoxLines);
-	}
-}
-
-void Renderer::DrawTriangles()
-{	
-	for (auto it = triangulation_triangles.begin(); it != triangulation_triangles.end(); ++it)
-	{
-		it->Rasterize();
-		yMax = max(yMax, it->yMax);
-		yMin = min(yMin, it->yMin);
-		shapes.push_back(&(*it));
-
-		if (isShowFacesNormals)
-		{
-			if (it->normal.should_draw)
-			{
-				yMax = max(yMax, it->normal.yMax);
-				yMin = min(yMin, it->normal.yMin);
-				it->normal.Rasterize();
-				shapes.push_back(&(it->normal));
-			}
-		}
-
-		if (isShowFacesNormals)
-		{
-			if (it->normal.should_draw)
-			{
-				yMax = max(yMax, it->normal.yMax);
-				yMin = min(yMin, it->normal.yMin);
-				it->normal.Rasterize();
-				shapes.push_back(&(it->normal));
-			}
-		}
-
-		if (isShowVerticsNormals)
-		{
-			if (it->p1_normal.should_draw)
-			{
-				yMax = max(yMax, it->p1_normal.yMax);
-				yMin = min(yMin, it->p1_normal.yMin);
-				it->p1_normal.Rasterize();
-				shapes.push_back(&(it->p1_normal));
-			}
-			if (it->p2_normal.should_draw)
-			{
-				yMax = max(yMax, it->p2_normal.yMax);
-				yMin = min(yMin, it->p2_normal.yMin);
-				it->p2_normal.Rasterize();
-				shapes.push_back(&(it->p2_normal));
-			}
-			if (it->p3_normal.should_draw)
-			{
-				yMax = max(yMax, it->p3_normal.yMax);
-				yMin = min(yMin, it->p3_normal.yMin);
-				it->p3_normal.Rasterize();
-				shapes.push_back(&(it->p3_normal));
-			}
-		}
-	}
-}
-		
+//
+//void Renderer::ClipModel(vector<Triangle>* triangles, vector<Line>* boundBoxLines)
+//{
+//	RendererActions action = shouldDrawModel(boundBoxLines);
+//	if (action == NotDraw)
+//	{
+//		return;
+//
+//	}
+//	else if (action == Clip)
+//	{
+//		for (auto it = triangles->begin(); it != triangles->end(); ++it)
+//		{
+//			it->UpdateShape();
+//			if (it->should_draw)
+//			{
+//				it->Clip();
+//			}
+//			
+//		}
+//	}
+//	else
+//	{
+//		for (auto it = triangles->begin(); it != triangles->end(); ++it)
+//		{
+//			it->UpdateShape();
+//			if (it->should_draw)
+//			{
+//				triangulation_triangles.push_back(*it);
+//			}
+//
+//		}
+//	}
+//
+//	if (isShowBoundBox)
+//	{
+//		DrawBoundingBox(boundBoxLines);
+//	}
+//}
+//
+//void Renderer::DrawTriangles()
+//{	
+//	for (auto it = triangulation_triangles.begin(); it != triangulation_triangles.end(); ++it)
+//	{
+//		it->Rasterize();
+//		yMax = max(yMax, it->yMax);
+//		yMin = min(yMin, it->yMin);
+//		shapes.push_back(&(*it));
+//
+//		if (isShowFacesNormals)
+//		{
+//			if (it->normal.should_draw)
+//			{
+//				yMax = max(yMax, it->normal.yMax);
+//				yMin = min(yMin, it->normal.yMin);
+//				it->normal.Rasterize();
+//				shapes.push_back(&(it->normal));
+//			}
+//		}
+//
+//		if (isShowFacesNormals)
+//		{
+//			if (it->normal.should_draw)
+//			{
+//				yMax = max(yMax, it->normal.yMax);
+//				yMin = min(yMin, it->normal.yMin);
+//				it->normal.Rasterize();
+//				shapes.push_back(&(it->normal));
+//			}
+//		}
+//
+//		if (isShowVerticsNormals)
+//		{
+//			if (it->p1_normal.should_draw)
+//			{
+//				yMax = max(yMax, it->p1_normal.yMax);
+//				yMin = min(yMin, it->p1_normal.yMin);
+//				it->p1_normal.Rasterize();
+//				shapes.push_back(&(it->p1_normal));
+//			}
+//			if (it->p2_normal.should_draw)
+//			{
+//				yMax = max(yMax, it->p2_normal.yMax);
+//				yMin = min(yMin, it->p2_normal.yMin);
+//				it->p2_normal.Rasterize();
+//				shapes.push_back(&(it->p2_normal));
+//			}
+//			if (it->p3_normal.should_draw)
+//			{
+//				yMax = max(yMax, it->p3_normal.yMax);
+//				yMin = min(yMin, it->p3_normal.yMin);
+//				it->p3_normal.Rasterize();
+//				shapes.push_back(&(it->p3_normal));
+//			}
+//		}
+//	}
+//}
+//		
 
 void Renderer::DrawBoundingBox(vector<Line>* boundBoxLines)
 {
@@ -1212,11 +1206,11 @@ vec2 Renderer::vec4ToVec2(const vec4& ver)
 	transformToScreen(point);
 	return point;
 }
-
-vector<Light> Renderer::GetLights()
-{
-	return lights;
-}
+//
+//vector<Light> Renderer::GetLights()
+//{
+//	return lights;
+//}
 
 void Renderer::addFog(vec3& color, float z)
 {
@@ -1258,48 +1252,48 @@ void Renderer::NormTransform(const vec3& ver, vec3& direction)
 	tempVec = cTransform * nTransform * tempVec;
 	direction =  normalize(vec3(tempVec.x, tempVec.y, tempVec.z));
 }
-
-void Renderer::ConfigureRenderer(const mat4& projection, const mat4& transform,
-								bool isDrawVertexNormal, bool isDrawFaceNormal, bool isWireFrame, bool isFog, bool isSuperSample,
-								bool isDrawBoundBox, vector<Light> scene_lights,
-								Shadow scene_shadow)
-{
-	cTransform = transform;
-	cProjection = projection;
-
-	isShowVerticsNormals = isDrawVertexNormal;
-	isShowFacesNormals = isDrawFaceNormal;
-	isShowBoundBox = isDrawBoundBox;
-	this->isSuperSample = isSuperSample;
-	this->isFog = isFog;
-	is_wire_frame = isWireFrame;
-
-	renderer = this;
-	yMin = m_height;
-	yMax = 0;
-	lights = scene_lights;
-	shadow = scene_shadow;
-	if (isSuperSample)
-	{
-		m_local_color_buffer = m_super_sample_out_Buffer;
-		m_local_z_buffer = m_super_sample_z_Buffer;
-		cur_width = extended_m_width;
-		cur_height = extended_m_height;
-	}
-	else
-	{
-		m_local_color_buffer = m_outBuffer;
-		m_local_z_buffer = m_zbuffer;
-		cur_width = m_width;
-		cur_height = m_height;
-	}
-	ClearColorBuffer();
-	ClearDepthBuffer();
-
-	triangulation_triangles.clear();
-	shapes.clear();
-	activePixels.clear();
-}	
+//
+//void Renderer::ConfigureRenderer(const mat4& projection, const mat4& transform,
+//								bool isDrawVertexNormal, bool isDrawFaceNormal, bool isWireFrame, bool isFog, bool isSuperSample,
+//								bool isDrawBoundBox, vector<Light> scene_lights,
+//								Shadow scene_shadow)
+//{
+//	cTransform = transform;
+//	cProjection = projection;
+//
+//	isShowVerticsNormals = isDrawVertexNormal;
+//	isShowFacesNormals = isDrawFaceNormal;
+//	isShowBoundBox = isDrawBoundBox;
+//	this->isSuperSample = isSuperSample;
+//	this->isFog = isFog;
+//	is_wire_frame = isWireFrame;
+//
+//	renderer = this;
+//	yMin = m_height;
+//	yMax = 0;
+//	lights = scene_lights;
+//	shadow = scene_shadow;
+//	if (isSuperSample)
+//	{
+//		m_local_color_buffer = m_super_sample_out_Buffer;
+//		m_local_z_buffer = m_super_sample_z_Buffer;
+//		cur_width = extended_m_width;
+//		cur_height = extended_m_height;
+//	}
+//	else
+//	{
+//		m_local_color_buffer = m_outBuffer;
+//		m_local_z_buffer = m_zbuffer;
+//		cur_width = m_width;
+//		cur_height = m_height;
+//	}
+//	ClearColorBuffer();
+//	ClearDepthBuffer();
+//
+//	triangulation_triangles.clear();
+//	shapes.clear();
+//	activePixels.clear();
+//}	
 
 
 
@@ -1413,50 +1407,50 @@ void Renderer::SetObjectMatrices(const mat4& oTransform, const mat4& nTransform)
 }
 
 
-void Renderer::ZBufferScanConvert()
-{
-	vec3 C_cords;
-	int minX, maxX;
-	int fixed_y;
-	vec3 color;
-	for (auto it = shapes.begin(); it != shapes.end(); ++it)
-	{
-		yMin = max(0, (*it)->yMin);
-		yMax = min((*it)->yMax, cur_height - 1);
-		for (int y = yMin; y <= yMax; y++)
-		{
-			fixed_y = y - yMin;
-			minX = max((*it)->x_min[fixed_y],0);
-			maxX = min((*it)->x_max[fixed_y], cur_width -1);
-			for (int i = minX; i <= maxX; i++)
-			{
-				C_cords =(*it)->GetCoordinates(i, y);
-				if (fabs(C_cords.z) <= m_local_z_buffer[ZINDEX(cur_width, i, y)])
-				{
-					activePixels.push_back(tuple<int,int>(i / 2,y / 2));
-					m_local_z_buffer[ZINDEX(cur_width, i, y)] = fabs(C_cords.z);
-					if (is_wire_frame && (i == maxX || i == minX))
-					{
-						DrawPixel(i, y, WHITE);
-					}
-					else if ((lights.size() > 0) && ((*it)->is_light == false))
-					{
-						color = (*it)->GetColor(C_cords, lights, shadow);
-						DrawPixel(i, y, color);
-					}
-					else
-					{
-						DrawPixel(i, y, (*it)->shape_color);
-					}
-				}
-			}
-		}
-	}
-	if (isSuperSample)
-	{
-		superSampling();
-	}
-}
+//void Renderer::ZBufferScanConvert()
+//{
+//	vec3 C_cords;
+//	int minX, maxX;
+//	int fixed_y;
+//	vec3 color;
+//	for (auto it = shapes.begin(); it != shapes.end(); ++it)
+//	{
+//		yMin = max(0, (*it)->yMin);
+//		yMax = min((*it)->yMax, cur_height - 1);
+//		for (int y = yMin; y <= yMax; y++)
+//		{
+//			fixed_y = y - yMin;
+//			minX = max((*it)->x_min[fixed_y],0);
+//			maxX = min((*it)->x_max[fixed_y], cur_width -1);
+//			for (int i = minX; i <= maxX; i++)
+//			{
+//				C_cords =(*it)->GetCoordinates(i, y);
+//				if (fabs(C_cords.z) <= m_local_z_buffer[ZINDEX(cur_width, i, y)])
+//				{
+//					activePixels.push_back(tuple<int,int>(i / 2,y / 2));
+//					m_local_z_buffer[ZINDEX(cur_width, i, y)] = fabs(C_cords.z);
+//					if (is_wire_frame && (i == maxX || i == minX))
+//					{
+//						DrawPixel(i, y, WHITE);
+//					}
+//					else if ((lights.size() > 0) && ((*it)->is_light == false))
+//					{
+//						color = (*it)->GetColor(C_cords, lights, shadow);
+//						DrawPixel(i, y, color);
+//					}
+//					else
+//					{
+//						DrawPixel(i, y, (*it)->shape_color);
+//					}
+//				}
+//			}
+//		}
+//	}
+//	if (isSuperSample)
+//	{
+//		superSampling();
+//	}
+//}
 
 void Shape::UpdateLimits(int x, int y)
 {

@@ -2,10 +2,12 @@
 
 // In Arguments
 in  vec4 vPosition;
-
+in  vec3 vNormal;
 
 // Out Arguments
 out vec3 vertexColor;
+out vec3 vertexNormal;
+out vec3 fragmentPosition;
 
 
 // Uniforms declaration
@@ -19,4 +21,6 @@ void main()
 {
     gl_Position = projectionMatrix  * modelViewMatrix * modelMatrix * vPosition;
     vertexColor = color;
+    vertexNormal = normalize(mat3(transpose(inverse(modelMatrix))) * vNormal);
+    fragmentPosition = vec3(modelMatrix * vPosition);
 }

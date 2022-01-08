@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Scene.h"
-#include "MeshModel.h"
+
 #include <string>
 #include <math.h>
 #include <chrono>
@@ -71,7 +71,7 @@ Camera* Scene::GetActiveCamera()
 	return cameras.at(activeCamera);
 }
 
-Light& Scene::GetActiveLight()
+LightModel* Scene::GetActiveLight()
 {
 	return lights.at(activeLight);
 }
@@ -90,20 +90,18 @@ vec4 Scene::GetModelK()
 
 void Scene::ChangeActiveLightL(vec4& l_params)
 {
-	lights.at(activeLight).La = l_params.x;
-	lights.at(activeLight).Ld = l_params.y;
-	lights.at(activeLight).Ls = l_params.z;
-	lights.at(activeLight).l_alpha = l_params.w;
+	lights.at(activeLight)->La = l_params.x;
+	lights.at(activeLight)->Ld = l_params.y;
+	lights.at(activeLight)->Ls = l_params.z;
+	lights.at(activeLight)->l_alpha = l_params.w;
 }
 
 void Scene::ChangeAmbientRgbLa(vec4 & rgbl)
-{
-	LightModel* light = (LightModel*)lights.at(0).model;
-	
-	light->light_color.x = rgbl.x;
-	light->light_color.y = rgbl.y;
-	light->light_color.z = rgbl.z;
-	light->La = rgbl.w;
+{	
+	lights.at(0)->light_color.x = rgbl.x;
+	lights.at(0)->light_color.y = rgbl.y;
+	lights.at(0)->light_color.z = rgbl.z;
+	lights.at(0)->La = rgbl.w;
 }
 
 
@@ -228,7 +226,7 @@ void Scene::ControlActiveCamera()
 
 void Scene::ControlActiveLight()
 {
-	activeModel = lights.at(activeLight).modelId;
+	activeModel = lights.at(activeLight)->modelId;
 }
 
 void Scene::setActiveCameraProjection(Projection proj)
@@ -369,6 +367,10 @@ void Scene::draw()
 			glUniform3f(my_light_location, light_model->light_color.x, light_model->light_color.y, light_model->light_color.z);
 			GLint l_a_location = glGetUniformLocation(program, "La");
 			glUniform1f(l_a_location, light_model->La);
+			GLint l_d_location = glGetUniformLocation(program, "Ld");
+			glUniform1f(l_d_location, light_model->Ld);
+			GLint l_s_location = glGetUniformLocation(program, "Ls");
+			glUniform1f(l_s_location, light_model->Ls);
 			//if (light_model->lightIndex == 0) //dont want to draw ambient light
 			//{
 			//	continue;
@@ -675,8 +677,7 @@ void Scene::ChangeShadow(Shadow s)
 
 vec4 Scene::GetAmbientRGB()
 {
-	LightModel* light = (LightModel*)lights.at(0).model;
-	return vec4(light->light_color, light->La); 
+	return vec4(lights.at(0)->light_color, lights.at(0)->La);
 }
 
 void Camera::MaintainRatio(float widthRatio, float heightRatio, Projection proj)
@@ -750,8 +751,8 @@ int Scene::addLight()
 	activeLight = newLightIndex;
 	activeModel = models.size();
 	LightModel* lightModel = new LightModel(activeModel, newLightIndex, light_program);
-	Light newLight = Light(models.size(), lightModel);
-	lights.push_back(newLight);
+	//Light newLight = Light(models.size(), lightModel);
+	lights.push_back(lightModel);
 	models.push_back(lightModel);
 	return newLightIndex;
 }
@@ -760,12 +761,11 @@ int Scene::addLight()
 void Scene::controlLight(int lightId)
 {
 	activeLight = lightId;
-	Light activeLight = lights.at(lightId);
+	LightModel* activeLight = lights.at(lightId);
 	ControlActiveLight();
 }
 
 void Scene::lookAtLight(int lightId)
 {
-	Light lightToLookAt = lights.at(lightId);
-	lookAtModel(lightToLookAt.modelId);
+	lookAtModel(lights.at(lightId)->modelId);
 }
