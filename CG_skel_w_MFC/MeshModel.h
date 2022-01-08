@@ -41,6 +41,7 @@ public:
 	float ks;
 	float ke;
 	bool is_non_unfiorm;
+	GLuint my_program;
 	unsigned int VAO, VBO, EBO;
 
 
@@ -54,10 +55,10 @@ public:
 	vec3 mesh_color;
 	vec3 matirials; // x - emissive, y - diffuse, z - specular
 
-	MeshModel(string fileName, int modelId);
+	MeshModel(string fileName, int modelId, GLuint program);
 	~MeshModel(void);
 	void loadFile(string fileName);
-	int draw(GLuint program);
+	int draw();
 	vec3 CenteringTranslation(TransAxis axis);
 	vector<Line>* CalcBounds();
 	vec3 GetCenter();
@@ -97,14 +98,15 @@ class CameraModel : public MeshModel
 		int cameraIndex;
 		mat4 _w_TransformInv;
 		mat4 _m_TransformInv;
-		CameraModel(int cameraIndex);
+		CameraModel(int cameraIndex, GLuint program);
 };
 
 class LightModel : public MeshModel
 {
 	public:
 		int lightIndex;
-		LightModel(int lightIndex);
+		vec3 light_color;
+		LightModel(int lightIndex, GLuint program);
 };
 
 mat4 matrixInverse(mat4& mat, Transformation T);

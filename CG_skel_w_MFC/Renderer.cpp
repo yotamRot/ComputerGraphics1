@@ -58,7 +58,7 @@ Normal::Normal(vec3& p1_3d, vec3& p2_3d, bool is_light, NormalKind normal_kind, 
 	x_min = NULL;
 }
 
-Light::Light(int modelId, Model* model) : modelId(modelId), model(model), La(0.3), Ld(0.3), Ls(0.3), type(POINT_SOURCE), light_color(vec3(1,1,1)), l_alpha(2)
+Light::Light(int modelId, Model* model) : modelId(modelId), model(model), La(0.3), Ld(0.3), Ls(0.3), type(POINT_SOURCE), l_alpha(2)
 {
 }
 
@@ -690,7 +690,7 @@ vec3 Triangle::GetColor(vec3& C_cords, vector<Light>& lights, Shadow shadow)
 		ia = l_ka * (it)->La;
 		id = l_kd * max(dot(light_direction, normal), 0) * (it)->Ld;
 		is = l_ks * pow(max(dot(reflect_direction, camera_direction), 0), (it)->l_alpha) * (it)->Ls;
-		color += (it)->light_color * (ia + id + is);
+		//color += (it)->light_color * (ia + id + is);
 	}
 	color = color * shape_color + shape_color * ke;
 

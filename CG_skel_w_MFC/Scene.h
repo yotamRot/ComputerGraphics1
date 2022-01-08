@@ -117,7 +117,7 @@ public:
 	bool toggleShowFog();
 	bool toggleShowWireFrame();
 	bool toggleSuperSample();
-	void draw(GLuint program);
+	void draw();
 	void drawDemo();
 	int modelMenuIdToVectorId(int menuId);
 	Camera* GetActiveCamera();
@@ -142,4 +142,6 @@ public:
 	void ApplyNonUniform();
 	void ChangeShadow(Shadow s);
 	vec4 GetAmbientRGB();
+	GLuint program;
+	GLuint light_program;
 };
