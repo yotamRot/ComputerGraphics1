@@ -816,6 +816,7 @@ int my_main( int argc, char **argv )
 	glutInitContextVersion( 3, 2 );
 	glutInitContextProfile( GLUT_CORE_PROFILE );
 	glutCreateWindow( "CG" );
+	glEnable(GL_DEPTH_TEST);
 	glewExperimental = GL_TRUE;
 	glewInit();
 	GLenum err = glewInit();

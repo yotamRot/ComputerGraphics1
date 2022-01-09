@@ -331,7 +331,7 @@ void Scene::draw()
 	mat4 curCameraInvMat = curCameraModel->_w_TransformInv * curCameraModel->_m_TransformInv;
 	MattoArr(curCameraInv, curCameraInvMat);
 	int cameraIndex = 0;
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glUseProgram(program);
 	GLint umV = glGetUniformLocation(program, "modelViewMatrix"); // Find the modelViewMatrix variable
 	glUniformMatrix4fv(umV, 1, GL_FALSE, curCameraInv);
