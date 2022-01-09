@@ -301,67 +301,68 @@ void MeshModel::SetupMesh()
 	glEnableVertexAttribArray(loc);
 	glVertexAttribPointer(loc, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
 
+	if (bound_box_vertices.size()!=0)
+	{
 
+		glUseProgram(simple_shader);
+		//bounding box
+		glGenVertexArrays(1, &bounding_box_VAO);
+		glGenBuffers(1, &bounding_box_VBO);
+		glGenBuffers(1, &bounding_box_EBO);
 
-	glUseProgram(simple_shader);
-	//bounding box
-	glGenVertexArrays(1, &bounding_box_VAO);
-	glGenBuffers(1, &bounding_box_VBO);
-	glGenBuffers(1, &bounding_box_EBO);
+		glBindVertexArray(bounding_box_VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, bounding_box_VBO);
 
-	glBindVertexArray(bounding_box_VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, bounding_box_VBO);
+		glBufferData(GL_ARRAY_BUFFER, bound_box_vertices.size() * sizeof(vec3), &bound_box_vertices[0], GL_STATIC_DRAW);
 
-	glBufferData(GL_ARRAY_BUFFER, bound_box_vertices.size() * sizeof(vec3), &bound_box_vertices[0], GL_STATIC_DRAW);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bounding_box_EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, bound_box_indices.size() * sizeof(unsigned int),
+			&bound_box_indices[0], GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bounding_box_EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, bound_box_indices.size() * sizeof(unsigned int),
-		&bound_box_indices[0], GL_STATIC_DRAW);
+		// vertex positions
+		loc = glGetAttribLocation(simple_shader, "vPosition");
+		glEnableVertexAttribArray(loc);
+		glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
 
-	// vertex positions
-	loc = glGetAttribLocation(simple_shader, "vPosition");
-	glEnableVertexAttribArray(loc);
-	glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
+		//vertex normals 
 
-	//vertex normals 
+		glGenVertexArrays(1, &vertex_normal_VAO);
+		glGenBuffers(1, &vertex_normal_VBO);
+		glGenBuffers(1, &vertex_normal_EBO);
 
-	glGenVertexArrays(1, &vertex_normal_VAO);
-	glGenBuffers(1, &vertex_normal_VBO);
-	glGenBuffers(1, &vertex_normal_EBO);
+		glBindVertexArray(vertex_normal_VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, vertex_normal_VBO);
 
-	glBindVertexArray(vertex_normal_VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, vertex_normal_VBO);
+		glBufferData(GL_ARRAY_BUFFER, vertices_normals.size() * sizeof(vec3), &vertices_normals[0], GL_STATIC_DRAW);
 
-	glBufferData(GL_ARRAY_BUFFER, vertices_normals.size() * sizeof(vec3), &vertices_normals[0], GL_STATIC_DRAW);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertex_normal_EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, vertices_normals_indices.size() * sizeof(unsigned int),
+			&vertices_normals_indices[0], GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertex_normal_EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, vertices_normals_indices.size() * sizeof(unsigned int),
-		&vertices_normals_indices[0], GL_STATIC_DRAW);
+		// vertex positions
+		loc = glGetAttribLocation(simple_shader, "vPosition");
+		glEnableVertexAttribArray(loc);
+		glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
 
-	// vertex positions
-	loc = glGetAttribLocation(simple_shader, "vPosition");
-	glEnableVertexAttribArray(loc);
-	glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
+		// faces normals
 
-	// faces normals
+		glGenVertexArrays(1, &face_normal_VAO);
+		glGenBuffers(1, &face_normal_VBO);
+		glGenBuffers(1, &face_normal_EBO);
 
-	glGenVertexArrays(1, &face_normal_VAO);
-	glGenBuffers(1, &face_normal_VBO);
-	glGenBuffers(1, &face_normal_EBO);
+		glBindVertexArray(face_normal_VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, face_normal_VBO);
 
-	glBindVertexArray(face_normal_VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, face_normal_VBO);
+		glBufferData(GL_ARRAY_BUFFER, face_normals.size() * sizeof(vec3), &face_normals[0], GL_STATIC_DRAW);
 
-	glBufferData(GL_ARRAY_BUFFER, face_normals.size() * sizeof(vec3), &face_normals[0], GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, face_normal_EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, faces_normals_indices.size() * sizeof(unsigned int),
-		&faces_normals_indices[0], GL_STATIC_DRAW);
-	// vertex positions
-	loc = glGetAttribLocation(simple_shader, "vPosition");
-	glEnableVertexAttribArray(loc);
-	glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
-
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, face_normal_EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, faces_normals_indices.size() * sizeof(unsigned int),
+			&faces_normals_indices[0], GL_STATIC_DRAW);
+		// vertex positions
+		loc = glGetAttribLocation(simple_shader, "vPosition");
+		glEnableVertexAttribArray(loc);
+		glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
+	}
 
 }
 
@@ -440,6 +441,12 @@ void MeshModel::draw(bool draw_bounding_box, bool draw_vertix_normals, bool draw
 	GLfloat modelMatrix[16];
 	MattoArr(modelMatrix, modelTrans);
 	glUniformMatrix4fv(umM, 1, GL_FALSE, modelMatrix);
+
+	GLint umN = glGetUniformLocation(my_program, "normalMatrix"); // Find the normalMatrix variable
+	mat4 normalTrans = this->_world_normal_transform * this->_model_normal_transform;
+	GLfloat normalMatrix[16];
+	MattoArr(normalMatrix, normalTrans);
+	glUniformMatrix4fv(umN, 1, GL_FALSE, normalMatrix);
 
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);

@@ -39,6 +39,7 @@ mat4 Frustum(const float left, const float right,
 vec3 LightPosition(mat4& c_transform, mat4& w_transform, mat4& m_transform)
 {
 	vec4 tempVec = c_transform * w_transform * m_transform * vec4(vec3(0));
+	//vec4 tempVec =  w_transform * m_transform * vec4(vec3(0));
 	return vec3(tempVec.x / tempVec.w, tempVec.y / tempVec.w, tempVec.z / tempVec.w);
 }
 
@@ -327,7 +328,8 @@ void Scene::draw()
 	MattoArr(curProjection, cameras[activeCamera]->projection);
 	CameraModel* curCameraModel = (CameraModel*)(cameras[activeCamera]->model);
 	GLfloat curCameraInv[16];
-	MattoArr(curCameraInv, curCameraModel->_w_TransformInv * curCameraModel->_m_TransformInv);
+	mat4 curCameraInvMat = curCameraModel->_w_TransformInv * curCameraModel->_m_TransformInv;
+	MattoArr(curCameraInv, curCameraInvMat);
 	int cameraIndex = 0;
 	glClear(GL_COLOR_BUFFER_BIT);
 	glUseProgram(program);
@@ -343,11 +345,11 @@ void Scene::draw()
 
 	MeshModel* curModel;
 	
-	/*
+	
 	for (auto it = lights.begin(); it != lights.end(); ++it)
 	{
-		(it)->c_light_position = LightPosition(curCameraInv, (it)->model->_world_transform, (it)->model->_model_transform);
-	}*/
+		(*it)->c_light_position = LightPosition(curCameraInvMat, (*it)->_world_transform, (*it)->_model_transform);
+	}
 	for (vector<Model*>::iterator it = models.begin(); it != models.end(); ++it)
 	{
 		curModel = (MeshModel*)(*it);
@@ -355,7 +357,7 @@ void Scene::draw()
 		{
 			if (isRenderCameras && cameraIndex != activeCamera) //dont want to draw active camera
 			{
-				(*it)->draw(isDrawBoundBox,isShowVerticsNormals,isShowFacesNormals); // draw camera
+				(*it)->draw(false, false, false ); // draw camera
 			}
 			cameraIndex++;
 		}
@@ -365,19 +367,22 @@ void Scene::draw()
 			glUseProgram(program);
 			GLint my_light_location = glGetUniformLocation(program, "lightColor");
 			glUniform3f(my_light_location, light_model->light_color.x, light_model->light_color.y, light_model->light_color.z);
+			GLint light_pos_location = glGetUniformLocation(program, "lightPosition");
+			glUniform3f(light_pos_location, light_model->c_light_position.x, light_model->c_light_position.y, light_model->c_light_position.z);
 			GLint l_a_location = glGetUniformLocation(program, "La");
 			glUniform1f(l_a_location, light_model->La);
 			GLint l_d_location = glGetUniformLocation(program, "Ld");
 			glUniform1f(l_d_location, light_model->Ld);
 			GLint l_s_location = glGetUniformLocation(program, "Ls");
 			glUniform1f(l_s_location, light_model->Ls);
+
 			//if (light_model->lightIndex == 0) //dont want to draw ambient light
 			//{
 			//	continue;
 			//}
 			//else
 			//{
-				(*it)->draw(isDrawBoundBox, isShowVerticsNormals, isShowFacesNormals);// draw models
+				(*it)->draw(false, false, false);// draw models
 			//}
 		}
 		else
@@ -456,6 +461,7 @@ void Scene::drawDemo()
 
 Scene::Scene() : current_shadow(FLAT)
 {
+
 	program = InitShader("minimal_vshader.glsl", "minimal_fshader.glsl");
 	light_program = InitShader("light_vshader.glsl", "light_fshader.glsl");
 	InitScene();
