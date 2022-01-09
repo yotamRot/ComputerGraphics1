@@ -58,8 +58,8 @@ public:
 	GLuint simple_shader;
 	unsigned int VAO, VBO, EBO;
 	unsigned int bounding_box_VAO, bounding_box_VBO, bounding_box_EBO;
-	unsigned int vertex_normal_VAO, vertex_normal_VBO;
-	unsigned int face_normal_VAO, face_normal_VBO;
+	unsigned int vertex_normal_VAO, vertex_normal_VBO, vertex_normal_EBO;
+	unsigned int face_normal_VAO, face_normal_VBO, face_normal_EBO;
 	int modelId;
 
 	//vector<Vertex>       vertices;
@@ -70,7 +70,9 @@ public:
 	vector<vec3> bound_box_vertices;
 	vector<unsigned int> bound_box_indices;
 	vector<vec3> vertices_normals;
+	vector<unsigned int> vertices_normals_indices;
 	vector<vec3> face_normals;
+	vector<unsigned int> faces_normals_indices;
 
 	vec3 mesh_color;
 	vec3 matirials; // x - emissive, y - diffuse, z - specular

@@ -259,6 +259,16 @@ void MeshModel::loadFile(string fileName)
 			face_normals.push_back(curCenter + curNormalEnd);
 		}
 	}
+
+	for (int i = 0; i < face_normals.size(); i++)
+	{
+		faces_normals_indices.push_back(i);
+	}
+
+	for (int i = 0; i < vertices_normals.size(); i++)
+	{
+		vertices_normals_indices.push_back(i);
+	}
 }
 
 void MeshModel::SetupMesh()
@@ -294,7 +304,7 @@ void MeshModel::SetupMesh()
 
 
 	glUseProgram(simple_shader);
-
+	//bounding box
 	glGenVertexArrays(1, &bounding_box_VAO);
 	glGenBuffers(1, &bounding_box_VBO);
 	glGenBuffers(1, &bounding_box_EBO);
@@ -313,19 +323,45 @@ void MeshModel::SetupMesh()
 	glEnableVertexAttribArray(loc);
 	glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
 
-	//glGenVertexArrays(1, &vertex_normal_VAO);
-	//glBindVertexArray(vertex_normal_VAO);
-	//glGenBuffers(1, &vertex_normal_VBO);
-	//glBindBuffer(GL_ARRAY_BUFFER, vertex_normal_VBO);
-	//glBufferData(GL_ARRAY_BUFFER, vertices_normals.size() * sizeof(vec3),
-	//	&vertices_normals[0], GL_STATIC_DRAW);
+	//vertex normals 
 
-	//glGenVertexArrays(1, &face_normal_VAO);
-	//glBindVertexArray(face_normal_VAO);
-	//glGenBuffers(1, &face_normal_VBO);
-	//glBindBuffer(GL_ARRAY_BUFFER, face_normal_VBO);
-	//glBufferData(GL_ARRAY_BUFFER, face_normals.size() * sizeof(vec3),
-	//	&face_normals[0], GL_STATIC_DRAW);
+	glGenVertexArrays(1, &vertex_normal_VAO);
+	glGenBuffers(1, &vertex_normal_VBO);
+	glGenBuffers(1, &vertex_normal_EBO);
+
+	glBindVertexArray(vertex_normal_VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, vertex_normal_VBO);
+
+	glBufferData(GL_ARRAY_BUFFER, vertices_normals.size() * sizeof(vec3), &vertices_normals[0], GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertex_normal_EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, vertices_normals_indices.size() * sizeof(unsigned int),
+		&vertices_normals_indices[0], GL_STATIC_DRAW);
+
+	// vertex positions
+	loc = glGetAttribLocation(simple_shader, "vPosition");
+	glEnableVertexAttribArray(loc);
+	glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
+
+	// faces normals
+
+	glGenVertexArrays(1, &face_normal_VAO);
+	glGenBuffers(1, &face_normal_VBO);
+	glGenBuffers(1, &face_normal_EBO);
+
+	glBindVertexArray(face_normal_VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, face_normal_VBO);
+
+	glBufferData(GL_ARRAY_BUFFER, face_normals.size() * sizeof(vec3), &face_normals[0], GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, face_normal_EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, faces_normals_indices.size() * sizeof(unsigned int),
+		&faces_normals_indices[0], GL_STATIC_DRAW);
+	// vertex positions
+	loc = glGetAttribLocation(simple_shader, "vPosition");
+	glEnableVertexAttribArray(loc);
+	glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
+
 
 }
 
@@ -417,34 +453,27 @@ void MeshModel::draw(bool draw_bounding_box, bool draw_vertix_normals, bool draw
 		drawBoundingBox();
 	}
 
+	if (draw_vertix_normals)
+	{
+		drawVerticesNormals();
+	}
+
+	if (draw_faces_normals)
+	{
+		drawFacesNormals();
+	}
+
 
 }
 
 void MeshModel::drawBoundingBox()
 {
-	//glUseProgram(simple_shader);
-
-	//GLint my_color_location = glGetUniformLocation(my_program, "color");
-	//glUniform3f(my_color_location, 0, 0, 1);
-
-	//GLint umM = glGetUniformLocation(simple_shader, "modelMatrix"); // Find the modelMatrix variable
-	//mat4 modelTrans = this->_world_transform * this->_model_transform;
-	//GLfloat modelMatrix[16];
-	//MattoArr(modelMatrix, modelTrans);
-	//glUniformMatrix4fv(umM, 1, GL_FALSE, modelMatrix);
-
-
-	//glBindVertexArray(bounding_box_VAO);
-	//glBindBuffer(GL_ARRAY_BUFFER, bounding_box_VBO);
-
-	//glDrawArrays(GL_LINE, 0, bound_box_vertices.size());
-
 	glUseProgram(simple_shader);
 	GLint my_color_location = glGetUniformLocation(simple_shader, "color");
-	glUniform3f(my_color_location, 1,0,0);
+	glUniform3f(my_color_location, 1,1,0);
 
 	GLint umM = glGetUniformLocation(simple_shader, "modelMatrix"); // Find the modelMatrix variable
-	mat4 modelTrans = this->_world_transform * this->_model_transform;
+	mat4 modelTrans = _world_transform * _model_transform;
 	GLfloat modelMatrix[16];
 	MattoArr(modelMatrix, modelTrans);
 	glUniformMatrix4fv(umM, 1, GL_FALSE, modelMatrix);
@@ -455,6 +484,48 @@ void MeshModel::drawBoundingBox()
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 
 	glDrawElements(GL_LINES, bound_box_indices.size(), GL_UNSIGNED_INT, 0);
+	glFlush();
+}
+
+void MeshModel::drawFacesNormals()
+{
+	glUseProgram(simple_shader);
+	GLint my_color_location = glGetUniformLocation(simple_shader, "color");
+	glUniform3f(my_color_location, 1, 0, 0);
+
+	GLint umM = glGetUniformLocation(simple_shader, "modelMatrix"); // Find the modelMatrix variable
+	mat4 modelTrans = _world_normal_transform * _model_normal_transform;
+	GLfloat modelMatrix[16];
+	MattoArr(modelMatrix, modelTrans);
+	glUniformMatrix4fv(umM, 1, GL_FALSE, modelMatrix);
+
+	glBindVertexArray(face_normal_VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, face_normal_VBO);
+
+	glClearColor(1.0, 1.0, 1.0, 1.0);
+
+	glDrawElements(GL_LINES, faces_normals_indices.size(), GL_UNSIGNED_INT, 0);
+	glFlush();
+}
+
+void MeshModel::drawVerticesNormals()
+{
+	glUseProgram(simple_shader);
+	GLint my_color_location = glGetUniformLocation(simple_shader, "color");
+	glUniform3f(my_color_location, 1, 0, 0);
+
+	GLint umM = glGetUniformLocation(simple_shader, "modelMatrix"); // Find the modelMatrix variable
+	mat4 modelTrans = _world_normal_transform * _model_normal_transform;
+	GLfloat modelMatrix[16];
+	MattoArr(modelMatrix, modelTrans);
+	glUniformMatrix4fv(umM, 1, GL_FALSE, modelMatrix);
+
+	glBindVertexArray(vertex_normal_VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, vertex_normal_VBO);
+
+	glClearColor(1.0, 1.0, 1.0, 1.0);
+
+	glDrawElements(GL_LINES, vertices_normals_indices.size(), GL_UNSIGNED_INT, 0);
 	glFlush();
 }
 
