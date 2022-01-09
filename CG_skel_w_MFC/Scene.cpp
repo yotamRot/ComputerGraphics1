@@ -179,7 +179,7 @@ void Scene::lookAtModel(int modelId)
 	float maxModelAxisSize = max(max(max(curModel->GetZBoundLength(), curModel->GetXBoundLength()), curModel->GetYBoundLength()), 0.2);
 	// model in camera cord
 	mat4 toModelTransform = curModel->_world_transform * curModel->_model_transform * Translate(curModel->GetCenter());
-	mat4 fromModelTransform = Translate(0, 0, 10 * maxModelAxisSize) * curModel->_world_transform * curModel->_model_transform * Translate(curModel->GetCenter());
+	mat4 fromModelTransform = Translate(0, 0, 3 * maxModelAxisSize) * curModel->_world_transform * curModel->_model_transform * Translate(curModel->GetCenter());
 	vec4 c_atCenter = toModelTransform * vec4(vec3());
 	vec4 c_from = fromModelTransform * vec4(vec3());
 	vec4 c_atDirection = normalize(c_atCenter/ c_atCenter.w - c_from / c_from.w);
