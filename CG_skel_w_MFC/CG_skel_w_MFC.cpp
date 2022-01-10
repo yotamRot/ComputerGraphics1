@@ -70,7 +70,7 @@
 //Texture wrap menu
 //shadow menu
 #define FROM_FILE					1
-#define PROJECTIVE					2
+#define PLANAR						2
 #define CYLINDER					3
 
 #define WHEEL_SCROLL_UP				3
@@ -658,14 +658,16 @@ void textureWrapMenu(int id)
 	switch (id)
 	{
 	case FROM_FILE:
-		scene->ChangeActiveModelTextureWrap(fromFile);
+		scene->ChangeActiveModelTextureWrap(from_file);
 		break;
-	case PROJECTIVE:
+	case PLANAR:
+		scene->ChangeActiveModelTextureWrap(planar);
+		break;
 	case CYLINDER:
 		scene->ChangeActiveModelTextureWrap(Cylinder);
-		scene->draw();
 		break;
 	}
+	scene->draw();
 }
 
 
@@ -798,9 +800,9 @@ void CreateProjectionMenus()
 void CreateTextureMenu()
 {
 	int menuChooseWrap = glutCreateMenu(textureWrapMenu);
-	glutAddMenuEntry("From File", FROM_FILE);
-	glutAddMenuEntry("Projective", PROJECTIVE);
-	glutAddMenuEntry("Spherical", CYLINDER);
+	glutAddMenuEntry("obj cords", FROM_FILE);
+	glutAddMenuEntry("planar", PLANAR);
+	glutAddMenuEntry("cylandar", CYLINDER);
 
 
 	menuTexture = glutCreateMenu(textureMenu);

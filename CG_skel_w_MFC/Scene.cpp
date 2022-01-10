@@ -673,11 +673,11 @@ void Scene::ChangeActiveModelTextureWrap(TextureWrap wrap)
 	MeshModel* cur_model = (MeshModel*)models.at(activeModel);
 	switch (wrap)
 	{
-	case fromFile:
+	case from_file:
 		cur_model->FileMapping();
 		break;
-	case projective:
-		cur_model->CylinderMapping();
+	case planar:
+		cur_model->PlanarMapping();
 		break;
 	case Cylinder:
 		cur_model->CylinderMapping();

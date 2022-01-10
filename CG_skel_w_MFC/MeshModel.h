@@ -24,8 +24,8 @@ enum TransformationDirection
 
 enum TextureWrap
 {
-	fromFile,
-	projective,
+	from_file,
+	planar,
 	Cylinder
 };
 
@@ -112,11 +112,11 @@ public:
 	void UpdateTriangleColor();
 	void UpdateTriangleIlluminationParams();
 	void RandomizePolygons();
-	void  SetBoundingBoxVertices(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat lenX, GLfloat lenY, GLfloat lenZ);
+	void SetBoundingBoxVertices(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat lenX, GLfloat lenY, GLfloat lenZ);
 	void SetupMesh();
 	void FileMapping();
 	void CylinderMapping();
-
+	void PlanarMapping();
 };
 
 class PrimMeshModel : public MeshModel

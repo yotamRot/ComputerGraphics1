@@ -303,7 +303,7 @@ void MeshModel::loadFile(string fileName)
 	
 	if (v_textures.size() != 0)
 	{
-		texture.wrap = fromFile;
+		texture.wrap = from_file;
 	}
 	else
 	{
@@ -313,8 +313,8 @@ void MeshModel::loadFile(string fileName)
 
 
 	// load and set texture
-	glGenTextures(1, &this->texture.id);
-	glBindTexture(GL_TEXTURE_2D, this->texture.id);
+	glGenTextures(1, &texture.id);
+	glBindTexture(GL_TEXTURE_2D,texture.id);
 	// set the texture wrapping parameters
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -448,6 +448,15 @@ void MeshModel::CylinderMapping()
 	}
 }
 
+void MeshModel::PlanarMapping()
+{
+	for (auto it = vertices.begin(); it != vertices.end(); ++it)
+	{
+		it->TexCoords.x = it->Position.x;
+		it->TexCoords.y = it->Position.y;
+	}
+}
+
 void MeshModel::CalcBounds()
 {
 	vec3 min_bound, max_bound;
@@ -531,11 +540,14 @@ void MeshModel::draw(bool draw_bounding_box, bool draw_vertix_normals, bool draw
 	glUniformMatrix4fv(umN, 1, GL_FALSE, normalMatrix);
 
 	GLint uKa = glGetUniformLocation(my_program, "Ka"); // Find the Ka variable
-	glUniform1i(uKa, ka);
+	glUniform1f(uKa, ka);
 	GLint uKd = glGetUniformLocation(my_program, "Kd"); // Find the Kd variable
-	glUniform1i(uKd, kd);
+	glUniform1f(uKd, kd);
 	GLint uKs = glGetUniformLocation(my_program, "Ks"); // Find the Ks variable
-	glUniform1i(uKs, ks);
+	glUniform1f(uKs, ks);
+
+	glBindTexture(GL_TEXTURE_2D, texture.id);
+	glUniform1i(glGetUniformLocation(my_program, "texture1"), 0);
 
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
