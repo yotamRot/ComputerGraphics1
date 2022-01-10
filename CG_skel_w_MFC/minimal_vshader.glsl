@@ -28,7 +28,9 @@ uniform vec3 lightColor;
 uniform float La;
 uniform float Ld;
 uniform float Ls;
-
+uniform float Ka;
+uniform float Kd;
+uniform float Ks;
 
 void main()
 {
@@ -46,9 +48,9 @@ void main()
 	    vec3 reflectDir = reflect(-lightDirection, normalizeNormal); 
 	    vec3 viewDirection = normalize(0 - fragmentPosition);
 
-	    vec3 ambient = La * lightColor;
-	    vec3 diffuse =  Ld * max(dot(normalizeNormal, lightDirection), 0.0) * lightColor; 
-        vec3 specular  = Ls * pow(max(dot(viewDirection, reflectDir), 0.0), 2) * lightColor; 
+	    vec3 ambient = Ka * La * lightColor;
+	    vec3 diffuse =  Kd * Ld * max(dot(normalizeNormal, lightDirection), 0.0) * lightColor; 
+        vec3 specular  = Ks * Ls * pow(max(dot(viewDirection, reflectDir), 0.0), 2) * lightColor; 
 	    vec3 result = (ambient + diffuse + specular) * vertexColor;
         if(shadow_type == GOURAUD)
         {

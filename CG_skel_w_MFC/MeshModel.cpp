@@ -530,6 +530,13 @@ void MeshModel::draw(bool draw_bounding_box, bool draw_vertix_normals, bool draw
 	MattoArr(normalMatrix, normalTrans);
 	glUniformMatrix4fv(umN, 1, GL_FALSE, normalMatrix);
 
+	GLint uKa = glGetUniformLocation(my_program, "Ka"); // Find the Ka variable
+	glUniform1i(uKa, ka);
+	GLint uKd = glGetUniformLocation(my_program, "Kd"); // Find the Kd variable
+	glUniform1i(uKd, kd);
+	GLint uKs = glGetUniformLocation(my_program, "Ks"); // Find the Ks variable
+	glUniform1i(uKs, ks);
+
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
@@ -759,9 +766,9 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 
 CameraModel::CameraModel(int cameraIndex, GLuint program) : cameraIndex(cameraIndex)
 {
-	//ka = 0.5;
-	//kd = 0.8;
-	//ks = 1.0;
+	ka = 0.5;
+	kd = 0.8;
+	ks = 1.0;
 	//ke = 1.0;
 	//is_non_unfiorm = false;
 	//triangles = new vector<Triangle>;
@@ -796,9 +803,9 @@ CameraModel::CameraModel(int cameraIndex, GLuint program) : cameraIndex(cameraIn
 
 LightModel::LightModel(int model_id, int lightIndex, GLuint program) : lightIndex(lightIndex), light_color(vec3(1,1,1)),La(0.5),Ld(0.8),Ls(1.0)
 {
-	//ka = 1;
-	//kd = 1;
-	//ks = 1;
+	ka = 1;
+	kd = 1;
+	ks = 1;
 	//ke = 1;
 	//is_non_unfiorm = false;
 	modelId = model_id;

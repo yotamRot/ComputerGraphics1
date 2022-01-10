@@ -24,6 +24,9 @@ uniform vec3 lightPosition;
 uniform float La;
 uniform float Ld;
 uniform float Ls;
+uniform float Ka;
+uniform float Kd;
+uniform float Ks;
 //uniform float Alpha;
 
 //texture
@@ -57,9 +60,9 @@ void phong_shadow()
 	vec3 reflectDir = reflect(-lightDirection, normalizeNormal); 
 	vec3 viewDirection = normalize(0 - fragmentPosition);
 
-	vec3 ambient = La * lightColor;
-	vec3 diffuse =  Ld * max(dot(normalizeNormal, lightDirection), 0.0) * lightColor; 
-    vec3 specular  = Ls * pow(max(dot(viewDirection, reflectDir), 0.0), 2) * lightColor; 
+	vec3 ambient = Ka * La * lightColor;
+	vec3 diffuse =  Kd * Ld * max(dot(normalizeNormal, lightDirection), 0.0) * lightColor; 
+    vec3 specular  = Ks * Ls * pow(max(dot(viewDirection, reflectDir), 0.0), 2) * lightColor; 
 	vec3 result = (ambient + diffuse + specular) * vertexColor;
 	fColor = vec4(result,1.0)* texture(texture1, TexCoord);;
 }
