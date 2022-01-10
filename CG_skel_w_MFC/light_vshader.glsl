@@ -15,6 +15,7 @@ uniform mat4 projectionMatrix;//projection;
 
 void main()
 {
-	gl_Position = projectionMatrix * modelViewMatrix * modelMatrix * vec4(vPosition,1.0);
+    vec3 fragmentPosition = vec3(modelViewMatrix * modelMatrix * vec4(vPosition, 1.0));
+	gl_Position = projectionMatrix *  vec4(fragmentPosition,1.0);
 	lightVertexColor = color;
 }

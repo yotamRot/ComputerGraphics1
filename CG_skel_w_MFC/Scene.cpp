@@ -337,6 +337,8 @@ void Scene::draw()
 	glUniformMatrix4fv(umV, 1, GL_FALSE, curCameraInv);
 	GLint umP = glGetUniformLocation(program, "projectionMatrix"); // Find the projectionMatrix variable
 	glUniformMatrix4fv(umP, 1, GL_FALSE, curProjection);
+	GLint uShadow = glGetUniformLocation(program, "shadow_type"); // Find the projectionMatrix variable
+	glUniform1i(uShadow, current_shadow);
 	glUseProgram(light_program);
 	GLint viewLightLoc = glGetUniformLocation(light_program, "modelViewMatrix"); // Find the modelViewMatrix variable
 	glUniformMatrix4fv(viewLightLoc, 1, GL_FALSE, curCameraInv);
