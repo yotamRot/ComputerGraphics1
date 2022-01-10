@@ -9,6 +9,10 @@
 #include "InitShader.h"
 #include <GL/freeglut_std.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+
 
 using namespace std;
 
@@ -148,6 +152,13 @@ MeshModel::~MeshModel(void)
 {
 }
 
+std::string dirnameOf(const std::string& fname)
+{
+	size_t pos = fname.find_last_of("\\/");
+	return (std::string::npos == pos)
+		? ""
+		: fname.substr(0, pos);
+}
 
 int check_key(map<int, int> &m, int key, int val)
 {
@@ -166,6 +177,7 @@ void MeshModel::loadFile(string fileName)
 	vector<FaceIdcs> faces;
 	vector<vec3> l_vertices;
 	vector<vec3> v_normals;
+	vector<vec2> v_textures;
 	vec3 curCenter;
 	vec3 curNormalEnd;
 	std::map<int, int> u;
@@ -174,11 +186,7 @@ void MeshModel::loadFile(string fileName)
 
 	vec3 p1, p2 , p3;
 	vec3 p1_nomral, p2_nomral, p3_nomral;
-
-	Normal curVertex1Normal;
-	Normal curVertex2Normal;
-	Normal curVertex3Normal;
-	Normal curFaceNormal;
+	vec2 p1_texture, p2_texture, p3_texture;
 
 	// while not end of file
 	while (!ifile.eof())
@@ -198,6 +206,8 @@ void MeshModel::loadFile(string fileName)
 			l_vertices.push_back(vec3fFromStream(issLine));
 		if (lineType == "vn") /*FIXED*/
 			v_normals.push_back(vec3fFromStream(issLine));
+		if (lineType == "vt") /*FIXED*/
+			v_textures.push_back(vec2fFromStream(issLine));
 		else if (lineType == "f") /*FIXED*/
 			faces.push_back(issLine);
 		else if (lineType == "#" || lineType == "")
@@ -221,43 +231,64 @@ void MeshModel::loadFile(string fileName)
 	// iterate through all stored faces and create triangles
 	for (vector<FaceIdcs>::iterator it = faces.begin(); it != faces.end(); ++it)
 	{
-		//Create Trignagl
+		p1 = l_vertices[it->v[0] - 1];
+		p2 = l_vertices[it->v[1] - 1];
+		p3 = l_vertices[it->v[2] - 1];
+
+		curCenter = (p1 + p2 + p3) / 3;
+		curNormalEnd = normalize(cross(p2 - p1, p3 - p1));
+		face_normals.push_back(curCenter);
+		face_normals.push_back(curCenter + curNormalEnd);
 
 		if (v_normals.size() != 0)
 		{
-			//Create Normals
-			p1 = l_vertices[it->v[0] - 1];
 			p1_nomral = (normalize(v_normals.at(check_key(u, it->v[0] - 1, it->vn[0] - 1))));
-			vertices_normals.push_back(p1);
-			vertices_normals.push_back(p1 + p1_nomral);
-			tempVertix.Position = p1;
-			tempVertix.V_Normal = p1_nomral;
-			this->vertices[it->v[0] - 1] = tempVertix;
-			this->indices.push_back(it->v[0] - 1);
-
-			p2 = l_vertices[it->v[1] - 1];
+			
 			p2_nomral = (normalize(v_normals.at(check_key(u, it->v[1] - 1, it->vn[1] - 1))));
-			vertices_normals.push_back(p2);
-			vertices_normals.push_back(p2 + p2_nomral);
-			tempVertix.Position = p2;
-			tempVertix.V_Normal = p2_nomral;
-			this->vertices[it->v[1] - 1] = tempVertix;
-			this->indices.push_back(it->v[1] - 1);
-
-			p3 = l_vertices[it->v[2] - 1];
+			
 			p3_nomral = (normalize(v_normals.at(check_key(u, it->v[2] - 1, it->vn[2] - 1))));
-			vertices_normals.push_back(p3);
-			vertices_normals.push_back(p3 + p3_nomral);
-			tempVertix.Position = p3;
-			tempVertix.V_Normal = p3_nomral;
-			this->vertices[it->v[2] - 1] = tempVertix;
-			this->indices.push_back(it->v[2] - 1);
-
-			curCenter = (p1 + p2 + p3) / 3;
-			curNormalEnd = normalize(cross(p2 - p1, p3 - p1));
-			face_normals.push_back(curCenter);
-			face_normals.push_back(curCenter + curNormalEnd);
+		
 		}
+		else
+		{
+			p1_nomral = p2_nomral = p3_nomral = curNormalEnd;
+		}
+
+		vertices_normals.push_back(p1);
+		vertices_normals.push_back(p1 + p1_nomral);
+		vertices_normals.push_back(p2);
+		vertices_normals.push_back(p2 + p2_nomral);
+		vertices_normals.push_back(p3);
+		vertices_normals.push_back(p3 + p3_nomral);
+
+		if (v_textures.size() != 0)
+		{
+			p1_texture = v_textures[it->vt[0] - 1];
+			p2_texture = v_textures[it->vt[1] - 1];
+			p3_texture = v_textures[it->vt[2] - 1];
+			fileTexCord.push_back(p1_texture);
+			fileTexCord.push_back(p2_texture);
+			fileTexCord.push_back(p3_texture);
+		}
+
+
+		tempVertix.Position = p1;
+		tempVertix.V_Normal = p1_nomral;
+		tempVertix.TexCoords = p1_texture;
+		this->vertices[it->v[0] - 1] = tempVertix;
+		this->indices.push_back(it->v[0] - 1);
+
+		tempVertix.Position = p2;
+		tempVertix.V_Normal = p2_nomral;
+		tempVertix.TexCoords = p2_texture;
+		this->vertices[it->v[1] - 1] = tempVertix;
+		this->indices.push_back(it->v[1] - 1);
+
+		tempVertix.Position = p3;
+		tempVertix.V_Normal = p3_nomral;
+		tempVertix.TexCoords = p3_texture;
+		this->vertices[it->v[2] - 1] = tempVertix;
+		this->indices.push_back(it->v[2] - 1);
 	}
 
 	for (int i = 0; i < face_normals.size(); i++)
@@ -269,6 +300,40 @@ void MeshModel::loadFile(string fileName)
 	{
 		vertices_normals_indices.push_back(i);
 	}
+	
+	if (v_textures.size() != 0)
+	{
+		texture.wrap = fromFile;
+	}
+	else
+	{
+		texture.wrap = Cylinder;
+		CylinderMapping();
+	}
+
+
+	// load and set texture
+	glGenTextures(1, &this->texture.id);
+	glBindTexture(GL_TEXTURE_2D, this->texture.id);
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// load image, create texture and generate mipmaps
+	int width, height, nrChannels;
+	stbi_set_flip_vertically_on_load(true);
+	unsigned char* data = stbi_load(&(dirnameOf(fileName) + "\\texture.png")[0], &width, &height, &nrChannels, 0);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	stbi_image_free(data);
+
+	glUseProgram(my_program);
+	glUniform1i(glGetUniformLocation(my_program, "texture1"), 0);
 }
 
 void MeshModel::SetupMesh()
@@ -364,6 +429,23 @@ void MeshModel::SetupMesh()
 		glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
 	}
 
+}
+
+void MeshModel::FileMapping()
+{
+	for (int i= 0; i < vertices.size(); i++)
+	{
+		vertices.at(i).TexCoords = fileTexCord.at(i);
+	}
+}
+
+void MeshModel::CylinderMapping()
+{
+	for (auto it = vertices.begin(); it != vertices.end(); ++it)
+	{
+		it->TexCoords.x = (atan2(it->Position.z, it->Position.x)) + M_PI;
+		it->TexCoords.y = it->Position.y;
+	}
 }
 
 void MeshModel::CalcBounds()

@@ -67,6 +67,12 @@
 #define GOURAUD_SHADOW				2
 #define PHONG_SHADOW				3
 
+//Texture wrap menu
+//shadow menu
+#define FROM_FILE					1
+#define PROJECTIVE					2
+#define CYLINDER					3
+
 #define WHEEL_SCROLL_UP				3
 #define WHEEL_SCROLL_DOWN			4
 
@@ -111,6 +117,7 @@ int menuTramsformation;
 int menuCameras;
 int menuRenderer;
 int menuProjections;
+int menuTexture;
 int menuTransformationAxies;
 Transformation curTramsformation = MOVE;
 Projection curProjection = PERSPECTIVE;
@@ -639,9 +646,28 @@ void rendererMenu(int id)
 
 void projectionMenu(int id)
 {
-	scene->setActiveCameraProjection((Projection)id);
-	scene->draw();
 }
+
+void textureMenu(int id)
+{
+}
+
+void textureWrapMenu(int id)
+{
+
+	switch (id)
+	{
+	case FROM_FILE:
+		scene->ChangeActiveModelTextureWrap(fromFile);
+		break;
+	case PROJECTIVE:
+	case CYLINDER:
+		scene->ChangeActiveModelTextureWrap(Cylinder);
+		scene->draw();
+		break;
+	}
+}
+
 
 void projectionChooseMenu(int id)
 {
@@ -769,6 +795,19 @@ void CreateProjectionMenus()
 	glutAddSubMenu("Projections parameters", menuProjectionParameters);
 }
 
+void CreateTextureMenu()
+{
+	int menuChooseWrap = glutCreateMenu(textureWrapMenu);
+	glutAddMenuEntry("From File", FROM_FILE);
+	glutAddMenuEntry("Projective", PROJECTIVE);
+	glutAddMenuEntry("Spherical", CYLINDER);
+
+
+	menuTexture = glutCreateMenu(textureMenu);
+	glutSetMenu(menuTexture);
+	glutAddSubMenu("Choose Wrap", menuChooseWrap);
+}
+
 void CreateMainMenu()
 {
 	menuObjectsId = glutCreateMenu(objectsMenu);
@@ -778,6 +817,7 @@ void CreateMainMenu()
 	glutAddSubMenu("Transformations", menuTramsformation);
 	glutAddSubMenu("Transformations axis", menuTransformationAxies);
 	glutAddSubMenu("Projection", menuProjections);
+	glutAddSubMenu("Textures", menuTexture);
 	glutAddSubMenu("Renderer", menuRenderer);
 	glutAddSubMenu("Look At Object", menuLookAtObjects);
 	glutAddSubMenu("Select Object",menuObjectsId);
@@ -797,6 +837,7 @@ void initMenu()
 	CreateShadowMenu();
 	CreateRendererMenu();
 	CreateProjectionMenus();
+	CreateTextureMenu();
 
 	CreateMainMenu();
 
@@ -858,6 +899,8 @@ int main( int argc, char **argv )
 {
 	int nRetCode = 0;
 	srand((unsigned)time(NULL));
+
+
 	
 	// initialize MFC and print and error on failure
 	if (!AfxWinInit(::GetModuleHandle(NULL), NULL, ::GetCommandLine(), 0))

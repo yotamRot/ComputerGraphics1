@@ -1,21 +1,17 @@
 #pragma once
 
+
 #include "gl/glew.h"
 #include <vector>
 #include <string>
 #include "Renderer.h"
 #include "MeshModel.h"
+
+
 using namespace std;
 
 #define ZOOM 2
 #define ILLEGAL_ACTIVE_MOVEL -1
-
-
-
-
-
-
-
 
 
 class Camera {
@@ -111,6 +107,7 @@ public:
 	void ChangeModelIlluminationParams(vec4& k);
 	void ApplyCrazyColors();
 	void ApplyNonUniform();
+	void ChangeActiveModelTextureWrap(TextureWrap wrap);
 	void ChangeShadow(Shadow s);
 	vec4 GetAmbientRGB();
 	GLuint program;

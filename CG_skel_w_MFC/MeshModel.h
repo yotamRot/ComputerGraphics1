@@ -7,6 +7,8 @@
 #include <vector>
 #include "Renderer.h"
 
+
+
 using namespace std;
 
 enum TransformationDirection
@@ -20,9 +22,18 @@ enum TransformationDirection
 };
 
 
+enum TextureWrap
+{
+	fromFile,
+	projective,
+	Cylinder
+};
+
 struct Texture {
 	unsigned int id;
 	string type;
+	string path;
+	TextureWrap wrap;
 };
 
 struct Vertex {
@@ -65,7 +76,7 @@ public:
 	//vector<Vertex>       vertices;
 	vector<Vertex>       vertices;
 	vector<unsigned int> indices;
-	vector<Texture>      textures;
+	Texture texture;
 
 	vector<vec3> bound_box_vertices;
 	vector<unsigned int> bound_box_indices;
@@ -73,6 +84,8 @@ public:
 	vector<unsigned int> vertices_normals_indices;
 	vector<vec3> face_normals;
 	vector<unsigned int> faces_normals_indices;
+
+	vector<vec2> fileTexCord;
 
 	vec3 mesh_color;
 	vec3 matirials; // x - emissive, y - diffuse, z - specular
@@ -101,6 +114,8 @@ public:
 	void RandomizePolygons();
 	void  SetBoundingBoxVertices(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat lenX, GLfloat lenY, GLfloat lenZ);
 	void SetupMesh();
+	void FileMapping();
+	void CylinderMapping();
 
 };
 

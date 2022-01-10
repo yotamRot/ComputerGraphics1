@@ -316,7 +316,7 @@ bool Scene::toggleSuperSample()
 	isSuperSample = !isSuperSample;
 	return isSuperSample;
 }
-
+	
 void Scene::draw()
 {
 	// 1. Send the renderer the current camera transform and the projection
@@ -668,7 +668,26 @@ void Scene::ApplyCrazyColors()
 	cur_model->RandomizePolygons();
 }
 
-
+void Scene::ChangeActiveModelTextureWrap(TextureWrap wrap)
+{
+	MeshModel* cur_model = (MeshModel*)models.at(activeModel);
+	switch (wrap)
+	{
+	case fromFile:
+		cur_model->FileMapping();
+		break;
+	case projective:
+		cur_model->CylinderMapping();
+		break;
+	case Cylinder:
+		cur_model->CylinderMapping();
+		break;
+	default:
+		break;
+	}
+	cur_model->SetupMesh();
+	
+}
 void Scene::ApplyNonUniform()
 {
 	MeshModel* cur_model = (MeshModel*)models.at(activeModel);

@@ -8,15 +8,14 @@
 // In Arguments
 in  vec3 vPosition;
 in  vec3 vNormal;
-
+in  vec2 vTexture;
 // Out Arguments
 out vec3 vertexColor;
 out vec3 vertexNormal;
 out vec3 fragmentPosition;
 flat out int shadow;
 flat out vec3 polygonColor;
-
-
+out vec2 TexCoord;
 // Uniforms declaration
 uniform vec3 color;
 uniform mat4 modelMatrix;
@@ -64,5 +63,6 @@ void main()
     }
 
     gl_Position = projectionMatrix * vec4(fragmentPosition,1.0);
-
+    
+	TexCoord = vec2(vTexture.x, vTexture.y);
 }

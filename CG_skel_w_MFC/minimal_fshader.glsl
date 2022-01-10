@@ -12,9 +12,11 @@ in  vec3 vertexNormal;
 in  vec3 fragmentPosition;
 flat in  int shadow;
 flat in vec3 polygonColor;
+in vec2 TexCoord;
 
 // Out Arguments
 out vec4 fColor;
+
 
 // Uniforms declaration
 uniform vec3 lightColor;
@@ -24,6 +26,8 @@ uniform float Ld;
 uniform float Ls;
 //uniform float Alpha;
 
+//texture
+uniform sampler2D texture1;
 
 void phong_shadow();
 void gouraud_shadow();
@@ -57,15 +61,15 @@ void phong_shadow()
 	vec3 diffuse =  Ld * max(dot(normalizeNormal, lightDirection), 0.0) * lightColor; 
     vec3 specular  = Ls * pow(max(dot(viewDirection, reflectDir), 0.0), 2) * lightColor; 
 	vec3 result = (ambient + diffuse + specular) * vertexColor;
-	fColor = vec4(result,1.0);
+	fColor = vec4(result,1.0)* texture(texture1, TexCoord);;
 }
 
 void gouraud_shadow()
 {
-	fColor = vec4(vertexColor,1.0);
+	fColor = vec4(vertexColor,1.0) * texture(texture1, TexCoord);;
 }
 void flat_shadow()
 {
-	fColor = vec4(polygonColor,1.0);
+	fColor = vec4(polygonColor,1.0) * texture(texture1, TexCoord);;
 }
 
