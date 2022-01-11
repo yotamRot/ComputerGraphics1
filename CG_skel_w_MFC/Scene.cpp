@@ -697,6 +697,14 @@ bool Scene::ToggleActiveModelIsUseNormalMap()
 	return cur_model->use_normal_map;
 }
 
+bool Scene::ToggleActiveModelIsUseTexture()
+{
+	MeshModel* cur_model = (MeshModel*)models.at(activeModel);
+
+	cur_model->use_texture = !cur_model->use_texture;
+	return cur_model->use_texture;
+}
+
 
 void Scene::ApplyNonUniform()
 {

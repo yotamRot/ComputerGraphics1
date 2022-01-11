@@ -33,6 +33,8 @@ uniform float Ks;
 
 //texture
 uniform sampler2D texture1;
+uniform bool useTexture;
+
 //normal map
 uniform bool useNormalMap;
 uniform sampler2D normalMap;
@@ -85,17 +87,17 @@ void phong_shadow()
 	vec3 diffuse =  Kd * Ld * max(dot(normalizeNormal, lightDirection), 0.0) * lightColor; 
 	vec3 specular  = Ks * Ls * pow(max(dot(viewDirection, reflectDir), 0.0), 2) * lightColor; 
 	vec3 result = (ambient + diffuse + specular) * vertexColor;
-	fColor = vec4(result, 1.0)* texture(texture1, TexCoord);
+	fColor = vec4(result, 1.0)* (useTexture ? texture(texture1, TexCoord) : vec4(1,1,1,1));
 
  
 }
 
 void gouraud_shadow()
 {
-	fColor = vec4(vertexColor,1.0) * texture(texture1, TexCoord);
+	fColor = vec4(vertexColor,1.0) * (useTexture ? texture(texture1, TexCoord) : vec4(1,1,1,1));
 }
 void flat_shadow()
 {
-	fColor = vec4(polygonColor,1.0) * texture(texture1, TexCoord);
+	fColor = vec4(polygonColor,1.0) * (useTexture ? texture(texture1, TexCoord) : vec4(1,1,1,1));
 }
 

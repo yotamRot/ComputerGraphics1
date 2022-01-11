@@ -143,6 +143,7 @@ MeshModel::MeshModel(string fileName, int modelId, GLuint program, GLuint simple
 {
 	is_non_unfiorm = false;
 	use_normal_map = false;
+	use_texture = true;
 	loadFile(fileName);
 	CalcBounds();
 	SetupMesh();
@@ -376,6 +377,11 @@ void MeshModel::loadFile(string fileName)
 			format = GL_RGBA;
 		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
+		has_texture = true;
+	}
+	else
+	{
+		has_texture = false;
 	}
 	stbi_image_free(data);
 
@@ -403,6 +409,11 @@ void MeshModel::loadFile(string fileName)
 			format = GL_RGBA;
 		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
+		has_normal_map = true;
+	}
+	else
+	{
+		has_normal_map = false;
 	}
 	stbi_image_free(data);
 
@@ -641,15 +652,25 @@ void MeshModel::draw(bool draw_bounding_box, bool draw_vertix_normals, bool draw
 	GLint uKs = glGetUniformLocation(my_program, "Ks"); // Find the Ks variable
 	glUniform1f(uKs, ks);
 
+
+	if (use_texture && has_texture)
+	{
+		glBindTexture(GL_TEXTURE_2D, texture.id);
+		glUniform1i(glGetUniformLocation(my_program, "texture1"), 0);
+	}
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture.id);
-	glUniform1i(glGetUniformLocation(my_program, "texture1"), 0);
 
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, normal_map.id);
-	glUniform1i(glGetUniformLocation(my_program, "normalMap"), 1);
+	if (use_normal_map && has_normal_map)
+	{
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, normal_map.id);
+		glUniform1i(glGetUniformLocation(my_program, "normalMap"), 1);
+	}
 
-	glUniform1i(glGetUniformLocation(my_program, "useNormalMap"), use_normal_map);
+
+	glUniform1i(glGetUniformLocation(my_program, "useNormalMap"), use_normal_map && has_normal_map);
+
+	glUniform1i(glGetUniformLocation(my_program, "useTexture"), use_texture && has_texture);
 
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);

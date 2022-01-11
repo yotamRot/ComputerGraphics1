@@ -79,8 +79,10 @@ public:
 	vector<Vertex>       vertices;
 	vector<unsigned int> indices;
 	bool use_texture;
+	bool has_texture;
 	Texture texture;
 	bool use_normal_map;
+	bool has_normal_map;
 	Texture normal_map;
 
 	vector<vec3> bound_box_vertices;

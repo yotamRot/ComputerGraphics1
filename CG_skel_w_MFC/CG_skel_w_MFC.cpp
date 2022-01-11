@@ -70,6 +70,8 @@
 //Texture wrap menu
 // 
 #define USE_NORMAL_MAP				2
+#define USE_TEXTURE					3
+
 //WRAP menu
 #define FROM_FILE					1
 #define PLANAR						2
@@ -662,19 +664,32 @@ void UseNormalMap()
 	}
 }
 
+void UseTexture()
+{
+	if (scene->ToggleActiveModelIsUseTexture())
+	{
+		glutChangeToMenuEntry(USE_TEXTURE, "Hide Texture", USE_TEXTURE);
+	}
+	else
+	{
+		glutChangeToMenuEntry(USE_TEXTURE, "Use Texture", USE_TEXTURE);
+	}
+}
+
 void textureMenu(int id)
 {
 	if (id == USE_NORMAL_MAP)
 	{
 		UseNormalMap();
 	}
+	else if(id == USE_TEXTURE)
+	{
+		UseTexture();
+	}
 }
-
-
 
 void textureWrapMenu(int id)
 {
-
 	switch (id)
 	{
 	case FROM_FILE:
@@ -829,6 +844,7 @@ void CreateTextureMenu()
 	glutSetMenu(menuTexture);
 	glutAddSubMenu("Choose Wrap", menuChooseWrap);
 	glutAddMenuEntry("Use Normal Map", USE_NORMAL_MAP);
+	glutAddMenuEntry("Hide texture", USE_TEXTURE);
 }
 
 void CreateMainMenu()
