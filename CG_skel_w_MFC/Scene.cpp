@@ -380,7 +380,7 @@ void Scene::draw()
 			GLint l_s_location = glGetUniformLocation(program, ("Ls[" + std::to_string(light_number) + "]").c_str());
 			glUniform1f(l_s_location, light_model->Ls);
 			GLint light_type_location = glGetUniformLocation(program, ("light_type[" + std::to_string(light_number) + "]").c_str());
-			glUniform1f(light_type_location, light_model->type);
+			glUniform1i(light_type_location, light_model->type);
 			//GLint ul_alpha = glGetUniformLocation(program, "alpha");
 			//glUniform1f(ul_alpha, light_model->l_alpha);
 			light_number++;

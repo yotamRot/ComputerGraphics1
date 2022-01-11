@@ -77,9 +77,18 @@ void main()
         mat3 TBN = transpose(mat3(T, B, N));    
         for(int i = 0; i < lights_number; i++)
         {
-            TangentLightPos[i] = TBN * lightPosition[i];
+            
+            if(light_type[i] == POINT_SOURCE)
+            {
+                TangentLightPos[i] = TBN * lightPosition[i];
+            }
+            else    // PARALLEL_SOURCE
+            {
+                TangentLightPos[i] = TBN * vec3(0);
+            }
+
 	    }
-        TangentViewPos  = vec3(0,0,0); // we are in camera space
+        TangentViewPos  = TBN * vec3(0,0,0); // we are in camera space
         TangentFragPos  = TBN * fragmentPosition;
     }
     if(shadow_type == PHONG)
@@ -102,14 +111,28 @@ void main()
             {
                 normalizeNormal = texture(normalMap, TexCoord).rgb;
 	            normalizeNormal = normalize(normalizeNormal * 2.0 - 1.0);  // this normal is in tangent space
-	            lightDirection =  normalize(TangentLightPos[i] - TangentFragPos);
-	            viewDirection = normalize(TangentViewPos - TangentFragPos);
+                viewDirection = normalize(TangentViewPos - TangentFragPos);
+                if(light_type[i] == POINT_SOURCE)
+                {
+                    lightDirection =  normalize(TangentLightPos[i] - TangentFragPos);
+                }
+                else    // PARALLEL_SOURCE
+                {
+                    lightDirection = normalize(TangentLightPos[i]);
+                }
             }
             else
             {
                 normalizeNormal = normalize(vertexNormal);
-                lightDirection = normalize(lightPosition[i] - fragmentPosition);
                 viewDirection = normalize(0 - fragmentPosition);
+                if(light_type[i] == POINT_SOURCE)
+                {
+                    lightDirection = normalize(lightPosition[i] - fragmentPosition);
+                }
+                else    // PARALLEL_SOURCE
+                {
+                    lightDirection = normalize(lightPosition[i]);
+                }
             }
 	        reflectDir = reflect(-lightDirection, normalizeNormal); 
 	        ambient  = Ka * La[i] * lightColor[i];

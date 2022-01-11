@@ -84,14 +84,28 @@ void phong_shadow()
 		{
 			normalizeNormal = texture(normalMap, TexCoord).rgb;
 			normalizeNormal = normalize(normalizeNormal * 2.0 - 1.0);  // this normal is in tangent space
-			lightDirection =  normalize(TangentLightPos[i] - TangentFragPos);
 			viewDirection = normalize(TangentViewPos - TangentFragPos);
+			if(light_type[i] == POINT_SOURCE)
+            {
+                lightDirection =  normalize(TangentLightPos[i] - TangentFragPos);
+            }
+            else    // PARALLEL_SOURCE
+            {
+                lightDirection = normalize(TangentLightPos[i]);
+            }
 		}
 		else
 		{
-			normalizeNormal = normalize(vertexNormal);
-			lightDirection = normalize(lightPosition[i] - fragmentPosition);
-			viewDirection = normalize(0 - fragmentPosition);
+            normalizeNormal = normalize(vertexNormal);
+            viewDirection = normalize(0 - fragmentPosition);
+            if(light_type[i] == POINT_SOURCE)
+            {
+                lightDirection = normalize(lightPosition[i] - fragmentPosition);
+            }
+            else    // PARALLEL_SOURCE
+            {
+                lightDirection = normalize(lightPosition[i]);
+            }
 		}
 		reflectDir = reflect(-lightDirection, normalizeNormal); 
 		ambient  = Ka * La[i] * lightColor[i];

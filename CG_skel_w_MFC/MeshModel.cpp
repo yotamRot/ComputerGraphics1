@@ -936,7 +936,7 @@ CameraModel::CameraModel(int cameraIndex, GLuint program) : cameraIndex(cameraIn
 	//UpdateTriangleIlluminationParams();
 }
 
-LightModel::LightModel(int model_id, int lightIndex, GLuint program) : lightIndex(lightIndex), light_color(vec3(1,1,1)),La(0.5),Ld(0.8),Ls(1.0)
+LightModel::LightModel(int model_id, int lightIndex, GLuint program) : lightIndex(lightIndex), light_color(vec3(1,1,1)),La(0.5),Ld(0.8),Ls(1.0), type(POINT_SOURCE)
 {
 	ka = 1;
 	kd = 1;
