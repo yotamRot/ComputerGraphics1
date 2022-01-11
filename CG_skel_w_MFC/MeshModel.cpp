@@ -139,9 +139,10 @@ mat4 CreateNormalTransform(mat4& matrix, Transformation T)
 	return normalMatrix;
 }
 
-MeshModel::MeshModel(string fileName, int modelId, GLuint program, GLuint simpleShader):mesh_color(BLUE), ka(0.5), kd(0.8), ks(1.0),ke(0), modelId(modelId), my_program(program), simple_shader(simpleShader)
+MeshModel::MeshModel(string fileName, int modelId, GLuint program, GLuint simpleShader):mesh_color(WHITE), ka(0.5), kd(0.8), ks(1.0),ke(0), modelId(modelId), my_program(program), simple_shader(simpleShader)
 {
 	is_non_unfiorm = false;
+	use_normal_map = false;
 	loadFile(fileName);
 	CalcBounds();
 	SetupMesh();
@@ -184,9 +185,15 @@ void MeshModel::loadFile(string fileName)
 
 	Vertex tempVertix;
 
-	vec3 p1, p2 , p3;
+	vec3 p1, p2, p3;
 	vec3 p1_nomral, p2_nomral, p3_nomral;
 	vec2 p1_texture, p2_texture, p3_texture;
+	float f, t;
+
+	//normal map variables
+	vec3 tangent, bitangent;
+	vec3 edge1, edge2;
+	vec2 deltaUV1, deltaUV2;
 
 	// while not end of file
 	while (!ifile.eof())
@@ -240,6 +247,8 @@ void MeshModel::loadFile(string fileName)
 		face_normals.push_back(curCenter);
 		face_normals.push_back(curCenter + curNormalEnd);
 
+		
+
 		if (v_normals.size() != 0)
 		{
 			p1_nomral = (normalize(v_normals.at(check_key(u, it->v[0] - 1, it->vn[0] - 1))));
@@ -270,23 +279,61 @@ void MeshModel::loadFile(string fileName)
 			fileTexCord.push_back(p2_texture);
 			fileTexCord.push_back(p3_texture);
 		}
+		else
+		{
+			// create planar mapping
+			p1_texture = vec2(p1.x, p1.y);
+			p2_texture = vec2(p2.x, p2.y);
+			p3_texture = vec2(p3.x, p3.y);
+
+		}
+
+		edge1 = p2 - p1;
+		edge2 = p3 - p2;
+		deltaUV1 = p2_texture - p1_texture;
+		deltaUV2 = p3_texture - p1_texture;
+		t = deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y;
+		if (t == 0)
+		{
+			f = 100.0f; // stam randmolay
+		}
+		else
+		{
+			f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+		}
+		
+
+		tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+		tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+		tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+
+		bitangent.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+		bitangent.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+		bitangent.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+
 
 
 		tempVertix.Position = p1;
 		tempVertix.V_Normal = p1_nomral;
 		tempVertix.TexCoords = p1_texture;
+		tempVertix.Tangent = tangent;
+		tempVertix.Bitangent = bitangent;
 		this->vertices[it->v[0] - 1] = tempVertix;
 		this->indices.push_back(it->v[0] - 1);
 
 		tempVertix.Position = p2;
 		tempVertix.V_Normal = p2_nomral;
 		tempVertix.TexCoords = p2_texture;
+		tempVertix.Tangent = tangent;
+		tempVertix.Bitangent = bitangent;
 		this->vertices[it->v[1] - 1] = tempVertix;
 		this->indices.push_back(it->v[1] - 1);
 
 		tempVertix.Position = p3;
 		tempVertix.V_Normal = p3_nomral;
 		tempVertix.TexCoords = p3_texture;
+		tempVertix.Tangent = tangent;
+		tempVertix.Bitangent = bitangent;
 		this->vertices[it->v[2] - 1] = tempVertix;
 		this->indices.push_back(it->v[2] - 1);
 	}
@@ -301,18 +348,11 @@ void MeshModel::loadFile(string fileName)
 		vertices_normals_indices.push_back(i);
 	}
 	
-	if (v_textures.size() != 0)
-	{
-		texture.wrap = from_file;
-	}
-	else
-	{
-		texture.wrap = Cylinder;
-		CylinderMapping();
-	}
+
 
 
 	// load and set texture
+	glActiveTexture(GL_TEXTURE0);
 	glGenTextures(1, &texture.id);
 	glBindTexture(GL_TEXTURE_2D,texture.id);
 	// set the texture wrapping parameters
@@ -325,15 +365,51 @@ void MeshModel::loadFile(string fileName)
 	int width, height, nrChannels;
 	stbi_set_flip_vertically_on_load(true);
 	unsigned char* data = stbi_load(&(dirnameOf(fileName) + "\\texture.png")[0], &width, &height, &nrChannels, 0);
+	GLenum format;
 	if (data)
 	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		if (nrChannels == 1)
+			format = GL_RED;
+		else if (nrChannels == 3)
+			format = GL_RGB;
+		else if (nrChannels == 4)
+			format = GL_RGBA;
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	stbi_image_free(data);
 
+	// load and set texture
+	glActiveTexture(GL_TEXTURE1);
+	glGenTextures(1, &normal_map.id);
+	glBindTexture(GL_TEXTURE_2D, normal_map.id);
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// load image, create texture and generate mipmaps
+	
+	stbi_set_flip_vertically_on_load(true);
+	data = stbi_load(&(dirnameOf(fileName) + "\\texture_normal.png")[0], &width, &height, &nrChannels, 0);
+	if (data)
+	{
+		if (nrChannels == 1)
+			format = GL_RED;
+		else if (nrChannels == 3)
+			format = GL_RGB;
+		else if (nrChannels == 4)
+			format = GL_RGBA;
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	stbi_image_free(data);
+
+
 	glUseProgram(my_program);
 	glUniform1i(glGetUniformLocation(my_program, "texture1"), 0);
+	glUniform1i(glGetUniformLocation(my_program, "normalMap"), 1);
 }
 
 void MeshModel::SetupMesh()
@@ -365,8 +441,16 @@ void MeshModel::SetupMesh()
 	loc = glGetAttribLocation(my_program, "vTexture");
 	glEnableVertexAttribArray(loc);
 	glVertexAttribPointer(loc, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
+	// tangent coords
+	loc = glGetAttribLocation(my_program, "vTangent");
+	glEnableVertexAttribArray(loc);
+	glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
+	// tangent coords
+	loc = glGetAttribLocation(my_program, "vBiTangent");
+	glEnableVertexAttribArray(loc);
+	glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
 
-	if (bound_box_vertices.size()!=0)
+	if (bound_box_vertices.size() != 0)
 	{
 
 		glUseProgram(simple_shader);
@@ -388,7 +472,10 @@ void MeshModel::SetupMesh()
 		loc = glGetAttribLocation(simple_shader, "vPosition");
 		glEnableVertexAttribArray(loc);
 		glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
+	}
 
+	if (vertices_normals.size() != 0)
+	{
 		//vertex normals 
 
 		glGenVertexArrays(1, &vertex_normal_VAO);
@@ -408,7 +495,10 @@ void MeshModel::SetupMesh()
 		loc = glGetAttribLocation(simple_shader, "vPosition");
 		glEnableVertexAttribArray(loc);
 		glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
+	}
 
+	if (face_normals.size() != 0)
+	{
 		// faces normals
 
 		glGenVertexArrays(1, &face_normal_VAO);
@@ -433,6 +523,11 @@ void MeshModel::SetupMesh()
 
 void MeshModel::FileMapping()
 {
+	if (fileTexCord.size() == 0)
+	{
+		return;
+	}
+
 	for (int i= 0; i < vertices.size(); i++)
 	{
 		vertices.at(i).TexCoords = fileTexCord.at(i);
@@ -546,8 +641,15 @@ void MeshModel::draw(bool draw_bounding_box, bool draw_vertix_normals, bool draw
 	GLint uKs = glGetUniformLocation(my_program, "Ks"); // Find the Ks variable
 	glUniform1f(uKs, ks);
 
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture.id);
 	glUniform1i(glGetUniformLocation(my_program, "texture1"), 0);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, normal_map.id);
+	glUniform1i(glGetUniformLocation(my_program, "normalMap"), 1);
+
+	glUniform1i(glGetUniformLocation(my_program, "useNormalMap"), use_normal_map);
 
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);

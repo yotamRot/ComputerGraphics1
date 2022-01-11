@@ -13,7 +13,9 @@ in  vec3 fragmentPosition;
 flat in  int shadow;
 flat in vec3 polygonColor;
 in vec2 TexCoord;
-
+in vec3 TangentLightPos;
+in  vec3 TangentViewPos;
+in   vec3 TangentFragPos;
 // Out Arguments
 out vec4 fColor;
 
@@ -31,6 +33,10 @@ uniform float Ks;
 
 //texture
 uniform sampler2D texture1;
+//normal map
+uniform bool useNormalMap;
+uniform sampler2D normalMap;
+
 
 void phong_shadow();
 void gouraud_shadow();
@@ -55,24 +61,41 @@ void main()
 
 void phong_shadow()
 {
-	vec3 normalizeNormal = normalize(vertexNormal);
-    vec3 lightDirection = normalize(lightPosition - fragmentPosition);
+	vec3 normalizeNormal;
+	vec3 lightDirection;
+	vec3 viewDirection;
+	if(useNormalMap)
+	{
+		normalizeNormal = texture(normalMap, TexCoord).rgb;
+		normalizeNormal = normalize(normalizeNormal * 2.0 - 1.0);  // this normal is in tangent space
+		lightDirection =  normalize(TangentLightPos - TangentFragPos);
+		viewDirection = normalize(TangentViewPos - TangentFragPos);
+	}
+	else
+	{
+		normalizeNormal = normalize(vertexNormal);
+		lightDirection = normalize(lightPosition - fragmentPosition);
+		viewDirection = normalize(0 - fragmentPosition);
+		
+	}
+
 	vec3 reflectDir = reflect(-lightDirection, normalizeNormal); 
-	vec3 viewDirection = normalize(0 - fragmentPosition);
 
 	vec3 ambient = Ka * La * lightColor;
 	vec3 diffuse =  Kd * Ld * max(dot(normalizeNormal, lightDirection), 0.0) * lightColor; 
-    vec3 specular  = Ks * Ls * pow(max(dot(viewDirection, reflectDir), 0.0), 2) * lightColor; 
+	vec3 specular  = Ks * Ls * pow(max(dot(viewDirection, reflectDir), 0.0), 2) * lightColor; 
 	vec3 result = (ambient + diffuse + specular) * vertexColor;
-	fColor = vec4(result,1.0)* texture(texture1, TexCoord);;
+	fColor = vec4(result, 1.0)* texture(texture1, TexCoord);
+
+ 
 }
 
 void gouraud_shadow()
 {
-	fColor = vec4(vertexColor,1.0) * texture(texture1, TexCoord);;
+	fColor = vec4(vertexColor,1.0) * texture(texture1, TexCoord);
 }
 void flat_shadow()
 {
-	fColor = vec4(polygonColor,1.0) * texture(texture1, TexCoord);;
+	fColor = vec4(polygonColor,1.0) * texture(texture1, TexCoord);
 }
 

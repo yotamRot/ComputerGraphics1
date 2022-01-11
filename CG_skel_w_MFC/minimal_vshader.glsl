@@ -9,6 +9,9 @@
 in  vec3 vPosition;
 in  vec3 vNormal;
 in  vec2 vTexture;
+in  vec3 vTangent;
+in  vec3 vBiTangent;
+
 // Out Arguments
 out vec3 vertexColor;
 out vec3 vertexNormal;
@@ -16,12 +19,22 @@ out vec3 fragmentPosition;
 flat out int shadow;
 flat out vec3 polygonColor;
 out vec2 TexCoord;
+out vec3 TangentLightPos;
+out vec3 TangentViewPos;
+out vec3 TangentFragPos;
+
+
+
 // Uniforms declaration
-uniform vec3 color;
+// location
 uniform mat4 modelMatrix;
 uniform mat4 normalMatrix;
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
+
+
+//lights
+uniform vec3 color;
 uniform int shadow_type;
 uniform vec3 lightPosition;
 uniform vec3 lightColor;
@@ -31,6 +44,11 @@ uniform float Ls;
 uniform float Ka;
 uniform float Kd;
 uniform float Ks;
+
+//normal map
+uniform bool useNormalMap;
+
+
 
 void main()
 {
@@ -66,5 +84,18 @@ void main()
 
     gl_Position = projectionMatrix * vec4(fragmentPosition,1.0);
     
+
+    if (useNormalMap)
+    {
+        vec3 T = normalize(mat3(modelViewMatrix * normalMatrix ) * vTangent);
+        vec3 N = normalize(mat3(modelViewMatrix * normalMatrix ) * vNormal);
+        T = normalize(T - dot(T, N) * N);
+        vec3 B = cross(N, T);
+    
+        mat3 TBN = transpose(mat3(T, B, N));    
+        TangentLightPos = TBN * lightPosition;
+        TangentViewPos  = vec3(0,0,0); // we are in camera space
+        TangentFragPos  = TBN * fragmentPosition;
+    }
 	TexCoord = vec2(vTexture.x, vTexture.y);
 }

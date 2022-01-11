@@ -84,6 +84,7 @@ public:
 	bool toggleShowFog();
 	bool toggleShowWireFrame();
 	bool toggleSuperSample();
+	bool ToggleActiveModelIsUseNormalMap();
 	void draw();
 	void drawDemo();
 	int modelMenuIdToVectorId(int menuId);

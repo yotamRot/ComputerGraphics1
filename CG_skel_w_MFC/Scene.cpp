@@ -688,6 +688,16 @@ void Scene::ChangeActiveModelTextureWrap(TextureWrap wrap)
 	cur_model->SetupMesh();
 	
 }
+
+bool Scene::ToggleActiveModelIsUseNormalMap()
+{
+	MeshModel* cur_model = (MeshModel*)models.at(activeModel);
+
+	cur_model->use_normal_map = !cur_model->use_normal_map;
+	return cur_model->use_normal_map;
+}
+
+
 void Scene::ApplyNonUniform()
 {
 	MeshModel* cur_model = (MeshModel*)models.at(activeModel);

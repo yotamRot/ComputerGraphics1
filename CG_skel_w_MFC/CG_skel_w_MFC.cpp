@@ -68,7 +68,9 @@
 #define PHONG_SHADOW				3
 
 //Texture wrap menu
-//shadow menu
+// 
+#define USE_NORMAL_MAP				2
+//WRAP menu
 #define FROM_FILE					1
 #define PLANAR						2
 #define CYLINDER					3
@@ -648,9 +650,27 @@ void projectionMenu(int id)
 {
 }
 
+void UseNormalMap()
+{
+	if (scene->ToggleActiveModelIsUseNormalMap())
+	{
+		glutChangeToMenuEntry(USE_NORMAL_MAP, "Hide Normal Map", USE_NORMAL_MAP);
+	}
+	else
+	{
+		glutChangeToMenuEntry(USE_NORMAL_MAP, "Use Normal Map", USE_NORMAL_MAP);
+	}
+}
+
 void textureMenu(int id)
 {
+	if (id == USE_NORMAL_MAP)
+	{
+		UseNormalMap();
+	}
 }
+
+
 
 void textureWrapMenu(int id)
 {
@@ -808,6 +828,7 @@ void CreateTextureMenu()
 	menuTexture = glutCreateMenu(textureMenu);
 	glutSetMenu(menuTexture);
 	glutAddSubMenu("Choose Wrap", menuChooseWrap);
+	glutAddMenuEntry("Use Normal Map", USE_NORMAL_MAP);
 }
 
 void CreateMainMenu()

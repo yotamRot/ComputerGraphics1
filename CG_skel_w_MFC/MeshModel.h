@@ -40,6 +40,8 @@ struct Vertex {
 	vec3 Position;
 	vec3 V_Normal;
 	vec2 TexCoords;
+	vec3 Tangent;
+	vec3 Bitangent;
 };
 
 class MeshModel : public Model
@@ -76,7 +78,10 @@ public:
 	//vector<Vertex>       vertices;
 	vector<Vertex>       vertices;
 	vector<unsigned int> indices;
+	bool use_texture;
 	Texture texture;
+	bool use_normal_map;
+	Texture normal_map;
 
 	vector<vec3> bound_box_vertices;
 	vector<unsigned int> bound_box_indices;
