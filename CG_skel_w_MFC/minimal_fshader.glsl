@@ -1,10 +1,15 @@
 
 #version 150
 
-
-#define FLAT            0
-#define GOURAUD         1
-#define PHONG           2
+// Shadow defines
+#define FLAT                0
+#define GOURAUD             1
+#define PHONG               2   
+// Light type defines
+#define POINT_SOURCE        0   
+#define PARALLEL_SOURCE     1   
+// Number of supported lights
+#define LIGHT_SOURCES       10
 
 // In Arguments
 in  vec3 vertexColor;
@@ -13,7 +18,7 @@ in  vec3 fragmentPosition;
 flat in  int shadow;
 flat in vec3 polygonColor;
 in vec2 TexCoord;
-in vec3 TangentLightPos;
+in vec3 TangentLightPos[LIGHT_SOURCES];
 in  vec3 TangentViewPos;
 in   vec3 TangentFragPos;
 // Out Arguments
@@ -21,15 +26,17 @@ out vec4 fColor;
 
 
 // Uniforms declaration
-uniform vec3 lightColor;
-uniform vec3 lightPosition;
-uniform float La;
-uniform float Ld;
-uniform float Ls;
+uniform int lights_number;
+uniform vec3 lightPosition[LIGHT_SOURCES];
+uniform vec3 lightColor[LIGHT_SOURCES];
+uniform float La[LIGHT_SOURCES];
+uniform float Ld[LIGHT_SOURCES];
+uniform float Ls[LIGHT_SOURCES];
+uniform int light_type[LIGHT_SOURCES];
 uniform float Ka;
 uniform float Kd;
 uniform float Ks;
-//uniform float Alpha;
+//uniform float alpha;
 
 //texture
 uniform sampler2D texture1;
@@ -63,33 +70,36 @@ void main()
 
 void phong_shadow()
 {
-	vec3 normalizeNormal;
-	vec3 lightDirection;
-	vec3 viewDirection;
-	if(useNormalMap)
-	{
-		normalizeNormal = texture(normalMap, TexCoord).rgb;
-		normalizeNormal = normalize(normalizeNormal * 2.0 - 1.0);  // this normal is in tangent space
-		lightDirection =  normalize(TangentLightPos - TangentFragPos);
-		viewDirection = normalize(TangentViewPos - TangentFragPos);
-	}
-	else
-	{
-		normalizeNormal = normalize(vertexNormal);
-		lightDirection = normalize(lightPosition - fragmentPosition);
-		viewDirection = normalize(0 - fragmentPosition);
-		
-	}
-
-	vec3 reflectDir = reflect(-lightDirection, normalizeNormal); 
-
-	vec3 ambient = Ka * La * lightColor;
-	vec3 diffuse =  Kd * Ld * max(dot(normalizeNormal, lightDirection), 0.0) * lightColor; 
-	vec3 specular  = Ks * Ls * pow(max(dot(viewDirection, reflectDir), 0.0), 2) * lightColor; 
-	vec3 result = (ambient + diffuse + specular) * vertexColor;
+    vec3 result = vec3(0);
+    vec3 normalizeNormal;
+    vec3 lightDirection;
+    vec3 reflectDir;
+    vec3 viewDirection;
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    for(int i = 0; i < lights_number; i++)
+    {
+		if(useNormalMap)
+		{
+			normalizeNormal = texture(normalMap, TexCoord).rgb;
+			normalizeNormal = normalize(normalizeNormal * 2.0 - 1.0);  // this normal is in tangent space
+			lightDirection =  normalize(TangentLightPos[i] - TangentFragPos);
+			viewDirection = normalize(TangentViewPos - TangentFragPos);
+		}
+		else
+		{
+			normalizeNormal = normalize(vertexNormal);
+			lightDirection = normalize(lightPosition[i] - fragmentPosition);
+			viewDirection = normalize(0 - fragmentPosition);
+		}
+		reflectDir = reflect(-lightDirection, normalizeNormal); 
+		ambient  = Ka * La[i] * lightColor[i];
+		diffuse  = Kd * Ld[i] * max(dot(normalizeNormal, lightDirection), 0.0) * lightColor[i]; 
+		specular = Ks * Ls[i] * pow(max(dot(viewDirection, reflectDir), 0.0), 2) * lightColor[i]; 
+		result += (ambient + diffuse + specular) * vertexColor;
+    }
 	fColor = vec4(result, 1.0)* (useTexture ? texture(texture1, TexCoord) : vec4(1,1,1,1));
-
- 
 }
 
 void gouraud_shadow()

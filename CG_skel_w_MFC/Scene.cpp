@@ -339,6 +339,8 @@ void Scene::draw()
 	glUniformMatrix4fv(umP, 1, GL_FALSE, curProjection);
 	GLint uShadow = glGetUniformLocation(program, "shadow_type"); // Find the shadow_type variable
 	glUniform1i(uShadow, current_shadow);
+	GLint ulightNumber = glGetUniformLocation(program, "lights_number"); // Find the lights_number variable
+	glUniform1i(ulightNumber, lights.size());
 	glUseProgram(light_program);
 	GLint viewLightLoc = glGetUniformLocation(light_program, "modelViewMatrix"); // Find the modelViewMatrix variable
 	glUniformMatrix4fv(viewLightLoc, 1, GL_FALSE, curCameraInv);
@@ -346,7 +348,7 @@ void Scene::draw()
 	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, curProjection);
 
 	MeshModel* curModel;
-	
+	int light_number = 0;
 	
 	for (auto it = lights.begin(); it != lights.end(); ++it)
 	{
@@ -367,17 +369,21 @@ void Scene::draw()
 		{
 			LightModel* light_model = (LightModel*)(*it);
 			glUseProgram(program);
-			GLint my_light_location = glGetUniformLocation(program, "lightColor");
+			GLint my_light_location = glGetUniformLocation(program, ("lightColor["+ std::to_string(light_number)+"]").c_str());
 			glUniform3f(my_light_location, light_model->light_color.x, light_model->light_color.y, light_model->light_color.z);
-			GLint light_pos_location = glGetUniformLocation(program, "lightPosition");
+			GLint light_pos_location = glGetUniformLocation(program, ("lightPosition[" + std::to_string(light_number) + "]").c_str());
 			glUniform3f(light_pos_location, light_model->c_light_position.x, light_model->c_light_position.y, light_model->c_light_position.z);
-			GLint l_a_location = glGetUniformLocation(program, "La");
+			GLint l_a_location = glGetUniformLocation(program, ("La[" + std::to_string(light_number) + "]").c_str());
 			glUniform1f(l_a_location, light_model->La);
-			GLint l_d_location = glGetUniformLocation(program, "Ld");
+			GLint l_d_location = glGetUniformLocation(program, ("Ld[" +std::to_string(light_number) + "]").c_str());
 			glUniform1f(l_d_location, light_model->Ld);
-			GLint l_s_location = glGetUniformLocation(program, "Ls");
+			GLint l_s_location = glGetUniformLocation(program, ("Ls[" + std::to_string(light_number) + "]").c_str());
 			glUniform1f(l_s_location, light_model->Ls);
-
+			GLint light_type_location = glGetUniformLocation(program, ("light_type[" + std::to_string(light_number) + "]").c_str());
+			glUniform1f(light_type_location, light_model->type);
+			//GLint ul_alpha = glGetUniformLocation(program, "alpha");
+			//glUniform1f(ul_alpha, light_model->l_alpha);
+			light_number++;
 			//if (light_model->lightIndex == 0) //dont want to draw ambient light
 			//{
 			//	continue;

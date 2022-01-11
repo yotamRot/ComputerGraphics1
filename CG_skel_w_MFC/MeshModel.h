@@ -158,6 +158,7 @@ class LightModel : public MeshModel
 		float Ls;
 		float l_alpha;
 		vec3 c_light_position;
+		LightType type;
 		LightModel(int model_id, int lightIndex, GLuint program);
 		vec4 GetL();
 };
