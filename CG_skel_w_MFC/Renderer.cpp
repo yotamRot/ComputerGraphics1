@@ -1,6 +1,5 @@
 #include "StdAfx.h"
 #include "Renderer.h"
-#include "CG_skel_w_MFC.h"
 #include "InitShader.h"
 #include "GL\freeglut.h"
 #include <limits>

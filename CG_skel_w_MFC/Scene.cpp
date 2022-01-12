@@ -9,7 +9,6 @@
 using namespace std;
 
 
-
 mat4 LookAt(const vec4& eye, const vec4& at, const vec4& up)
 {
 	vec4 n = normalize(eye - at);
@@ -169,6 +168,10 @@ void Scene::Zoom(ZoomDirection direction)
 }
 
 
+void Scene::loadEnvironmentMapping(string directoryPath)
+{
+	isUseEnvironmentTexture = envBox.load(directoryPath);
+}
 
 void Scene::lookAtModel(int modelId)
 {
@@ -337,6 +340,7 @@ void Scene::draw()
 	mat4 curCameraInvMat = curCameraModel->_w_TransformInv * curCameraModel->_m_TransformInv;
 	MattoArr(curCameraInv, curCameraInvMat);
 	int cameraIndex = 0;
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glUseProgram(program);
 	GLint umV = glGetUniformLocation(program, "modelViewMatrix"); // Find the modelViewMatrix variable
@@ -359,6 +363,23 @@ void Scene::draw()
 
 	MeshModel* curModel;
 	int light_number = 0;
+
+
+	if (isUseEnvironmentTexture)
+	{
+		glDepthFunc(GL_LEQUAL);
+		glUseProgram(enviroment_texture_program);
+		mat4 temp = CleanMove(curCameraInvMat);
+		GLfloat enviromemntCamMat[16];
+		MattoArr(enviromemntCamMat, temp);
+		GLint viewEnviromentLock = glGetUniformLocation(enviroment_texture_program, "modelViewMatrix"); // Find the modelViewMatrix variable
+		glUniformMatrix4fv(viewEnviromentLock, 1, GL_FALSE, enviromemntCamMat);
+		GLint projectionLoc = glGetUniformLocation(enviroment_texture_program, "projectionMatrix"); // Find the projectionMatrix variable
+		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, curProjection);
+		envBox.draw();
+		glDepthFunc(GL_LESS);
+	}
+
 	
 	for (auto it = lights.begin(); it != lights.end(); ++it)
 	{
@@ -371,7 +392,7 @@ void Scene::draw()
 		{
 			if (isRenderCameras && cameraIndex != activeCamera) //dont want to draw active camera
 			{
-				(*it)->draw(false, false, false ); // draw camera
+				(*it)->draw(false, false, false); // draw camera
 			}
 			cameraIndex++;
 		}
@@ -408,7 +429,6 @@ void Scene::draw()
 			(*it)->draw(isDrawBoundBox, isShowVerticsNormals, isShowFacesNormals);// draw models
 		}
 	}
-
 	
 	glutSwapBuffers();
 
@@ -422,8 +442,7 @@ void Scene::drawDemo()
 		{1.1f, -1.1f, 0.0f,1.0f},
 		{0.0f,  1.1f, 0.0f,1.0f}
 	};
-	GLuint program = InitShader("minimal_vshader.glsl",
-		"minimal_fshader.glsl");
+	GLuint program = InitShader("minimal_vshader.glsl", "minimal_fshader.glsl");
 
 	glUseProgram(program);
 
@@ -444,7 +463,7 @@ void Scene::drawDemo()
 	GLuint loc = glGetAttribLocation(program, "vPosition");
 	glEnableVertexAttribArray(loc);
 	glVertexAttribPointer(loc, 4, GL_FLOAT, GL_FALSE, 0, 0);
-	glClearColor(1.0, 1.0, 1.0, 1.0);
+
 
 	GLint umM = glGetUniformLocation(program, "modelMatrix"); // Find the mM variable
 	mat4 modelTrans = Translate(5, 0, -1);
@@ -482,6 +501,7 @@ Scene::Scene() : current_shadow(FLAT),toon_color_number(4),toon_thickness(0.05)
 
 	program = InitShader("minimal_vshader.glsl", "minimal_fshader.glsl");
 	light_program = InitShader("light_vshader.glsl", "light_fshader.glsl");
+	enviroment_texture_program = InitShader("EnviromentTextureVertixShader.glsl", "EnviromentTextureFragmentShader.glsl");
 	InitScene();
 	activeModel = ILLEGAL_ACTIVE_MOVEL;
 	proj = FRUSTUM;
@@ -494,6 +514,7 @@ Scene::Scene() : current_shadow(FLAT),toon_color_number(4),toon_thickness(0.05)
 	isShowWireFrame = false;
 	isSuperSample = false;
 	axis = MODEL;
+
 }
 
 //Scene::Scene(Renderer *renderer=NULL) : current_shadow(FLAT)
@@ -522,7 +543,8 @@ void Scene::InitScene()
 	lights.at(0)->Ld = 0;
 	lights.at(0)->Ls = 0;
 	lights.at(0)->La = 0.4;
-
+	isUseEnvironmentTexture = false;
+	envBox.Init(enviroment_texture_program);
 }
 void Scene::manipulateActiveModel(Transformation T, TransformationDirection direction
 									, TransAxis axis, float power)
@@ -645,6 +667,8 @@ Camera::Camera(vec3& lbn, vec3& rtf, int modelId, Model* model) :lbn(lbn), rtf(r
 	up.x = up.z = 0;
 	up.y = 1;
 	up.w = 1;
+	this->model->_model_transform = LookAt(vec4(), vec4(at), vec4(up));
+	this->model->_world_transform = mat4();
 	//set camera world view aligned with world asix with offset in z
 }
 
@@ -721,6 +745,11 @@ bool Scene::ToggleActiveModelIsUseTexture()
 	return cur_model->use_texture;
 }
 
+bool Scene::ToggleUseEnvirnment()
+{
+	isUseEnvironmentTexture = !isUseEnvironmentTexture;
+	return isUseEnvironmentTexture;
+}
 
 void Scene::ApplyNonUniform()
 {

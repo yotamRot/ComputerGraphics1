@@ -8,7 +8,6 @@
 #include "Renderer.h"
 
 
-
 using namespace std;
 
 enum TransformationDirection
@@ -146,6 +145,8 @@ class CameraModel : public MeshModel
 		mat4 _w_TransformInv;
 		mat4 _m_TransformInv;
 		CameraModel(int cameraIndex, GLuint program);
+
+
 };
 
 class LightModel : public MeshModel
@@ -164,3 +165,17 @@ class LightModel : public MeshModel
 };
 
 mat4 matrixInverse(mat4& mat, Transformation T);
+
+
+class enviromentBox
+{
+public:
+	GLuint enviroment_texture_program;
+	vector <float> environmentBox;
+	vector <unsigned int> environmentBoxIndices;
+	unsigned int EnvironmentBoxVBO, EnvironmentBoxVAO, EnvironmentBoxEBO;
+	unsigned int environmentTextureID;
+	void Init(unsigned int program);
+	bool load(string directoryPath);
+	void draw();
+};

@@ -73,6 +73,8 @@
 // 
 #define USE_NORMAL_MAP				2
 #define USE_TEXTURE					3
+#define LOAD_ENVIRNONMENT			4
+#define USE_ENVIRNONMENT			5
 
 //WRAP menu
 #define FROM_FILE					1
@@ -361,11 +363,11 @@ void RenderCameras()
 {
 	if (scene->toggleRenderCameras())
 	{
-		glutChangeToMenuEntry(2, "Hide Cameras", RENDER_CAMERAS);
+		glutChangeToMenuEntry(RENDER_CAMERAS, "Hide Cameras", RENDER_CAMERAS);
 	}
 	else
 	{
-		glutChangeToMenuEntry(2, "Render Cameras", RENDER_CAMERAS);
+		glutChangeToMenuEntry(RENDER_CAMERAS, "Render Cameras", RENDER_CAMERAS);
 	}
 }
 
@@ -382,6 +384,21 @@ void OpenFile()
 		glutSetMenu(menuLookAtObjects);
 		glutAddMenuEntry(name.c_str(), newModelId);
 		scene->lookAtModel(scene->activeModel);
+	}
+	else
+	{
+		return;
+	}
+}
+
+void OpenEnvironmentFile()
+{
+	CFileDialog dlg(TRUE, _T(".jpg"), NULL, NULL, _T("*.jpg|*.*"));
+	if (dlg.DoModal() == IDOK)
+	{
+		glutSetMenu(menuObjectsId);
+		std::string path = ((LPCTSTR)dlg.GetFolderPath());
+		scene->loadEnvironmentMapping(path);
 	}
 	else
 	{
@@ -694,16 +711,33 @@ void UseTexture()
 	}
 }
 
+void UseEnvironment()
+{
+	if (scene->ToggleUseEnvirnment())
+	{
+		glutChangeToMenuEntry(USE_ENVIRNONMENT, "Hide Evironment Mapping", USE_ENVIRNONMENT);
+	}
+	else
+	{
+		glutChangeToMenuEntry(USE_ENVIRNONMENT, "Use Evironment Mapping", USE_ENVIRNONMENT);
+	}
+}
+
 void textureMenu(int id)
 {
-	if (id == USE_NORMAL_MAP)
+	switch (id)
 	{
+	case USE_NORMAL_MAP:
 		UseNormalMap();
-	}
-	else if(id == USE_TEXTURE)
-	{
+		break;
+	case USE_TEXTURE:
 		UseTexture();
+		break;
+	case LOAD_ENVIRNONMENT:
+		OpenEnvironmentFile();
+		break;
 	}
+	scene->draw();
 }
 
 void textureWrapMenu(int id)
@@ -865,6 +899,8 @@ void CreateTextureMenu()
 	glutAddSubMenu("Choose Wrap", menuChooseWrap);
 	glutAddMenuEntry("Use Normal Map", USE_NORMAL_MAP);
 	glutAddMenuEntry("Hide texture", USE_TEXTURE);
+	glutAddMenuEntry("Load environment texture", LOAD_ENVIRNONMENT);
+	glutAddMenuEntry("Use environment texture", USE_ENVIRNONMENT);
 }
 
 void CreateMainMenu()

@@ -672,7 +672,7 @@ mat4 Scale( const vec3& v )
 
 
 inline
-void MattoArr(GLfloat* floatArr , mat4 mat)
+void MattoArr(GLfloat* floatArr , mat4 &mat)
 {
     int i, j;
     for (i = 0; i < 4; i++) {
@@ -683,6 +683,21 @@ void MattoArr(GLfloat* floatArr , mat4 mat)
         }
 
     }
+}
+
+inline
+mat4 CleanMove(mat4& mat)
+{
+    mat4 temp = mat;
+    temp[0][3] = 0;
+    temp[1][3] = 0;
+    temp[2][3] = 0;
+
+    temp[3][0] = 0;
+    temp[3][1] = 0;
+    temp[3][2] = 0;
+    temp = temp / temp[3][3];
+    return temp;
 }
 
 //----------------------------------------------------------------------------

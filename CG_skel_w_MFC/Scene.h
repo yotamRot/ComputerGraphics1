@@ -8,6 +8,7 @@
 #include "MeshModel.h"
 
 
+
 using namespace std;
 
 #define ZOOM 2
@@ -45,6 +46,9 @@ class Scene {
 	vector<Camera*> cameras;
 	vector<LightModel*> lights;
 	Projection proj;
+	
+	
+	
 	bool isShowVerticsNormals;
 	bool isShowFacesNormals;
 	bool isRenderCameras;
@@ -52,6 +56,7 @@ class Scene {
 	bool isShowFog;
 	bool isShowWireFrame;
 	bool isSuperSample;
+	bool isUseEnvironmentTexture;
 	TransAxis axis;
 	Shadow current_shadow;
 	void ResetZoom();
@@ -64,6 +69,10 @@ public:
 	//Scene(Renderer* renderer);
 	void InitScene();
 	int loadOBJModel(string fileName);
+	void loadEnvironmentMapping(string directoryPath);
+
+	enviromentBox envBox;
+
 	int loadCubeModel();
 	void lookAtModel(int modelId);
 	int addCamera();
@@ -88,8 +97,10 @@ public:
 	bool toggleSuperSample();
 	bool ToggleActiveModelIsUseNormalMap();
 	bool ToggleActiveModelIsUseTexture();
+	bool ToggleUseEnvirnment();
 	void draw();
 	void drawDemo();
+	void drawEnviromentBox();
 	int modelMenuIdToVectorId(int menuId);
 	Camera* GetActiveCamera();
 	LightModel*  GetActiveLight();
@@ -117,4 +128,5 @@ public:
 	vec4 GetAmbientRGB();
 	GLuint program;
 	GLuint light_program;
+	GLuint enviroment_texture_program;
 };

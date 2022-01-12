@@ -13,7 +13,6 @@
 #include "stb_image.h"
 
 
-
 using namespace std;
 
 struct FaceIdcs
@@ -655,10 +654,10 @@ void MeshModel::draw(bool draw_bounding_box, bool draw_vertix_normals, bool draw
 
 	if (use_texture && has_texture)
 	{
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture.id);
 		glUniform1i(glGetUniformLocation(my_program, "texture1"), 0);
 	}
-	glActiveTexture(GL_TEXTURE0);
 
 	if (use_normal_map && has_normal_map)
 	{
@@ -675,7 +674,7 @@ void MeshModel::draw(bool draw_bounding_box, bool draw_vertix_normals, bool draw
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-	glClearColor(1.0, 1.0, 1.0, 1.0);
+	
 
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 	glFlush();
@@ -712,7 +711,7 @@ void MeshModel::drawBoundingBox()
 	glBindVertexArray(bounding_box_VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, bounding_box_VBO);
 
-	glClearColor(1.0, 1.0, 1.0, 1.0);
+
 
 	glDrawElements(GL_LINES, bound_box_indices.size(), GL_UNSIGNED_INT, 0);
 	glFlush();
@@ -733,7 +732,6 @@ void MeshModel::drawFacesNormals()
 	glBindVertexArray(face_normal_VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, face_normal_VBO);
 
-	glClearColor(1.0, 1.0, 1.0, 1.0);
 
 	glDrawElements(GL_LINES, faces_normals_indices.size(), GL_UNSIGNED_INT, 0);
 	glFlush();
@@ -754,7 +752,6 @@ void MeshModel::drawVerticesNormals()
 	glBindVertexArray(vertex_normal_VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, vertex_normal_VBO);
 
-	glClearColor(1.0, 1.0, 1.0, 1.0);
 
 	glDrawElements(GL_LINES, vertices_normals_indices.size(), GL_UNSIGNED_INT, 0);
 	glFlush();
@@ -904,6 +901,7 @@ CameraModel::CameraModel(int cameraIndex, GLuint program) : cameraIndex(cameraIn
 	ka = 0.5;
 	kd = 0.8;
 	ks = 1.0;
+	has_normal_map = has_texture = use_normal_map = use_texture = false;
 	//ke = 1.0;
 	//is_non_unfiorm = false;
 	//triangles = new vector<Triangle>;
@@ -946,6 +944,7 @@ LightModel::LightModel(int model_id, int lightIndex, GLuint program) : lightInde
 	modelId = model_id;
 	my_program = program;
 	mesh_color = RED;
+	has_normal_map = has_texture = use_normal_map = use_texture = false;
 	//triangles = new vector<Triangle>;
 	//Normal curFaceNormal;
 	vec3 p1, p2, p3;
@@ -971,7 +970,7 @@ LightModel::LightModel(int model_id, int lightIndex, GLuint program) : lightInde
 	//curTriangle = Triangle(p1, p2, p3, mesh_color, true, curFaceNormal);
 	//triangles->push_back(curTriangle);
 	// first triangle other side
-	p1 = vec3(0.1, 0, 0); // bottom left
+	p1 = vec3(0.1,0, 0); // bottom left
 	temp.Position = p1;
 	vertices.push_back(temp);
 	p2 = vec3(-0.1, 0, 0); // top left
@@ -1297,4 +1296,139 @@ mat4 MeshModel::GetObjectMatrix()
 mat4 MeshModel::GetNormalMatrix()
 {
 	return _world_normal_transform * _model_normal_transform;
+}
+
+void enviromentBox::Init(unsigned int program)
+{
+	enviroment_texture_program = program;
+
+	environmentBox = 
+	{ -1.0f,  1.0f, -1.0f,
+	-1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+	 1.0f,  1.0f, -1.0f,
+	-1.0f,  1.0f, -1.0f,
+
+	-1.0f, -1.0f,  1.0f,
+	-1.0f, -1.0f, -1.0f,
+	-1.0f,  1.0f, -1.0f,
+	-1.0f,  1.0f, -1.0f,
+	-1.0f,  1.0f,  1.0f,
+	-1.0f, -1.0f,  1.0f,
+
+	 1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+
+	-1.0f, -1.0f,  1.0f,
+	-1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f, -1.0f,  1.0f,
+	-1.0f, -1.0f,  1.0f,
+
+	-1.0f,  1.0f, -1.0f,
+	 1.0f,  1.0f, -1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	-1.0f,  1.0f,  1.0f,
+	-1.0f,  1.0f, -1.0f,
+
+	-1.0f, -1.0f, -1.0f,
+	-1.0f, -1.0f,  1.0f,
+	 1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+	-1.0f, -1.0f,  1.0f,
+	 1.0f, -1.0f,  1.0f };
+
+	for (int i = 0; i < 36; i++)
+	{
+		environmentBoxIndices.push_back(i);
+	}
+
+	glUseProgram(enviroment_texture_program);
+
+	glGenVertexArrays(1, &EnvironmentBoxVAO);
+	glGenBuffers(1, &EnvironmentBoxVBO);
+	glGenBuffers(1, &EnvironmentBoxEBO);
+
+	glBindVertexArray(EnvironmentBoxVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, EnvironmentBoxVBO);
+	glBufferData(GL_ARRAY_BUFFER, environmentBox.size() * sizeof(float), &environmentBox[0], GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EnvironmentBoxEBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, environmentBoxIndices.size() * sizeof(unsigned int),
+		&environmentBoxIndices[0], GL_STATIC_DRAW);
+
+	unsigned int loc = glGetAttribLocation(enviroment_texture_program, "vPosition");
+	glEnableVertexAttribArray(loc);
+	glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);	
+}
+
+bool enviromentBox::load(string directoryPath)
+{
+	glGenTextures(1, &environmentTextureID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, environmentTextureID);
+
+	vector<string> faces = { "right", "left", "top", "bottom", "front", "back" };
+	stbi_set_flip_vertically_on_load(false);
+
+	int width, height, nrChannels;
+	for (unsigned int i = 0; i < faces.size(); i++)
+	{
+		unsigned char* data = stbi_load((directoryPath +"\\" + faces.at(i) + ".png").c_str(), &width, &height, &nrChannels, 0);
+		if (data)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+			stbi_image_free(data);
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	glBindTexture(GL_TEXTURE_2D, environmentTextureID);
+	glUniform1i(glGetUniformLocation(enviroment_texture_program, "enviromentTexture"), 0);
+	return true;
+}
+
+void enviromentBox::draw()
+{
+
+	//glUseProgram(enviroment_texture_program);
+
+	//glBindVertexArray(EnvironmentBoxVAO);
+	//glBindVertexArray(EnvironmentBoxVAO);
+	//unsigned int loc = glGetAttribLocation(enviroment_texture_program, "vPosition");
+	//glEnableVertexAttribArray(loc);
+	//glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_CUBE_MAP, environmentTextureID);
+	//glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	//glFlush();
+
+
+	glUseProgram(enviroment_texture_program);
+
+	glBindVertexArray(EnvironmentBoxVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, EnvironmentBoxVBO);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, environmentTextureID);
+
+	glDrawElements(GL_TRIANGLES, environmentBoxIndices.size(), GL_UNSIGNED_INT, 0);
+	glFlush();
+
 }
