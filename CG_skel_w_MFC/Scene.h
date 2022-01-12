@@ -58,6 +58,8 @@ class Scene {
 public:
 	vector<int> modelToVectorId;
 	vector<Model*> models;
+	float toon_thickness;
+	int toon_color_number;
 	Scene();
 	//Scene(Renderer* renderer);
 	void InitScene();
@@ -94,6 +96,7 @@ public:
 	vec3 GetModelRGB();
 	vec4 GetModelK();
 	void ChangeActiveLightL(vec4& l_params);
+	void ChangeToonParams(int number, float thick);
 	void ChangeAmbientRgbLa(vec4& rgbl);
 	void Zoom(ZoomDirection direction);
 	int activeModel;

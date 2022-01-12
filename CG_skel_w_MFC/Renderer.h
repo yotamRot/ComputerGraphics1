@@ -56,7 +56,8 @@ enum Shadow
 {
 	FLAT,
 	GOURAUD,
-	PHONG
+	PHONG,
+	TOON
 };
 
 enum RendererActions

@@ -32,7 +32,10 @@
 #define IDC_L_A_EDIT                219
 #define IDC_L_D_EDIT                220
 #define IDC_L_S_EDIT                221
-#define IDC_ALPHA_EDIT                222
+#define IDC_ALPHA_EDIT              222
+
+#define IDC_TOON_N_EDIT             223
+#define IDC_TOON_T_EDIT             224
 
 #define CMD_EDIT_TITLE              "Command"
 #define X_EDIT_TITLE                "X ="
@@ -60,6 +63,8 @@
 #define K_D_EDIT_TITLE              "Kd "
 #define K_S_EDIT_TITLE              "Ks "
 #define K_E_EDIT_TITLE              "Ke "
+#define TOON_N_EDIT_TITLE           "Number of colors "
+#define TOON_T_EDIT_TITLE           "Line Thickness "
 
 
 vec3 rtf;
@@ -68,6 +73,8 @@ vec4 l; //la,ld,ls,alpha
 vec3 RGB;
 vec4 ambient_rgbl;
 vec4 k;
+int toon_number;
+float toon_tickness;
 
 void SetLbnRtf(vec3& Ilbn, vec3& Irtf)
 {
@@ -85,6 +92,12 @@ void SetLbnRtf(vec3& Ilbn, vec3& Irtf)
 void SetLightL(vec4& l_params)
 {
     l = l_params;
+}
+
+void SetToonParams(int number,float thick)
+{
+    toon_number = number;
+    toon_tickness = thick;
 }
 
 void SetRGBLa(vec4& rgbl)
@@ -700,4 +713,70 @@ void RgbDialog::OnPaint()
     dc.DrawText(CString(L_A_EDIT_TITLE), -1, &l_rect, DT_SINGLELINE);
 
     mRedEdit.SetFocus();
+}
+
+
+// ----------------------
+//    Class ToonDialog
+// ----------------------
+
+ToonDialog::ToonDialog(CString title)
+    : CInputDialog(title), mColorNum(toon_number), mLineThick(toon_tickness)
+{ }
+
+ToonDialog::~ToonDialog()
+{ }
+
+
+int ToonDialog::GetNum()
+{
+    return mColorNum;
+}
+
+float ToonDialog::GetTick()
+{
+    return mLineThick;
+}
+
+int GetNum();  //mColorNum, mLineThick
+float GetTick();  //mColorNum, mLineThick
+
+void ToonDialog::DoDataExchange(CDataExchange* pDX)
+{
+    CInputDialog::DoDataExchange(pDX);
+    DDX_Text(pDX, IDC_TOON_N_EDIT, mColorNum);
+    DDX_Text(pDX, IDC_TOON_T_EDIT, mLineThick);
+}
+
+// ToonDialog message handlers
+BEGIN_MESSAGE_MAP(ToonDialog, CInputDialog)
+    ON_WM_CREATE()
+    ON_WM_PAINT()
+END_MESSAGE_MAP()
+
+int ToonDialog::OnCreate(LPCREATESTRUCT lpcs)
+{
+
+    mColorNumEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(250, 70, 340, 90), this, IDC_TOON_N_EDIT);
+
+    mLineThickEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(250, 140, 340, 160), this, IDC_TOON_T_EDIT);
+
+    return 0;
+}
+
+void ToonDialog::OnPaint()
+{
+    CPaintDC dc(this);
+    dc.SetBkMode(TRANSPARENT);
+
+    CRect r_rect(100, 72, 450, 90);
+    dc.DrawText(CString(TOON_N_EDIT_TITLE), -1, &r_rect, DT_SINGLELINE);
+
+    CRect g_rect(100, 142, 450, 160);
+    dc.DrawText(CString(TOON_T_EDIT_TITLE), -1, &g_rect, DT_SINGLELINE);
+
+
+    mColorNumEdit.SetFocus();
 }

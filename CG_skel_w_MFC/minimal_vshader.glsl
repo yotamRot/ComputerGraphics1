@@ -5,6 +5,7 @@
 #define FLAT                0
 #define GOURAUD             1
 #define PHONG               2   
+#define TOON                3
 // Light type defines
 #define POINT_SOURCE        0   
 #define PARALLEL_SOURCE     1   
@@ -28,6 +29,7 @@ out vec2 TexCoord;
 out vec3 TangentLightPos[LIGHT_SOURCES];
 out vec3 TangentViewPos;
 out vec3 TangentFragPos;
+out float back_face;
 
 
 
@@ -37,7 +39,6 @@ uniform mat4 modelMatrix;
 uniform mat4 normalMatrix;
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
-
 
 //lights
 uniform vec3 color;
@@ -54,12 +55,13 @@ uniform float Kd;
 uniform float Ks;
 //uniform float alpha;
 
-
 //normal map
 uniform bool useNormalMap;
 uniform sampler2D normalMap;
 
+uniform float toonTickness;
 
+varying vec3 normal;
 
 void main()
 {
@@ -94,6 +96,10 @@ void main()
     if(shadow_type == PHONG)
     {
         shadow = PHONG;
+    }
+    else if (shadow_type == TOON)
+    {
+        shadow = TOON;
     }
     else // GOURAUD or FLAT
     {
@@ -151,6 +157,18 @@ void main()
             polygonColor = result;
             shadow = FLAT;
         }
+    }
+    vec4 tmpNormal = normalMatrix*vec4(vNormal,1.0);
+    normal = (tmpNormal/tmpNormal.w).xyz;
+    if (shadow_type == TOON)
+    {
+
+    	back_face = dot(-fragmentPosition,normal); // if < 0 back facing
+        if(back_face < 0)
+	    {
+		    fragmentPosition = fragmentPosition + toonTickness*normalize(normal);
+	    }
+
     }
     gl_Position = projectionMatrix * vec4(fragmentPosition,1.0);
 }

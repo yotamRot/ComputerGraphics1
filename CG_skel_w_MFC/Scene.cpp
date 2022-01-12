@@ -97,6 +97,12 @@ void Scene::ChangeActiveLightL(vec4& l_params)
 	lights.at(activeLight)->l_alpha = l_params.w;
 }
 
+void Scene::ChangeToonParams(int number, float thick)
+{
+	toon_color_number = number;
+	toon_thickness = thick;
+}
+
 void Scene::ChangeAmbientRgbLa(vec4 & rgbl)
 {	
 	lights.at(0)->light_color.x = rgbl.x;
@@ -341,6 +347,10 @@ void Scene::draw()
 	glUniform1i(uShadow, current_shadow);
 	GLint ulightNumber = glGetUniformLocation(program, "lights_number"); // Find the lights_number variable
 	glUniform1i(ulightNumber, lights.size());
+	GLint uToonN = glGetUniformLocation(program, "toonColorNumber"); // Find the toonColorNumber variable
+	glUniform1i(uToonN, toon_color_number);
+	GLint uToonT = glGetUniformLocation(program, "toonTickness"); // Find the toonTickness variable
+	glUniform1f(uToonT, toon_thickness);
 	glUseProgram(light_program);
 	GLint viewLightLoc = glGetUniformLocation(light_program, "modelViewMatrix"); // Find the modelViewMatrix variable
 	glUniformMatrix4fv(viewLightLoc, 1, GL_FALSE, curCameraInv);
@@ -467,7 +477,7 @@ void Scene::drawDemo()
 }
 
 
-Scene::Scene() : current_shadow(FLAT)
+Scene::Scene() : current_shadow(FLAT),toon_color_number(4),toon_thickness(0.05)
 {
 
 	program = InitShader("minimal_vshader.glsl", "minimal_fshader.glsl");

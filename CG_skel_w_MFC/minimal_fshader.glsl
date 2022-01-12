@@ -5,6 +5,7 @@
 #define FLAT                0
 #define GOURAUD             1
 #define PHONG               2   
+#define TOON                3
 // Light type defines
 #define POINT_SOURCE        0   
 #define PARALLEL_SOURCE     1   
@@ -17,10 +18,11 @@ in  vec3 vertexNormal;
 in  vec3 fragmentPosition;
 flat in  int shadow;
 flat in vec3 polygonColor;
-in vec2 TexCoord;
-in vec3 TangentLightPos[LIGHT_SOURCES];
+in  vec2 TexCoord;
+in  vec3 TangentLightPos[LIGHT_SOURCES];
 in  vec3 TangentViewPos;
-in   vec3 TangentFragPos;
+in  vec3 TangentFragPos;
+in  float back_face;
 // Out Arguments
 out vec4 fColor;
 
@@ -47,9 +49,14 @@ uniform bool useNormalMap;
 uniform sampler2D normalMap;
 
 
+uniform int toonColorNumber;
+
+varying vec3 normal;
+
 void phong_shadow();
 void gouraud_shadow();
 void flat_shadow();
+void toon_shadow();
 
 void main() 
 { 
@@ -64,6 +71,10 @@ void main()
 	else if(shadow == PHONG)
 	{
 		phong_shadow();
+	}
+	else if(shadow == TOON)
+	{
+		toon_shadow();
 	}
 } 
 
@@ -125,3 +136,35 @@ void flat_shadow()
 	fColor = vec4(polygonColor,1.0) * (useTexture ? texture(texture1, TexCoord) : vec4(1,1,1,1));
 }
 
+void toon_shadow()
+{
+	float intensity;
+
+	vec4 color;
+	vec3 lightDirection;
+	for(int i = 0; i < lights_number; i++)
+    {
+        if(light_type[i] == POINT_SOURCE)
+        {
+            lightDirection = normalize(lightPosition[i] - fragmentPosition);
+        }
+        else    // PARALLEL_SOURCE
+        {
+            lightDirection = normalize(lightPosition[i]);
+        }
+	}
+	intensity = dot(lightDirection,normal);
+
+
+	if(back_face < 0)
+	{
+		color = vec4(0,0,0,1.0);
+	}
+	else
+	{
+		color = round(intensity * toonColorNumber) / toonColorNumber * vec4(vertexColor,1);
+	}
+
+
+	fColor = color;
+}

@@ -10,6 +10,7 @@ void SetLbnRtf(vec3& Ilbn, vec3& Irtf);
 void SetLightL(vec4& l_params);
 void SetColorParam(vec3& colors, vec4& k_params);
 void SetRGBLa(vec4& rgbl);
+void SetToonParams(int number, float thick);
 // ------------------------
 //    Class CInputDialog
 // ------------------------
@@ -257,6 +258,30 @@ protected:
     CEdit mGreenEdit;
     CEdit mBlueEdit;
     CEdit mLaEdit;
+
+
+    virtual void DoDataExchange(CDataExchange* pDX);
+
+    afx_msg int OnCreate(LPCREATESTRUCT lpcs);
+    afx_msg void OnPaint();
+    DECLARE_MESSAGE_MAP()
+};
+
+class ToonDialog : public CInputDialog
+{
+public:
+    ToonDialog(CString title = "Input Dialog");
+    virtual ~ToonDialog();
+
+    int GetNum();  //mColorNum, mLineThick
+    float GetTick();  //mColorNum, mLineThick
+
+protected:
+    float mColorNum;
+    float mLineThick;
+    CEdit mColorNumEdit;
+    CEdit mLineThickEdit;
+
 
 
     virtual void DoDataExchange(CDataExchange* pDX);

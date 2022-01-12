@@ -66,6 +66,8 @@
 #define FLAT_SHADOW					1
 #define GOURAUD_SHADOW				2
 #define PHONG_SHADOW				3
+#define TOON_SHADOW					4
+#define TOON_PARAMS					5
 
 //Texture wrap menu
 // 
@@ -184,6 +186,16 @@ void ChangeLightLParams()
 	if (adlg.DoModal() == IDOK) {
 		vec4 l_params = adlg.GetL();// l params and alpha
 		scene->ChangeActiveLightL(l_params);
+	}
+}
+void ChangeToonParams()
+{
+	SetToonParams(scene->toon_color_number,scene->toon_thickness);
+	ToonDialog dlg;
+	if (dlg.DoModal() == IDOK) {
+		int num = dlg.GetNum();
+		float tick = dlg.GetTick();
+		scene->ChangeToonParams(num, tick);
 	}
 }
 
@@ -583,6 +595,12 @@ void shadowMenu(int id)
 	case PHONG_SHADOW:
 		scene->ChangeShadow(PHONG);
 		break;
+	case TOON_SHADOW:
+		scene->ChangeShadow(TOON);
+		break;
+	case TOON_PARAMS:
+		ChangeToonParams();
+		break;
 	}
 	scene->draw();
 }
@@ -800,6 +818,8 @@ void CreateShadowMenu()
 	glutAddMenuEntry("Flat Shadow", FLAT_SHADOW);
 	glutAddMenuEntry("Gouruad Shadow", GOURAUD_SHADOW);
 	glutAddMenuEntry("Phong Shadow", PHONG_SHADOW);
+	glutAddMenuEntry("Toon Shadow", TOON_SHADOW);
+	glutAddMenuEntry("Toon Parameters", TOON_PARAMS);
 }
 
 void CreateRendererMenu()
