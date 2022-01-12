@@ -384,14 +384,14 @@ void Scene::draw()
 			//GLint ul_alpha = glGetUniformLocation(program, "alpha");
 			//glUniform1f(ul_alpha, light_model->l_alpha);
 			light_number++;
-			//if (light_model->lightIndex == 0) //dont want to draw ambient light
-			//{
-			//	continue;
-			//}
-			//else
-			//{
+			if (light_model->lightIndex == 0) //dont want to draw ambient light
+			{
+				continue;
+			}
+			else
+			{
 				(*it)->draw(false, false, false);// draw models
-			//}
+			}
 		}
 		else
 		{
@@ -508,10 +508,10 @@ void Scene::InitScene()
 {
 	activeCamera = addCamera();
 	// add ambient Light with id 0 and set Ld & Ls to 0
-	//activeLight = addLight();
-	//lights.at(0).Ld = 0;
-	//lights.at(0).Ls = 0;
-	//lights.at(0).La = 0.4;
+	activeLight = addLight();
+	lights.at(0)->Ld = 0;
+	lights.at(0)->Ls = 0;
+	lights.at(0)->La = 0.4;
 
 }
 void Scene::manipulateActiveModel(Transformation T, TransformationDirection direction
