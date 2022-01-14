@@ -8,6 +8,8 @@
 #include "GL\freeglut.h"
 using namespace std;
 
+float timer = 1;
+float delta = 0.01;
 
 mat4 LookAt(const vec4& eye, const vec4& at, const vec4& up)
 {
@@ -355,6 +357,19 @@ void Scene::draw()
 	glUniform1i(uToonN, toon_color_number);
 	GLint uToonT = glGetUniformLocation(program, "toonTickness"); // Find the toonTickness variable
 	glUniform1f(uToonT, toon_thickness);
+	GLint uCanima = glGetUniformLocation(program, "useColorAnimation"); // Find the useColorAnimation variable
+	glUniform1i(uCanima, is_color_animation);
+	GLint uTime = glGetUniformLocation(program, "time"); // Find the time variable
+	timer = timer - delta;
+	if (timer < 0)
+	{
+		delta = -0.01;
+	}
+	if (timer > 1)
+	{
+		delta = 0.01;
+	}
+	glUniform1f(uTime, timer);
 	glUseProgram(light_program);
 	GLint viewLightLoc = glGetUniformLocation(light_program, "modelViewMatrix"); // Find the modelViewMatrix variable
 	glUniformMatrix4fv(viewLightLoc, 1, GL_FALSE, curCameraInv);
@@ -513,6 +528,7 @@ Scene::Scene() : current_shadow(FLAT),toon_color_number(4),toon_thickness(0.05)
 	isShowFog = false;
 	isShowWireFrame = false;
 	isSuperSample = false;
+	is_color_animation = 0;
 	axis = MODEL;
 
 }
@@ -758,6 +774,19 @@ void Scene::ApplyNonUniform()
 	cur_model->UpdateTriangleIlluminationParams();
 }
 
+
+
+void Scene::ApplyColorAnimation()
+{
+	if (is_color_animation == 1)
+	{
+		is_color_animation = 0;
+	}
+	else
+	{
+		is_color_animation = 1;
+	}
+}
 
 
 void Scene::ChangeShadow(Shadow s)

@@ -48,6 +48,9 @@ uniform bool useTexture;
 uniform bool useNormalMap;
 uniform sampler2D normalMap;
 
+uniform float time;
+uniform int useColorAnimation;
+
 
 uniform int toonColorNumber;
 
@@ -124,16 +127,39 @@ void phong_shadow()
 		specular = Ks * Ls[i] * pow(max(dot(viewDirection, reflectDir), 0.0), 2) * lightColor[i]; 
 		result += (ambient + diffuse + specular) * vertexColor;
     }
-	fColor = vec4(result, 1.0)* (useTexture ? texture(texture1, TexCoord) : vec4(1,1,1,1));
+		if(useColorAnimation == 1)
+	{
+		fColor = vec4(result*time,1.0) * (useTexture ? texture(texture1, TexCoord) : vec4(1,1,1,1));
+	}
+	else
+	{
+		fColor = vec4(result, 1.0)* (useTexture ? texture(texture1, TexCoord) : vec4(1,1,1,1));
+	}
+
 }
 
 void gouraud_shadow()
 {
-	fColor = vec4(vertexColor,1.0) * (useTexture ? texture(texture1, TexCoord) : vec4(1,1,1,1));
+	if(useColorAnimation == 1)
+	{
+		fColor = vec4(vertexColor*time,1.0) * (useTexture ? texture(texture1, TexCoord) : vec4(1,1,1,1));
+	}
+	else
+	{
+			fColor = vec4(vertexColor,1.0) * (useTexture ? texture(texture1, TexCoord) : vec4(1,1,1,1));
+	}
+
 }
 void flat_shadow()
 {
-	fColor = vec4(polygonColor,1.0) * (useTexture ? texture(texture1, TexCoord) : vec4(1,1,1,1));
+	if(useColorAnimation == 1)
+	{
+		fColor = vec4(polygonColor*time,1.0) * (useTexture ? texture(texture1, TexCoord) : vec4(1,1,1,1));
+	}
+	else
+	{
+		fColor = vec4(polygonColor,1.0) * (useTexture ? texture(texture1, TexCoord) : vec4(1,1,1,1));
+	}
 }
 
 void toon_shadow()
