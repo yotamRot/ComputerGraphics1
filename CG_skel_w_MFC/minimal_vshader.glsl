@@ -54,6 +54,8 @@ uniform int light_type[LIGHT_SOURCES];
 uniform float Ka;
 uniform float Kd;
 uniform float Ks;
+
+uniform float time;
 //uniform float alpha;
 
 //normal map
@@ -65,11 +67,22 @@ uniform int useVertexAnimation;
 uniform vec3 random;
 varying vec3 normal;
 
+mat4 RotateY( float theta);
+mat4 Translate( float x, float y, float z);
+float timeToAngle(float time);
+
 void main()
 {
     vOriginalPosition = vPosition;
     vertexColor = color;
-    fragmentPosition = vec3(modelViewMatrix * modelMatrix * vec4(vPosition, 1.0));
+    if(useVertexAnimation == 1)
+	{
+		fragmentPosition = vec3(modelViewMatrix *modelMatrix *RotateY(timeToAngle(time) * vPosition.y)*  vec4(vPosition, 1.0));
+	}
+    else
+    {
+        fragmentPosition = vec3(modelViewMatrix * modelMatrix * vec4(vPosition, 1.0));
+    }
     vertexNormal = mat3(modelViewMatrix * normalMatrix ) * vNormal;
     TexCoord = vec2(vTexture.x, vTexture.y);
    
@@ -173,9 +186,28 @@ void main()
 	    }
 
     }
-	if(useVertexAnimation == 1)
-	{
-		fragmentPosition = fragmentPosition + random;
-	}
+//	if(useVertexAnimation == 1)
+//	{
+//		fragmentPosition = fragmentPosition;
+//	}
     gl_Position = projectionMatrix * vec4(fragmentPosition,1.0);
+}
+
+
+mat4 RotateY( float theta)
+{
+    float angle = (3.414 / 180.0) * theta;
+
+    mat4 c;
+    c[0][0] = c[2][2] = cos(angle);
+    c[1][1] = 1;
+    c[0][2] = sin(angle);
+    c[2][0] = -c[0][2];
+    c[3][3] = 1;
+    return c;
+}
+
+float timeToAngle(float time)
+{
+    return 60 * (2* time -1 );
 }
