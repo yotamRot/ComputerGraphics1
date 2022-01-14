@@ -357,8 +357,10 @@ void Scene::draw()
 	glUniform1i(uToonN, toon_color_number);
 	GLint uToonT = glGetUniformLocation(program, "toonTickness"); // Find the toonTickness variable
 	glUniform1f(uToonT, toon_thickness);
-	GLint uCanima = glGetUniformLocation(program, "useColorAnimation"); // Find the useColorAnimation variable
-	glUniform1i(uCanima, is_color_animation);
+	GLint uColorAnimation = glGetUniformLocation(program, "useColorAnimation"); // Find the useColorAnimation variable
+	glUniform1i(uColorAnimation, is_color_animation);
+	GLint uVertexAnimation = glGetUniformLocation(program, "useVertexAnimation"); // Find the useColorAnimation variable
+	glUniform1i(uVertexAnimation, is_vertex_animation);
 	GLint uTime = glGetUniformLocation(program, "time"); // Find the time variable
 	timer = timer - delta;
 	if (timer < 0)
@@ -370,6 +372,11 @@ void Scene::draw()
 		delta = 0.01;
 	}
 	glUniform1f(uTime, timer);
+	float r1 = ((double)rand() / (RAND_MAX)*2);
+	float r2 = ((double)rand() / (RAND_MAX)*2);
+	float r3 = ((double)rand() / (RAND_MAX)*2);
+	GLint uRand = glGetUniformLocation(program, "random"); // Find the random variable
+	glUniform3f(uRand, r1, r2, r3);
 	glUseProgram(light_program);
 	GLint viewLightLoc = glGetUniformLocation(light_program, "modelViewMatrix"); // Find the modelViewMatrix variable
 	glUniformMatrix4fv(viewLightLoc, 1, GL_FALSE, curCameraInv);
@@ -785,6 +792,18 @@ void Scene::ApplyColorAnimation()
 	else
 	{
 		is_color_animation = 1;
+	}
+}
+
+void Scene::ApplyVertexAnimation()
+{
+	if (is_vertex_animation == 1)
+	{
+		is_vertex_animation = 0;
+	}
+	else
+	{
+		is_vertex_animation = 1;
 	}
 }
 
