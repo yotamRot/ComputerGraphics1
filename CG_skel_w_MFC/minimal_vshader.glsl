@@ -61,7 +61,8 @@ uniform bool useNormalMap;
 uniform sampler2D normalMap;
 
 uniform float toonTickness;
-
+uniform int useVertexAnimation;
+uniform vec3 random;
 varying vec3 normal;
 
 void main()
@@ -172,5 +173,9 @@ void main()
 	    }
 
     }
+	if(useVertexAnimation == 1)
+	{
+		fragmentPosition = fragmentPosition + random;
+	}
     gl_Position = projectionMatrix * vec4(fragmentPosition,1.0);
 }

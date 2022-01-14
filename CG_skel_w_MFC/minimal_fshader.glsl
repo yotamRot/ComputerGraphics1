@@ -165,6 +165,8 @@ void phong_shadow()
 	}
 }
 
+
+
 void gouraud_shadow()
 {
 	if(useColorAnimation == 1)
@@ -176,7 +178,6 @@ void gouraud_shadow()
 		fColor = vec4(vertexColor,1.0) * (useTexture ? textureColor : vec4(1,1,1,1));
 	}
 
-	fColor = vec4(vertexColor,1.0) * (useTexture ? textureColor : vec4(1,1,1,1));
 }
 
 

@@ -45,6 +45,8 @@
 #define SUPER_SAMPLE				7
 #define CRAZY_COLORS				8
 #define NON_UNIFORM					9
+#define COLOR_ANIMATION				10
+#define VERTEX_ANIMATION			11
 
 #define ORTHOGRPHIC_PARAMETERS		1
 #define PRESPECTIVE_PARAMETERS		2
@@ -306,6 +308,34 @@ void CreateNonUniform()
 	scene->ApplyNonUniform();
 }
 
+void animation(int id)
+{
+	if (scene->is_color_animation)
+	{
+		glutTimerFunc(30, animation, -1); // call animation() again in 30 milliseconds
+		scene->draw();
+		glutPostRedisplay();
+	}
+	if (scene->is_vertex_animation)
+	{
+		glutTimerFunc(30, animation, -1); // call animation() again in 30 milliseconds
+		scene->draw();
+		glutPostRedisplay();
+	}
+}
+
+void CreateColorAnimation()
+{
+	scene->ApplyColorAnimation();
+	animation(0);
+}
+
+
+void CreateVertexAnimation()
+{
+	scene->ApplyVertexAnimation();
+	animation(0);
+}
 
 void ClearScene()
 {
@@ -680,7 +710,14 @@ void rendererMenu(int id)
 		case NON_UNIFORM:
 			CreateNonUniform();
 			break;
+		case COLOR_ANIMATION:
+			CreateColorAnimation();
+			break;
+		case VERTEX_ANIMATION:
+			CreateVertexAnimation();
+			break;
 	}
+
 	scene->draw();
 }
 
@@ -904,6 +941,8 @@ void CreateRendererMenu()
 	glutAddMenuEntry("Use SuperSample", SUPER_SAMPLE);
 	glutAddMenuEntry("Apply Crazy Colors", CRAZY_COLORS);
 	glutAddMenuEntry("Apply Non Uniform", NON_UNIFORM);
+	glutAddMenuEntry("Apply Color Animation", COLOR_ANIMATION);
+	glutAddMenuEntry("Apply Vertex Animation", VERTEX_ANIMATION);
 }
 
 void CreateProjectionMenus()

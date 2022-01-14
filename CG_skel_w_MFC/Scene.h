@@ -66,6 +66,8 @@ public:
 	vector<Model*> models;
 	float toon_thickness;
 	int toon_color_number;
+	int is_color_animation;
+	int is_vertex_animation;
 	Scene();
 	//Scene(Renderer* renderer);
 	void InitScene();
@@ -128,6 +130,8 @@ public:
 	void ChangeModelIlluminationParams(vec4& k);
 	void ApplyCrazyColors();
 	void ApplyNonUniform();
+	void ApplyColorAnimation();
+	void ApplyVertexAnimation();
 	void ChangeActiveModelTextureWrap(TextureWrap wrap);
 	void ChangeShadow(Shadow s);
 	vec4 GetAmbientRGB();
