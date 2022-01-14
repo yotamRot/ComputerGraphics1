@@ -85,6 +85,8 @@ public:
 	bool has_normal_map;
 	Texture normal_map;
 
+	bool use_marble_texture;
+
 	vector<vec3> bound_box_vertices;
 	vector<unsigned int> bound_box_indices;
 	vector<vec3> vertices_normals;

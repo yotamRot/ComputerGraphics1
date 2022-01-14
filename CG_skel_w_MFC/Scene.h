@@ -74,6 +74,8 @@ public:
 
 	enviromentBox envBox;
 
+	Texture smoothRandom;
+
 	int loadCubeModel();
 	void lookAtModel(int modelId);
 	int addCamera();
@@ -98,6 +100,7 @@ public:
 	bool toggleSuperSample();
 	bool ToggleActiveModelIsUseNormalMap();
 	bool ToggleActiveModelIsUseEnviromentTexture();
+	bool ToggleActiveModelIsUseMarbleTexture();
 	bool ToggleActiveModelIsUseTexture();
 	bool ToggleUseEnvirnmentCube();
 	void draw();

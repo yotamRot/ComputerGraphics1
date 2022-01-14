@@ -9,7 +9,6 @@
 #define new DEBUG_NEW
 #endif
 
-
 // The one and only application object
 #include "InputDialog.h"
 #include "GL/glew.h"
@@ -76,6 +75,7 @@
 #define LOAD_ENVIRNONMENT_CUBE		4
 #define USE_ENVIRNONMENT_CUBE		5
 #define USE_ENVIRNONMENT_TEXTURE	6
+#define USE_MARBLE_TEXTURE			7
 
 //WRAP menu
 #define FROM_FILE					1
@@ -720,9 +720,11 @@ void UseEnvironmentCube()
 	}
 	else
 	{
-		glutChangeToMenuEntry(USE_ENVIRNONMENT_CUBE, "Use Enviroment Cube", USE_ENVIRNONMENT_CUBE);
+		glutChangeToMenuEntry(USE_TEXTURE, "Use Cube Map", USE_TEXTURE);
 	}
 }
+
+
 
 void UseEnvironmentTexture()
 {
@@ -733,6 +735,18 @@ void UseEnvironmentTexture()
 	else
 	{
 		glutChangeToMenuEntry(USE_ENVIRNONMENT_TEXTURE, "Use environment texture", USE_ENVIRNONMENT_TEXTURE);
+	}
+}
+
+void UseMarbleTexture()
+{
+	if (scene->ToggleActiveModelIsUseMarbleTexture())
+	{
+		glutChangeToMenuEntry(USE_MARBLE_TEXTURE, "Hide marble texture", USE_MARBLE_TEXTURE);
+	}
+	else
+	{
+		glutChangeToMenuEntry(USE_MARBLE_TEXTURE, "Use marble texture", USE_MARBLE_TEXTURE);
 	}
 }
 
@@ -754,6 +768,9 @@ void textureMenu(int id)
 		break;
 	case USE_ENVIRNONMENT_TEXTURE:
 		UseEnvironmentTexture();
+		break;
+	case USE_MARBLE_TEXTURE:
+		UseMarbleTexture();
 		break;
 	}
 	scene->draw();
@@ -921,6 +938,7 @@ void CreateTextureMenu()
 	glutAddMenuEntry("Load environment cube", LOAD_ENVIRNONMENT_CUBE);
 	glutAddMenuEntry("Use environment cube", USE_ENVIRNONMENT_CUBE);
 	glutAddMenuEntry("Use environment texture", USE_ENVIRNONMENT_TEXTURE);
+	glutAddMenuEntry("Use marble texture", USE_MARBLE_TEXTURE);
 }
 
 void CreateMainMenu()

@@ -143,6 +143,7 @@ MeshModel::MeshModel(string fileName, int modelId, GLuint program, GLuint simple
 	is_non_unfiorm = false;
 	use_normal_map = false;
 	use_enviroment_texture = false;
+	use_marble_texture = false;
 	use_texture = true;
 	loadFile(fileName);
 	CalcBounds();
@@ -673,6 +674,8 @@ void MeshModel::draw(bool draw_bounding_box, bool draw_vertix_normals, bool draw
 	glUniform1i(glGetUniformLocation(my_program, "useTexture"), use_texture && has_texture);
 
 	glUniform1i(glGetUniformLocation(my_program, "useEnviromentTexture"), use_enviroment_texture);
+
+	glUniform1i(glGetUniformLocation(my_program, "isMarble"), use_marble_texture);
 
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);

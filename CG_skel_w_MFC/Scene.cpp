@@ -434,6 +434,7 @@ void Scene::draw()
 
 }
 
+
 void Scene::drawDemo()
 {
 	const int pnum = 3;
@@ -736,6 +737,14 @@ bool Scene::ToggleActiveModelIsUseEnviromentTexture()
 
 	cur_model->use_enviroment_texture = !cur_model->use_enviroment_texture;
 	return cur_model->use_enviroment_texture;
+}
+
+bool Scene::ToggleActiveModelIsUseMarbleTexture()
+{
+	MeshModel* cur_model = (MeshModel*)models.at(activeModel);
+
+	cur_model->use_marble_texture = !cur_model->use_marble_texture;
+	return cur_model->use_marble_texture;
 }
 
 bool Scene::ToggleActiveModelIsUseNormalMap()

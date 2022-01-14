@@ -20,6 +20,7 @@ in  vec3 vTangent;
 in  vec3 vBiTangent;
 
 // Out Arguments
+out vec3 vOriginalPosition;
 out vec3 vertexColor;
 out vec3 vertexNormal;
 out vec3 fragmentPosition;
@@ -65,6 +66,7 @@ varying vec3 normal;
 
 void main()
 {
+    vOriginalPosition = vPosition;
     vertexColor = color;
     fragmentPosition = vec3(modelViewMatrix * modelMatrix * vec4(vPosition, 1.0));
     vertexNormal = mat3(modelViewMatrix * normalMatrix ) * vNormal;
