@@ -159,14 +159,14 @@ void main()
         }
     }
     vec4 tmpNormal = normalMatrix*vec4(vNormal,1.0);
-    normal = (tmpNormal/tmpNormal.w).xyz;
+    normal = normalize((tmpNormal / tmpNormal.w).xyz);
     if (shadow_type == TOON)
     {
 
     	back_face = dot(-fragmentPosition,normal); // if < 0 back facing
         if(back_face < 0)
 	    {
-		    fragmentPosition = fragmentPosition + toonTickness*normalize(normal);
+		    fragmentPosition = fragmentPosition + toonTickness* normal;
 	    }
 
     }

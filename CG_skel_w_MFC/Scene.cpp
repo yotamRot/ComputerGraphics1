@@ -170,7 +170,7 @@ void Scene::Zoom(ZoomDirection direction)
 
 void Scene::loadEnvironmentMapping(string directoryPath)
 {
-	isUseEnvironmentTexture = envBox.load(directoryPath);
+	isHasEnvironmentCube = envBox.load(directoryPath);
 }
 
 void Scene::lookAtModel(int modelId)
@@ -365,7 +365,7 @@ void Scene::draw()
 	int light_number = 0;
 
 
-	if (isUseEnvironmentTexture)
+	if (isUseEnvironmentCube && isHasEnvironmentCube)
 	{
 		glDepthFunc(GL_LEQUAL);
 		glUseProgram(enviroment_texture_program);
@@ -543,7 +543,8 @@ void Scene::InitScene()
 	lights.at(0)->Ld = 0;
 	lights.at(0)->Ls = 0;
 	lights.at(0)->La = 0.4;
-	isUseEnvironmentTexture = false;
+	isUseEnvironmentCube = false;
+	isHasEnvironmentCube = false;
 	envBox.Init(enviroment_texture_program);
 }
 void Scene::manipulateActiveModel(Transformation T, TransformationDirection direction
@@ -729,6 +730,14 @@ void Scene::ChangeActiveModelTextureWrap(TextureWrap wrap)
 	
 }
 
+bool Scene::ToggleActiveModelIsUseEnviromentTexture()
+{
+	MeshModel* cur_model = (MeshModel*)models.at(activeModel);
+
+	cur_model->use_enviroment_texture = !cur_model->use_enviroment_texture;
+	return cur_model->use_enviroment_texture;
+}
+
 bool Scene::ToggleActiveModelIsUseNormalMap()
 {
 	MeshModel* cur_model = (MeshModel*)models.at(activeModel);
@@ -745,10 +754,10 @@ bool Scene::ToggleActiveModelIsUseTexture()
 	return cur_model->use_texture;
 }
 
-bool Scene::ToggleUseEnvirnment()
+bool Scene::ToggleUseEnvirnmentCube()
 {
-	isUseEnvironmentTexture = !isUseEnvironmentTexture;
-	return isUseEnvironmentTexture;
+	isUseEnvironmentCube = !isUseEnvironmentCube;
+	return isUseEnvironmentCube;
 }
 
 void Scene::ApplyNonUniform()

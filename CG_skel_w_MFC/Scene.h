@@ -56,7 +56,8 @@ class Scene {
 	bool isShowFog;
 	bool isShowWireFrame;
 	bool isSuperSample;
-	bool isUseEnvironmentTexture;
+	bool isUseEnvironmentCube;
+	bool isHasEnvironmentCube;
 	TransAxis axis;
 	Shadow current_shadow;
 	void ResetZoom();
@@ -96,8 +97,9 @@ public:
 	bool toggleShowWireFrame();
 	bool toggleSuperSample();
 	bool ToggleActiveModelIsUseNormalMap();
+	bool ToggleActiveModelIsUseEnviromentTexture();
 	bool ToggleActiveModelIsUseTexture();
-	bool ToggleUseEnvirnment();
+	bool ToggleUseEnvirnmentCube();
 	void draw();
 	void drawDemo();
 	void drawEnviromentBox();

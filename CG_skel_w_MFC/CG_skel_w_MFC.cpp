@@ -73,8 +73,9 @@
 // 
 #define USE_NORMAL_MAP				2
 #define USE_TEXTURE					3
-#define LOAD_ENVIRNONMENT			4
-#define USE_ENVIRNONMENT			5
+#define LOAD_ENVIRNONMENT_CUBE		4
+#define USE_ENVIRNONMENT_CUBE		5
+#define USE_ENVIRNONMENT_TEXTURE	6
 
 //WRAP menu
 #define FROM_FILE					1
@@ -391,7 +392,7 @@ void OpenFile()
 	}
 }
 
-void OpenEnvironmentFile()
+void OpenEnvironmentCubeTexturesFile()
 {
 	CFileDialog dlg(TRUE, _T(".jpg"), NULL, NULL, _T("*.jpg|*.*"));
 	if (dlg.DoModal() == IDOK)
@@ -707,19 +708,31 @@ void UseTexture()
 	}
 	else
 	{
-		glutChangeToMenuEntry(USE_TEXTURE, "Use Texture", USE_TEXTURE);
+		glutChangeToMenuEntry(USE_TEXTURE, "Use Cube Map", USE_TEXTURE);
 	}
 }
 
-void UseEnvironment()
+void UseEnvironmentCube()
 {
-	if (scene->ToggleUseEnvirnment())
+	if (scene->ToggleUseEnvirnmentCube())
 	{
-		glutChangeToMenuEntry(USE_ENVIRNONMENT, "Hide Evironment Mapping", USE_ENVIRNONMENT);
+		glutChangeToMenuEntry(USE_ENVIRNONMENT_CUBE, "Hide Enviroment Cube", USE_ENVIRNONMENT_CUBE);
 	}
 	else
 	{
-		glutChangeToMenuEntry(USE_ENVIRNONMENT, "Use Evironment Mapping", USE_ENVIRNONMENT);
+		glutChangeToMenuEntry(USE_ENVIRNONMENT_CUBE, "Use Enviroment Cube", USE_ENVIRNONMENT_CUBE);
+	}
+}
+
+void UseEnvironmentTexture()
+{
+	if (scene->ToggleActiveModelIsUseEnviromentTexture())
+	{
+		glutChangeToMenuEntry(USE_ENVIRNONMENT_TEXTURE, "Hide environment texture", USE_ENVIRNONMENT_TEXTURE);
+	}
+	else
+	{
+		glutChangeToMenuEntry(USE_ENVIRNONMENT_TEXTURE, "Use environment texture", USE_ENVIRNONMENT_TEXTURE);
 	}
 }
 
@@ -733,8 +746,14 @@ void textureMenu(int id)
 	case USE_TEXTURE:
 		UseTexture();
 		break;
-	case LOAD_ENVIRNONMENT:
-		OpenEnvironmentFile();
+	case LOAD_ENVIRNONMENT_CUBE:
+		OpenEnvironmentCubeTexturesFile();
+		break;
+	case USE_ENVIRNONMENT_CUBE:
+		UseEnvironmentCube();
+		break;
+	case USE_ENVIRNONMENT_TEXTURE:
+		UseEnvironmentTexture();
 		break;
 	}
 	scene->draw();
@@ -899,8 +918,9 @@ void CreateTextureMenu()
 	glutAddSubMenu("Choose Wrap", menuChooseWrap);
 	glutAddMenuEntry("Use Normal Map", USE_NORMAL_MAP);
 	glutAddMenuEntry("Hide texture", USE_TEXTURE);
-	glutAddMenuEntry("Load environment texture", LOAD_ENVIRNONMENT);
-	glutAddMenuEntry("Use environment texture", USE_ENVIRNONMENT);
+	glutAddMenuEntry("Load environment cube", LOAD_ENVIRNONMENT_CUBE);
+	glutAddMenuEntry("Use environment cube", USE_ENVIRNONMENT_CUBE);
+	glutAddMenuEntry("Use environment texture", USE_ENVIRNONMENT_TEXTURE);
 }
 
 void CreateMainMenu()

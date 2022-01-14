@@ -48,6 +48,9 @@ uniform bool useTexture;
 uniform bool useNormalMap;
 uniform sampler2D normalMap;
 
+//enviroment
+uniform samplerCube enviromentTexture;
+uniform bool useEnviromentTexture;
 
 uniform int toonColorNumber;
 
@@ -58,8 +61,21 @@ void gouraud_shadow();
 void flat_shadow();
 void toon_shadow();
 
+
+vec4 textureColor;
+
 void main() 
 { 
+	if(useEnviromentTexture)
+	{
+		vec3 I = normalize(fragmentPosition);
+		vec3 R = reflect(I, normalize(vertexNormal));
+		textureColor =texture(enviromentTexture, R);
+	}
+	else
+	{
+		textureColor =texture(texture1, TexCoord);
+	}
 	if(shadow == FLAT)
 	{
 		flat_shadow();
@@ -76,6 +92,8 @@ void main()
 	{
 		toon_shadow();
 	}
+
+
 } 
 
 
@@ -124,16 +142,17 @@ void phong_shadow()
 		specular = Ks * Ls[i] * pow(max(dot(viewDirection, reflectDir), 0.0), 2) * lightColor[i]; 
 		result += (ambient + diffuse + specular) * vertexColor;
     }
-	fColor = vec4(result, 1.0)* (useTexture ? texture(texture1, TexCoord) : vec4(1,1,1,1));
+	fColor = vec4(result, 1.0)* (useTexture ? textureColor : vec4(1,1,1,1));
 }
 
 void gouraud_shadow()
-{
-	fColor = vec4(vertexColor,1.0) * (useTexture ? texture(texture1, TexCoord) : vec4(1,1,1,1));
+{	
+
+	fColor = vec4(vertexColor,1.0) * (useTexture ? textureColor : vec4(1,1,1,1));
 }
 void flat_shadow()
 {
-	fColor = vec4(polygonColor,1.0) * (useTexture ? texture(texture1, TexCoord) : vec4(1,1,1,1));
+	fColor = vec4(polygonColor,1.0) * (useTexture ? textureColor : vec4(1,1,1,1));
 }
 
 void toon_shadow()
@@ -153,7 +172,8 @@ void toon_shadow()
             lightDirection = normalize(lightPosition[i]);
         }
 	}
-	intensity = dot(lightDirection,normal);
+
+	intensity = dot(lightDirection, normal);
 
 
 	if(back_face < 0)
@@ -161,10 +181,8 @@ void toon_shadow()
 		color = vec4(0,0,0,1.0);
 	}
 	else
-	{
-		color = round(intensity * toonColorNumber) / toonColorNumber * vec4(vertexColor,1);
+	{ 
+		color = (max(round(intensity * toonColorNumber),1) / toonColorNumber) * vec4(vertexColor,1);
 	}
-
-
 	fColor = color;
 }

@@ -80,6 +80,7 @@ public:
 	bool use_texture;
 	bool has_texture;
 	Texture texture;
+	bool use_enviroment_texture;
 	bool use_normal_map;
 	bool has_normal_map;
 	Texture normal_map;
