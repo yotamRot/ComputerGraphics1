@@ -990,7 +990,7 @@ void CreateRendererMenu()
 	glutAddMenuEntry("Show Wire Frame", WIRE_FRAME);
 	//glutAddMenuEntry("Show Fog", FOG);
 	//glutAddMenuEntry("Use SuperSample", SUPER_SAMPLE);
-	glutAddMenuEntry("Apply Crazy Colors", CRAZY_COLORS);
+	//glutAddMenuEntry("Apply Crazy Colors", CRAZY_COLORS);
 	glutAddMenuEntry("Apply Non Uniform", NON_UNIFORM);
 	glutAddMenuEntry("Apply Color Animation", COLOR_ANIMATION);
 	glutAddMenuEntry("Apply Vertex Animation", VERTEX_ANIMATION);
