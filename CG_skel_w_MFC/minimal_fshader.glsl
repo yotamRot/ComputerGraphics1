@@ -39,7 +39,7 @@ uniform int light_type[LIGHT_SOURCES];
 uniform float Ka;
 uniform float Kd;
 uniform float Ks;
-//uniform float alpha;
+uniform float alpha;
 
 //texture
 uniform sampler2D texture1;
@@ -152,7 +152,7 @@ void phong_shadow()
 		reflectDir = reflect(-lightDirection, normalizeNormal); 
 		ambient  = Ka * La[i] * lightColor[i];
 		diffuse  = Kd * Ld[i] * max(dot(normalizeNormal, lightDirection), 0.0) * lightColor[i]; 
-		specular = Ks * Ls[i] * pow(max(dot(viewDirection, reflectDir), 0.0), 2) * lightColor[i]; 
+		specular = Ks * Ls[i] * pow(max(dot(viewDirection, reflectDir), 0.0), alpha) * lightColor[i]; 
 		result += (ambient + diffuse + specular) * vertexColor;
     }
 		if(useColorAnimation == 1)

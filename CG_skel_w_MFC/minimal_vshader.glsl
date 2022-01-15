@@ -56,7 +56,7 @@ uniform float Kd;
 uniform float Ks;
 
 uniform float time;
-//uniform float alpha;
+uniform float alpha;
 
 //normal map
 uniform bool useNormalMap;
@@ -159,7 +159,7 @@ void main()
 	        reflectDir = reflect(-lightDirection, normalizeNormal); 
 	        ambient  = Ka * La[i] * lightColor[i];
 	        diffuse  = Kd * Ld[i] * max(dot(normalizeNormal, lightDirection), 0.0) * lightColor[i]; 
-            specular = Ks * Ls[i] * pow(max(dot(viewDirection, reflectDir), 0.0), 2) * lightColor[i]; 
+            specular = Ks * Ls[i] * pow(max(dot(viewDirection, reflectDir), 0.0), alpha) * lightColor[i]; 
 	        result += (ambient + diffuse + specular) * vertexColor;
         }
 

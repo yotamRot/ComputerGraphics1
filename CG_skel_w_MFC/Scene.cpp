@@ -441,8 +441,7 @@ void Scene::draw()
 			glUniform1f(l_s_location, light_model->Ls);
 			GLint light_type_location = glGetUniformLocation(program, ("light_type[" + std::to_string(light_number) + "]").c_str());
 			glUniform1i(light_type_location, light_model->type);
-			//GLint ul_alpha = glGetUniformLocation(program, "alpha");
-			//glUniform1f(ul_alpha, light_model->l_alpha);
+
 			light_number++;
 			if (light_model->lightIndex == 0) //dont want to draw ambient light
 			{
@@ -450,6 +449,8 @@ void Scene::draw()
 			}
 			else
 			{
+				GLint ul_alpha = glGetUniformLocation(program, "alpha");
+				glUniform1f(ul_alpha, light_model->l_alpha);
 				(*it)->draw(false, false, false);// draw models
 			}
 		}
@@ -575,6 +576,7 @@ void Scene::InitScene()
 	lights.at(0)->Ld = 0;
 	lights.at(0)->Ls = 0;
 	lights.at(0)->La = 0.4;
+	lights.at(0)->l_alpha = 0;
 	isUseEnvironmentCube = false;
 	isHasEnvironmentCube = false;
 	envBox.Init(enviroment_texture_program);

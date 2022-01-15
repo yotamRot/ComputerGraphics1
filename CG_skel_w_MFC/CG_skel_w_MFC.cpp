@@ -142,18 +142,21 @@ void switchToCameraMenu(int id)
 {
 	scene->switchToCamera(id);
 	scene->draw();
+	glutPostRedisplay();
 }
 
 void lookAtCameraMenu(int id)
 {
 	scene->lookAtCamera(id);
 	scene->draw();
+	glutPostRedisplay();
 }
 
 void switchToLightMenu(int id)
 {
 	scene->controlLight(id);
 	scene->draw();
+	glutPostRedisplay();
 }
 
 void switchLightTypeMenu(int id)
@@ -167,6 +170,7 @@ void switchLightTypeMenu(int id)
 		scene->GetActiveLight()->type = POINT_SOURCE;
 	}
 	scene->draw();
+	glutPostRedisplay();
 }
 
 
@@ -174,6 +178,7 @@ void lookAtLightMenu(int id)
 {
 	scene->lookAtLight(id);
 	scene->draw();
+	glutPostRedisplay();
 }
 
 void ChangeAmbientColors()
@@ -535,6 +540,7 @@ void keyboard( unsigned char key, int x, int y )
 	}
 	scene->manipulateActiveModel(curTramsformation, axis,scene->GetTrasformationAxis(),10);
 	scene->draw();
+	glutPostRedisplay();
 }
 
 void mouse(int button, int state, int x, int y)
@@ -563,7 +569,8 @@ void mouse(int button, int state, int x, int y)
 			break;
 	}
 	// add your code
-	scene->draw();
+	scene->draw(); 
+	glutPostRedisplay();
 }
 
 void motion(int x, int y)
@@ -581,6 +588,7 @@ void motion(int x, int y)
 		scene->manipulateActiveModel(ROTATE, X_dir, MODEL, dy);
 		//scene->rotateAroundActiveModel(dx, dy);
 		scene->draw();
+		glutPostRedisplay();
 	}
 	else
 	{
@@ -594,6 +602,7 @@ void objectsMenu(int id)
 {
 	scene->activeModel = scene->modelMenuIdToVectorId(id);
 	scene->draw();
+	glutPostRedisplay();
 }
 
 
@@ -601,6 +610,7 @@ void lookAtObjectMenu(int id)
 {
 	scene->lookAtModel(scene->modelMenuIdToVectorId(id));
 	scene->draw();
+	glutPostRedisplay();
 }
 
 void camerasMenu(int id)
@@ -618,6 +628,7 @@ void camerasMenu(int id)
 			break;
 	}
 	scene->draw();
+	glutPostRedisplay();
 }
 
 
@@ -643,6 +654,7 @@ void lightsMenu(int id)
 			break;
 	}
 	scene->draw();
+	glutPostRedisplay();
 }
 
 void shadowMenu(int id)
@@ -666,6 +678,7 @@ void shadowMenu(int id)
 		break;
 	}
 	scene->draw();
+	glutPostRedisplay();
 }
 
 
@@ -681,6 +694,7 @@ void fileMenu(int id)
 			break;
 	}
 	scene->draw();
+	glutPostRedisplay();
 }
 
 
@@ -734,6 +748,7 @@ void rendererMenu(int id)
 	}
 
 	scene->draw();
+	glutPostRedisplay();
 }
 
 void projectionMenu(int id)
@@ -826,6 +841,7 @@ void textureMenu(int id)
 		break;
 	}
 	scene->draw();
+	glutPostRedisplay();
 }
 
 void textureWrapMenu(int id)
@@ -846,6 +862,7 @@ void textureWrapMenu(int id)
 		break;
 	}
 	scene->draw();
+	glutPostRedisplay();
 }
 
 
@@ -853,6 +870,7 @@ void projectionChooseMenu(int id)
 {
 	scene->setActiveCameraProjection((Projection)id);
 	scene->draw();
+	glutPostRedisplay();
 }
 
 void ProjParameresMenu(int id)
@@ -867,6 +885,7 @@ void ProjParameresMenu(int id)
 		OrthoFrustrumParameters(id);
 	}
 	scene->draw();
+	glutPostRedisplay();
 }
 
 void mainMenu(int id)
