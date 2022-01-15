@@ -1116,6 +1116,7 @@ LightModel::LightModel(int model_id, int lightIndex, GLuint program) : lightInde
 
 	//bound_box_vertices = CalcBounds();
 	//UpdateTriangleIlluminationParams();
+	CalcBounds();
 	SetupMesh();
 
 }
