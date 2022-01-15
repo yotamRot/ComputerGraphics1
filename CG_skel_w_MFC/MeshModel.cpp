@@ -56,7 +56,7 @@ struct FaceIdcs
 
 void  MeshModel::SetBoundingBoxVertices(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat lenX, GLfloat lenY, GLfloat lenZ)
 {
-
+	SimpleVertex tempSimpleVertics;
 	GLfloat halfX = lenX * 0.5f;
 	GLfloat halfY = lenY * 0.5f;
 	GLfloat halfZ = lenZ * 0.5f;
@@ -74,34 +74,59 @@ void  MeshModel::SetBoundingBoxVertices(GLfloat posX, GLfloat posY, GLfloat posZ
 	vec3 backBottomRight = vec3(posX + halfX, posY - halfY, posZ + halfZ);
 
 	//lines
+	tempSimpleVertics.isNormal = false;
+	tempSimpleVertics.Position = frontTopLeft;
+	bound_box_vertices.push_back(tempSimpleVertics);
+	tempSimpleVertics.Position = frontTopRight;
+	bound_box_vertices.push_back(tempSimpleVertics);
+	tempSimpleVertics.Position = frontTopLeft;
+	bound_box_vertices.push_back(tempSimpleVertics);
+	tempSimpleVertics.Position = frontBottomLeft;
+	bound_box_vertices.push_back(tempSimpleVertics);
+	tempSimpleVertics.Position = frontTopLeft;
+	bound_box_vertices.push_back(tempSimpleVertics);
+	tempSimpleVertics.Position = backTopLeft;
+	bound_box_vertices.push_back(tempSimpleVertics);
 
-	bound_box_vertices.push_back(frontTopLeft);
-	bound_box_vertices.push_back(frontTopRight);
-	bound_box_vertices.push_back(frontTopLeft);
-	bound_box_vertices.push_back(frontBottomLeft);
-	bound_box_vertices.push_back(frontTopLeft);
-	bound_box_vertices.push_back(backTopLeft);
+	tempSimpleVertics.Position = backTopRight;
+	bound_box_vertices.push_back(tempSimpleVertics);
+	tempSimpleVertics.Position = backTopLeft;
+	bound_box_vertices.push_back(tempSimpleVertics);
+	tempSimpleVertics.Position = backTopRight;
+	bound_box_vertices.push_back(tempSimpleVertics);
+	tempSimpleVertics.Position = backBottomRight;
+	bound_box_vertices.push_back(tempSimpleVertics);
+	tempSimpleVertics.Position = backTopRight;
+	bound_box_vertices.push_back(tempSimpleVertics);
+	tempSimpleVertics.Position = frontTopRight;
+	bound_box_vertices.push_back(tempSimpleVertics);
 
-	bound_box_vertices.push_back(backTopRight);
-	bound_box_vertices.push_back(backTopLeft);
-	bound_box_vertices.push_back(backTopRight);
-	bound_box_vertices.push_back(backBottomRight);
-	bound_box_vertices.push_back(backTopRight);
-	bound_box_vertices.push_back(frontTopRight);
+	tempSimpleVertics.Position = backBottomLeft;
+	bound_box_vertices.push_back(tempSimpleVertics);
+	tempSimpleVertics.Position = backTopLeft;
+	bound_box_vertices.push_back(tempSimpleVertics);
+	tempSimpleVertics.Position = backBottomLeft;
+	bound_box_vertices.push_back(tempSimpleVertics);
+	tempSimpleVertics.Position = backBottomRight;
+	bound_box_vertices.push_back(tempSimpleVertics);
+	tempSimpleVertics.Position = backBottomLeft;
+	bound_box_vertices.push_back(tempSimpleVertics);
+	tempSimpleVertics.Position = frontBottomLeft;
+	bound_box_vertices.push_back(tempSimpleVertics);
 
-	bound_box_vertices.push_back(backBottomLeft);
-	bound_box_vertices.push_back(backTopLeft);
-	bound_box_vertices.push_back(backBottomLeft);
-	bound_box_vertices.push_back(backBottomRight);
-	bound_box_vertices.push_back(backBottomLeft);
-	bound_box_vertices.push_back(frontBottomLeft);
+	tempSimpleVertics.Position = frontBottomRight;
+	bound_box_vertices.push_back(tempSimpleVertics);
+	tempSimpleVertics.Position = frontBottomLeft;
+	bound_box_vertices.push_back(tempSimpleVertics);
+	tempSimpleVertics.Position = frontBottomRight;
+	bound_box_vertices.push_back(tempSimpleVertics);
+	tempSimpleVertics.Position = frontTopRight;
+	bound_box_vertices.push_back(tempSimpleVertics);
+	tempSimpleVertics.Position = frontBottomRight;
+	bound_box_vertices.push_back(tempSimpleVertics);
+	tempSimpleVertics.Position = backBottomRight;
+	bound_box_vertices.push_back(tempSimpleVertics);
 
-	bound_box_vertices.push_back(frontBottomRight);
-	bound_box_vertices.push_back(frontBottomLeft);
-	bound_box_vertices.push_back(frontBottomRight);
-	bound_box_vertices.push_back(frontTopRight);
-	bound_box_vertices.push_back(frontBottomRight);
-	bound_box_vertices.push_back(backBottomRight);
 	for (int i = 0; i < bound_box_vertices.size(); i++)
 	{
 		bound_box_indices.push_back(i);// = i;
@@ -186,6 +211,7 @@ void MeshModel::loadFile(string fileName)
 	std::map<int, int> u;
 
 	Vertex tempVertix;
+	SimpleVertex tempSimpleVertix;
 
 	vec3 p1, p2, p3;
 	vec3 p1_nomral, p2_nomral, p3_nomral;
@@ -245,9 +271,14 @@ void MeshModel::loadFile(string fileName)
 		p3 = l_vertices[it->v[2] - 1];
 
 		curCenter = (p1 + p2 + p3) / 3;
+		tempSimpleVertix.Position = curCenter;
+		tempSimpleVertix.isNormal = false;
+		face_normals.push_back(tempSimpleVertix);
+
 		curNormalEnd = normalize(cross(p2 - p1, p3 - p1));
-		face_normals.push_back(curCenter);
-		face_normals.push_back(curCenter + curNormalEnd);
+		tempSimpleVertix.Position = curCenter + 0.3*curNormalEnd;
+		tempSimpleVertix.isNormal = true;
+		face_normals.push_back(tempSimpleVertix);
 
 		
 
@@ -265,12 +296,26 @@ void MeshModel::loadFile(string fileName)
 			p1_nomral = p2_nomral = p3_nomral = curNormalEnd;
 		}
 
-		vertices_normals.push_back(p1);
-		vertices_normals.push_back(p1 + p1_nomral);
-		vertices_normals.push_back(p2);
-		vertices_normals.push_back(p2 + p2_nomral);
-		vertices_normals.push_back(p3);
-		vertices_normals.push_back(p3 + p3_nomral);
+		tempSimpleVertix.Position = p1;
+		tempSimpleVertix.isNormal = false;
+		vertices_normals.push_back(tempSimpleVertix);
+		tempSimpleVertix.Position = p1 + 0.3 * p1_nomral;
+		tempSimpleVertix.isNormal = true;
+		vertices_normals.push_back(tempSimpleVertix);
+		
+		tempSimpleVertix.Position = p2;
+		tempSimpleVertix.isNormal = false;
+		vertices_normals.push_back(tempSimpleVertix);
+		tempSimpleVertix.Position = p2 + 0.3 * p2_nomral;
+		tempSimpleVertix.isNormal = true;
+		vertices_normals.push_back(tempSimpleVertix);
+
+		tempSimpleVertix.Position = p3;
+		tempSimpleVertix.isNormal = false;
+		vertices_normals.push_back(tempSimpleVertix);
+		tempSimpleVertix.Position = p3 + 0.3 * p3_nomral;
+		tempSimpleVertix.isNormal = true;
+		vertices_normals.push_back(tempSimpleVertix);
 
 		if (v_textures.size() != 0)
 		{
@@ -350,9 +395,6 @@ void MeshModel::loadFile(string fileName)
 		vertices_normals_indices.push_back(i);
 	}
 	
-
-
-
 	// load and set texture
 	glActiveTexture(GL_TEXTURE0);
 	glGenTextures(1, &texture.id);
@@ -474,7 +516,7 @@ void MeshModel::SetupMesh()
 		glBindVertexArray(bounding_box_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, bounding_box_VBO);
 
-		glBufferData(GL_ARRAY_BUFFER, bound_box_vertices.size() * sizeof(vec3), &bound_box_vertices[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, bound_box_vertices.size() * (sizeof(SimpleVertex)), &bound_box_vertices[0], GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bounding_box_EBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, bound_box_indices.size() * sizeof(unsigned int),
@@ -483,7 +525,14 @@ void MeshModel::SetupMesh()
 		// vertex positions
 		loc = glGetAttribLocation(simple_shader, "vPosition");
 		glEnableVertexAttribArray(loc);
-		glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
+		glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex), (void*)0);
+
+		//is normal
+		loc = glGetAttribLocation(simple_shader, "isNormal");
+		glEnableVertexAttribArray(loc);
+		glVertexAttribPointer(loc, 1, GL_INT, GL_FALSE, sizeof(SimpleVertex), (void*)offsetof(SimpleVertex, isNormal));
+
+
 	}
 
 	if (vertices_normals.size() != 0)
@@ -497,7 +546,7 @@ void MeshModel::SetupMesh()
 		glBindVertexArray(vertex_normal_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, vertex_normal_VBO);
 
-		glBufferData(GL_ARRAY_BUFFER, vertices_normals.size() * sizeof(vec3), &vertices_normals[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, vertices_normals.size() * (sizeof(SimpleVertex)), &vertices_normals[0], GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertex_normal_EBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, vertices_normals_indices.size() * sizeof(unsigned int),
@@ -506,7 +555,12 @@ void MeshModel::SetupMesh()
 		// vertex positions
 		loc = glGetAttribLocation(simple_shader, "vPosition");
 		glEnableVertexAttribArray(loc);
-		glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
+		glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex), (void*)0);
+
+		//is normal
+		loc = glGetAttribLocation(simple_shader, "isNormal");
+		glEnableVertexAttribArray(loc);
+		glVertexAttribPointer(loc, 1, GL_INT, GL_FALSE, sizeof(SimpleVertex), (void*)offsetof(SimpleVertex, isNormal));
 	}
 
 	if (face_normals.size() != 0)
@@ -520,17 +574,22 @@ void MeshModel::SetupMesh()
 		glBindVertexArray(face_normal_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, face_normal_VBO);
 
-		glBufferData(GL_ARRAY_BUFFER, face_normals.size() * sizeof(vec3), &face_normals[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, face_normals.size() * (sizeof(SimpleVertex)), &face_normals[0], GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, face_normal_EBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, faces_normals_indices.size() * sizeof(unsigned int),
 			&faces_normals_indices[0], GL_STATIC_DRAW);
+
 		// vertex positions
 		loc = glGetAttribLocation(simple_shader, "vPosition");
 		glEnableVertexAttribArray(loc);
-		glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
-	}
+		glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex), (void*)0);
 
+		//is normal
+		loc = glGetAttribLocation(simple_shader, "isNormal");
+		glEnableVertexAttribArray(loc);
+		glVertexAttribPointer(loc, 1, GL_INT, GL_FALSE, sizeof(SimpleVertex), (void*)offsetof(SimpleVertex, isNormal));
+	}
 }
 
 void MeshModel::FileMapping()
@@ -716,15 +775,23 @@ void MeshModel::draw(bool draw_bounding_box, bool draw_vertix_normals, bool draw
 
 void MeshModel::drawBoundingBox()
 {
+	glLineWidth(3);
 	glUseProgram(simple_shader);
 	GLint my_color_location = glGetUniformLocation(simple_shader, "color");
-	glUniform3f(my_color_location, 1,1,0);
+	glUniform3f(my_color_location, 0,1,1);
 
 	GLint umM = glGetUniformLocation(simple_shader, "modelMatrix"); // Find the modelMatrix variable
 	mat4 modelTrans = _world_transform * _model_transform;
 	GLfloat modelMatrix[16];
 	MattoArr(modelMatrix, modelTrans);
 	glUniformMatrix4fv(umM, 1, GL_FALSE, modelMatrix);
+
+	GLint umN = glGetUniformLocation(simple_shader, "normalMatrix"); // Find the normalMatrix variable
+	mat4 normalTrans = this->_world_normal_transform * this->_model_normal_transform;
+	GLfloat normalMatrix[16];
+	MattoArr(normalMatrix, normalTrans);
+	glUniformMatrix4fv(umN, 1, GL_FALSE, normalMatrix);
+
 
 	glBindVertexArray(bounding_box_VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, bounding_box_VBO);
@@ -733,19 +800,27 @@ void MeshModel::drawBoundingBox()
 
 	glDrawElements(GL_LINES, bound_box_indices.size(), GL_UNSIGNED_INT, 0);
 	glFlush();
+	glLineWidth(1);
+
 }
 
 void MeshModel::drawFacesNormals()
 {
 	glUseProgram(simple_shader);
 	GLint my_color_location = glGetUniformLocation(simple_shader, "color");
-	glUniform3f(my_color_location, 1, 0, 0);
+	glUniform3f(my_color_location, 1, 1, 0);
 
 	GLint umM = glGetUniformLocation(simple_shader, "modelMatrix"); // Find the modelMatrix variable
-	mat4 modelTrans = _world_normal_transform * _model_normal_transform;
+	mat4 modelTrans = _world_transform * _model_transform;
 	GLfloat modelMatrix[16];
 	MattoArr(modelMatrix, modelTrans);
 	glUniformMatrix4fv(umM, 1, GL_FALSE, modelMatrix);
+
+	GLint umN = glGetUniformLocation(simple_shader, "normalMatrix"); // Find the normalMatrix variable
+	mat4 normalTrans = this->_world_normal_transform * this->_model_normal_transform;
+	GLfloat normalMatrix[16];
+	MattoArr(normalMatrix, normalTrans);
+	glUniformMatrix4fv(umN, 1, GL_FALSE, normalMatrix);
 
 	glBindVertexArray(face_normal_VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, face_normal_VBO);
@@ -762,10 +837,16 @@ void MeshModel::drawVerticesNormals()
 	glUniform3f(my_color_location, 1, 0, 0);
 
 	GLint umM = glGetUniformLocation(simple_shader, "modelMatrix"); // Find the modelMatrix variable
-	mat4 modelTrans = _world_normal_transform * _model_normal_transform;
+	mat4 modelTrans = _world_transform * _model_transform;
 	GLfloat modelMatrix[16];
 	MattoArr(modelMatrix, modelTrans);
 	glUniformMatrix4fv(umM, 1, GL_FALSE, modelMatrix);
+
+	GLint umN = glGetUniformLocation(simple_shader, "normalMatrix"); // Find the normalMatrix variable
+	mat4 normalTrans = this->_world_normal_transform * this->_model_normal_transform;
+	GLfloat normalMatrix[16];
+	MattoArr(normalMatrix, normalTrans);
+	glUniformMatrix4fv(umN, 1, GL_FALSE, normalMatrix);
 
 	glBindVertexArray(vertex_normal_VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, vertex_normal_VBO);

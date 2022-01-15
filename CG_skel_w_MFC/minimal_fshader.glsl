@@ -319,8 +319,7 @@ float turbulence (vec3 cord)
 
 vec3 marble(vec3 p)
 {
-	float temp = 6.28 * p.x;
-    temp += 8 * turbulence(p);
+	float temp = 6.28 * p.x + 8 * turbulence(p);;
     temp = sin(temp);
 	return marble_color(temp);
 }

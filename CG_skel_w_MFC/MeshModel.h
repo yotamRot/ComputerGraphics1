@@ -44,6 +44,12 @@ struct Vertex {
 	vec3 Bitangent;
 };
 
+struct SimpleVertex {
+	vec3 Position;
+	int isNormal;
+};
+
+
 class MeshModel : public Model
 {
 protected :
@@ -75,7 +81,6 @@ public:
 	unsigned int face_normal_VAO, face_normal_VBO, face_normal_EBO;
 	int modelId;
 
-	//vector<Vertex>       vertices;
 	vector<Vertex>       vertices;
 	vector<unsigned int> indices;
 	bool use_texture;
@@ -88,11 +93,11 @@ public:
 
 	bool use_marble_texture;
 
-	vector<vec3> bound_box_vertices;
+	vector<SimpleVertex> bound_box_vertices;
 	vector<unsigned int> bound_box_indices;
-	vector<vec3> vertices_normals;
+	vector<SimpleVertex> vertices_normals;
 	vector<unsigned int> vertices_normals_indices;
-	vector<vec3> face_normals;
+	vector<SimpleVertex> face_normals;
 	vector<unsigned int> faces_normals_indices;
 
 	vector<vec2> fileTexCord;
