@@ -537,6 +537,7 @@ Scene::Scene() : current_shadow(FLAT),toon_color_number(4),toon_thickness(0.05)
 	isShowWireFrame = false;
 	isSuperSample = false;
 	is_color_animation = 0;
+	is_vertex_animation = 0;
 	axis = MODEL;
 
 }
