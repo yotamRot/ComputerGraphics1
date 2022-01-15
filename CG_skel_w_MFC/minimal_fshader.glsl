@@ -63,6 +63,10 @@ varying vec3 normal;
 // marble
 uniform bool isMarble;
 
+//ununiform material
+uniform bool isNonUniform;
+uniform float MaxY;
+
 void phong_shadow();
 void gouraud_shadow();
 void flat_shadow();
@@ -70,6 +74,9 @@ void toon_shadow();
 vec3 marble(vec3 p);
 
 vec4 textureColor;
+vec3 curColor;
+float cnoise(vec3 P);
+vec3 calcColorSpeciel();
 
 void main() 
 { 
@@ -88,21 +95,38 @@ void main()
 		textureColor = texture(texture1, TexCoord);
 	}
 
-
 	if(shadow == FLAT)
 	{
+		curColor = polygonColor;
 		flat_shadow();
 	}
 	else if(shadow == GOURAUD)
 	{
+		curColor = vertexColor;
 		gouraud_shadow();
 	}
 	else if(shadow == PHONG)
 	{
+		if(isNonUniform)
+		{
+			curColor =  calcColorSpeciel();
+		}
+		else
+		{
+			curColor = vertexColor;
+		}
 		phong_shadow();
 	}
 	else if(shadow == TOON)
 	{
+		if(isNonUniform)
+		{
+			curColor =  calcColorSpeciel();
+		}
+		else
+		{
+			curColor = vertexColor;
+		}
 		toon_shadow();
 	}
 
@@ -120,6 +144,7 @@ void phong_shadow()
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
+	float v_Ka, v_Kd, v_Ks;
     for(int i = 0; i < lights_number; i++)
     {
 		if(useNormalMap)
@@ -149,13 +174,27 @@ void phong_shadow()
                 lightDirection = normalize(lightPosition[i]);
             }
 		}
+
+		if(isNonUniform)
+        {
+            v_Ka = 0.4 + cnoise(fragmentPosition);
+            v_Kd = cnoise(2*fragmentPosition);
+            v_Ks = cnoise(3*fragmentPosition);  
+        }
+        else
+        {
+            v_Ka = Ka;
+            v_Kd = Kd;
+            v_Ks = Ks;
+        }
 		reflectDir = reflect(-lightDirection, normalizeNormal); 
-		ambient  = Ka * La[i] * lightColor[i];
-		diffuse  = Kd * Ld[i] * max(dot(normalizeNormal, lightDirection), 0.0) * lightColor[i]; 
-		specular = Ks * Ls[i] * pow(max(dot(viewDirection, reflectDir), 0.0), alpha) * lightColor[i]; 
-		result += (ambient + diffuse + specular) * vertexColor;
+		ambient  = v_Ka * La[i] * lightColor[i];
+		diffuse  = v_Kd * Ld[i] * max(dot(normalizeNormal, lightDirection), 0.0) * lightColor[i]; 
+		specular = v_Ks * Ls[i] * pow(max(dot(viewDirection, reflectDir), 0.0), alpha) * lightColor[i]; 
+		result += (ambient + diffuse + specular) * curColor;
     }
-		if(useColorAnimation == 1)
+
+	if(useColorAnimation == 1)
 	{
 		fColor = vec4(result*time,1.0) * (useTexture ? textureColor : vec4(1,1,1,1));
 	}
@@ -171,11 +210,11 @@ void gouraud_shadow()
 {
 	if(useColorAnimation == 1)
 	{
-		fColor = vec4(vertexColor*time,1.0) * (useTexture ? textureColor : vec4(1,1,1,1));
+		fColor = vec4(curColor*time, 1.0) * (useTexture ? textureColor : vec4(1,1,1,1));
 	}
 	else
 	{
-		fColor = vec4(vertexColor,1.0) * (useTexture ? textureColor : vec4(1,1,1,1));
+		fColor = vec4(curColor, 1.0) * (useTexture ? textureColor : vec4(1,1,1,1));
 	}
 
 }
@@ -185,11 +224,11 @@ void flat_shadow()
 {
 	if(useColorAnimation == 1)
 	{
-		fColor = vec4(polygonColor * time,1.0) * (useTexture ? textureColor : vec4(1,1,1,1));
+		fColor = vec4(curColor * time,1.0) * (useTexture ? textureColor : vec4(1,1,1,1));
 	}
 	else
 	{
-		fColor = vec4(polygonColor,1.0) * (useTexture ? textureColor : vec4(1,1,1,1));
+		fColor = vec4(curColor,1.0) * (useTexture ? textureColor : vec4(1,1,1,1));
 	}
 }
 
@@ -220,7 +259,7 @@ void toon_shadow()
 	}
 	else
 	{ 
-		color = (max(round(intensity * toonColorNumber),1) / toonColorNumber) * vec4(vertexColor,1);
+		color = (max(round(intensity * toonColorNumber),1) / toonColorNumber) * vec4(curColor,1);
 	}
 	fColor = color;
 }
@@ -322,4 +361,19 @@ vec3 marble(vec3 p)
 	float temp = 6.28 * p.x + 8 * turbulence(p);;
     temp = sin(temp);
 	return marble_color(temp);
+}
+
+vec3 calcColorSpeciel()
+{
+    float precent;
+	if(2*vOriginalPosition.y < MaxY)
+	{
+		precent = 2* vOriginalPosition.y/MaxY;
+		return vec3(1,0,0) *  precent + (1-precent) * vec3(0,1,0);
+	}
+	else
+	{
+		precent = 2*( vOriginalPosition.y - 0.5*MaxY)/(MaxY - 0.5*MaxY);
+		return vec3(0,1,0) *  precent + (1-precent) * vec3(1,0,0);
+	}
 }

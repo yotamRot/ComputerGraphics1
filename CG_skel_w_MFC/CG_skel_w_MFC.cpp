@@ -335,7 +335,7 @@ void animation(int id)
 	}
 	if (scene->is_vertex_animation)
 	{
-		glutTimerFunc(30, animation, -1); // call animation() again in 30 milliseconds
+		glutTimerFunc(300, animation, -1); // call animation() again in 30 milliseconds
 		scene->draw();
 		glutPostRedisplay();
 	}
@@ -799,7 +799,7 @@ void UseEnvironmentCube()
 	}
 	else
 	{
-		glutChangeToMenuEntry(USE_TEXTURE, "Use Cube Map", USE_TEXTURE);
+		glutChangeToMenuEntry(USE_ENVIRNONMENT_CUBE, "Use Cube Map", USE_ENVIRNONMENT_CUBE);
 	}
 }
 

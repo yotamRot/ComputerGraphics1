@@ -72,6 +72,7 @@ public:
 	float ks;
 	float ke;
 	bool is_non_unfiorm;
+	float local_maxY;
 	GLuint my_program;
 	LightType type;
 	GLuint simple_shader;

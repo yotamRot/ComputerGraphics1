@@ -667,7 +667,7 @@ void MeshModel::CalcBounds()
 			min_bound.z = it->Position.z;
 		}
 	}
-	
+	local_maxY = (max_bound.y);
 	x_bound_lenght = fabs(max_bound.x - min_bound.x);
 	y_bound_lenght = fabs(max_bound.y - min_bound.y);
 	z_bound_lenght = fabs(max_bound.z - min_bound.z);
@@ -747,6 +747,14 @@ void MeshModel::draw(bool draw_bounding_box, bool draw_vertix_normals, bool draw
 	glUniform1i(glGetUniformLocation(my_program, "useEnviromentTexture"), use_enviroment_texture);
 
 	glUniform1i(glGetUniformLocation(my_program, "isMarble"), use_marble_texture);
+
+	glUniform1i(glGetUniformLocation(my_program, "isNonUniform"), is_non_unfiorm);
+
+	glUniform1f(glGetUniformLocation(my_program, "MaxY"), local_maxY);
+
+
+
+	 
 
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
