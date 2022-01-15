@@ -169,7 +169,9 @@ MeshModel::MeshModel(string fileName, int modelId, GLuint program, GLuint simple
 	use_normal_map = false;
 	use_enviroment_texture = false;
 	use_marble_texture = false;
-	use_texture = true;
+	use_texture = false;
+	has_texture = false;
+	has_normal_map = false;
 	loadFile(fileName);
 	CalcBounds();
 	SetupMesh();
@@ -395,75 +397,89 @@ void MeshModel::loadFile(string fileName)
 		vertices_normals_indices.push_back(i);
 	}
 	
-	// load and set texture
-	glActiveTexture(GL_TEXTURE0);
-	glGenTextures(1, &texture.id);
-	glBindTexture(GL_TEXTURE_2D,texture.id);
-	// set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// load image, create texture and generate mipmaps
-	int width, height, nrChannels;
-	stbi_set_flip_vertically_on_load(true);
-	unsigned char* data = stbi_load(&(dirnameOf(fileName) + "\\texture.png")[0], &width, &height, &nrChannels, 0);
-	GLenum format;
-	if (data)
-	{
-		if (nrChannels == 1)
-			format = GL_RED;
-		else if (nrChannels == 3)
-			format = GL_RGB;
-		else if (nrChannels == 4)
-			format = GL_RGBA;
-		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-		has_texture = true;
-	}
-	else
-	{
-		has_texture = false;
-	}
-	stbi_image_free(data);
-
-	// load and set texture
-	glActiveTexture(GL_TEXTURE1);
-	glGenTextures(1, &normal_map.id);
-	glBindTexture(GL_TEXTURE_2D, normal_map.id);
-	// set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// load image, create texture and generate mipmaps
 	
+}
+
+
+void MeshModel::loadTexture(string fileName, TextureType type)
+{
+	int width, height, nrChannels;
+	unsigned char* data;
+	GLenum format;
 	stbi_set_flip_vertically_on_load(true);
-	data = stbi_load(&(dirnameOf(fileName) + "\\texture_normal.png")[0], &width, &height, &nrChannels, 0);
-	if (data)
+	if (type == Regular)
 	{
-		if (nrChannels == 1)
-			format = GL_RED;
-		else if (nrChannels == 3)
-			format = GL_RGB;
-		else if (nrChannels == 4)
-			format = GL_RGBA;
-		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-		has_normal_map = true;
+		// load and set texture
+		glActiveTexture(GL_TEXTURE0);
+		glGenTextures(1, &texture.id);
+		glBindTexture(GL_TEXTURE_2D, texture.id);
+		// set the texture wrapping parameters
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		// set texture filtering parameters
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		// load image, create texture and generate mipmaps
+	
+		data = stbi_load(&(fileName)[0], &width, &height, &nrChannels, 0);
+		if (data)
+		{
+			if (nrChannels == 1)
+				format = GL_RED;
+			else if (nrChannels == 3)
+				format = GL_RGB;
+			else if (nrChannels == 4)
+				format = GL_RGBA;
+			glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+			glGenerateMipmap(GL_TEXTURE_2D);
+			has_texture = true;
+		}
+		else
+		{
+			has_texture = false;
+		}
+		stbi_image_free(data);
+		glUniform1i(glGetUniformLocation(my_program, "texture1"), 0);
+
 	}
+
 	else
 	{
-		has_normal_map = false;
-	}
-	stbi_image_free(data);
+		// load and set texture
+		glActiveTexture(GL_TEXTURE1);
+		glGenTextures(1, &normal_map.id);
+		glBindTexture(GL_TEXTURE_2D, normal_map.id);
+		// set the texture wrapping parameters
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		// set texture filtering parameters
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		// load image, create texture and generate mipmaps
 
+		data = stbi_load(&(fileName)[0], &width, &height, &nrChannels, 0);
+		if (data)
+		{
+			if (nrChannels == 1)
+				format = GL_RED;
+			else if (nrChannels == 3)
+				format = GL_RGB;
+			else if (nrChannels == 4)
+				format = GL_RGBA;
+			glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+			glGenerateMipmap(GL_TEXTURE_2D);
+			has_normal_map = true;
+		}
+		else
+		{
+			has_normal_map = false;
+		}
+		stbi_image_free(data);
+		glUniform1i(glGetUniformLocation(my_program, "normalMap"), 1);
+
+	}
 
 	glUseProgram(my_program);
-	glUniform1i(glGetUniformLocation(my_program, "texture1"), 0);
-	glUniform1i(glGetUniformLocation(my_program, "normalMap"), 1);
 }
 
 void MeshModel::SetupMesh()

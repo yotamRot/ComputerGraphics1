@@ -136,6 +136,7 @@ public:
 	void ApplyVertexAnimation();
 	void ApplyColorAnimationGradient();
 	void ChangeActiveModelTextureWrap(TextureWrap wrap);
+	void LoadActiveModelTexture(const string path, TextureType type);
 	void ChangeShadow(Shadow s);
 	vec4 GetAmbientRGB();
 	vec3 GetLightRGB();

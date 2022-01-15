@@ -176,7 +176,11 @@ void Scene::Zoom(ZoomDirection direction)
 	}
 }
 
-
+void Scene::LoadActiveModelTexture(const string path , TextureType type)
+{
+	MeshModel* curModel = (MeshModel*)models.at(activeModel);
+	curModel->loadTexture(path, type);
+}
 void Scene::loadEnvironmentMapping(string directoryPath)
 {
 	isHasEnvironmentCube = envBox.load(directoryPath);
@@ -366,10 +370,10 @@ void Scene::draw()
 	glUniform1f(uToonT, toon_thickness);
 	GLint uColorAnimation = glGetUniformLocation(program, "useColorAnimation"); // Find the useColorAnimation variable
 	glUniform1i(uColorAnimation, is_color_animation);
-	GLint uVertexAnimation = glGetUniformLocation(program, "useColorAnimationGradient"); // Find the useColorAnimation variable
-	glUniform1i(uVertexAnimation, is_color_animation_gradient);
-	GLint uColorAnimationGradient = glGetUniformLocation(program, "useVertexAnimation"); // Find the useColorAnimation variable
+	GLint uVertexAnimation = glGetUniformLocation(program, "useVertexAnimation"); // Find the useVertexAnimation variable
 	glUniform1i(uVertexAnimation, is_vertex_animation);
+	GLint uColorAnimationGradient = glGetUniformLocation(program, "useColorAnimationGradient"); // Find the useColorAnimationGradient variable
+	glUniform1i(uColorAnimationGradient, is_color_animation_gradient);
 	GLint uTime = glGetUniformLocation(program, "time"); // Find the time variable
 	timer = timer - delta;
 	if (timer < 0)

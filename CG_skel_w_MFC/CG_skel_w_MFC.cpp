@@ -81,6 +81,8 @@
 #define USE_ENVIRNONMENT_CUBE		5
 #define USE_ENVIRNONMENT_TEXTURE	6
 #define USE_MARBLE_TEXTURE			7
+#define LOAD_TEXTURE				8
+#define LOAD_NORMAL_TEXTURE			9
 
 //WRAP menu
 #define FROM_FILE					1
@@ -456,6 +458,21 @@ void OpenEnvironmentCubeTexturesFile()
 	}
 }
 
+void OpenTexturesFile(TextureType type)
+{
+	CFileDialog dlg(TRUE, _T(".jpg"), NULL, NULL, _T("*.jpg|*.*"));
+	if (dlg.DoModal() == IDOK)
+	{
+		glutSetMenu(menuObjectsId);
+		std::string path = ((LPCTSTR)dlg.GetPathName());
+		scene->LoadActiveModelTexture(path , type);
+	}
+	else
+	{
+		return;
+	}
+}
+
 void AddCube()
 {
 	glutSetMenu(menuObjectsId);
@@ -792,7 +809,7 @@ void UseTexture()
 	}
 	else
 	{
-		glutChangeToMenuEntry(USE_TEXTURE, "Use Cube Map", USE_TEXTURE);
+		glutChangeToMenuEntry(USE_TEXTURE, "Use Texture", USE_TEXTURE);
 	}
 }
 
@@ -804,7 +821,7 @@ void UseEnvironmentCube()
 	}
 	else
 	{
-		glutChangeToMenuEntry(USE_ENVIRNONMENT_CUBE, "Use Cube Map", USE_ENVIRNONMENT_CUBE);
+		glutChangeToMenuEntry(USE_ENVIRNONMENT_CUBE, "Use Enviroment Cube", USE_ENVIRNONMENT_CUBE);
 	}
 }
 
@@ -855,6 +872,12 @@ void textureMenu(int id)
 		break;
 	case USE_MARBLE_TEXTURE:
 		UseMarbleTexture();
+		break;
+	case LOAD_TEXTURE:
+		OpenTexturesFile(Regular);
+		break;
+	case LOAD_NORMAL_TEXTURE:
+		OpenTexturesFile(Normal_Texture);
 		break;
 	}
 	scene->draw();
@@ -1036,6 +1059,8 @@ void CreateTextureMenu()
 	glutAddMenuEntry("Use environment cube", USE_ENVIRNONMENT_CUBE);
 	glutAddMenuEntry("Use environment texture", USE_ENVIRNONMENT_TEXTURE);
 	glutAddMenuEntry("Use marble texture", USE_MARBLE_TEXTURE);
+	glutAddMenuEntry("Load texture", LOAD_TEXTURE);
+	glutAddMenuEntry("Load normal texture", LOAD_NORMAL_TEXTURE);
 }
 
 void CreateMainMenu()

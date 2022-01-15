@@ -29,6 +29,14 @@ enum TextureWrap
 	Sphere
 };
 
+enum TextureType
+{
+	Regular,
+	Normal_Texture
+};
+
+
+
 struct Texture {
 	unsigned int id;
 	string type;
@@ -109,6 +117,7 @@ public:
 	MeshModel(string fileName, int modelId, GLuint program, GLuint simpleShader);
 	~MeshModel(void);
 	void loadFile(string fileName);
+	void loadTexture(string fileName, TextureType type);
 	void draw(bool draw_bounding_box, bool draw_vertix_normals, bool draw_faces_normals);
 	void drawBoundingBox();
 	void drawVerticesNormals();
