@@ -209,5 +209,5 @@ mat4 RotateY( float theta)
 
 float timeToAngle(float time)
 {
-    return 60 * (2* time -1 );
+    return 180 * (2* time -1 );
 }

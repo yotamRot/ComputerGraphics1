@@ -546,6 +546,17 @@ void MeshModel::FileMapping()
 	}
 }
 
+void MeshModel::SphereMapping()
+{
+	vec3 normalizePoint;
+	for (auto it = vertices.begin(); it != vertices.end(); ++it)
+	{
+		normalizePoint = normalize(it->Position);
+		it->TexCoords.x = 0.5f + (atan2f(normalizePoint.x, normalizePoint.z)) / (2 * M_PI);
+		it->TexCoords.y = 0.5f - asinf(normalizePoint.y)/( M_PI);
+	}
+}
+
 void MeshModel::CylinderMapping()
 {
 	for (auto it = vertices.begin(); it != vertices.end(); ++it)
@@ -554,6 +565,7 @@ void MeshModel::CylinderMapping()
 		it->TexCoords.y = it->Position.y;
 	}
 }
+
 
 void MeshModel::PlanarMapping()
 {
@@ -1059,7 +1071,7 @@ mat4 matrixInverse(mat4& mat , Transformation T)
 mat4 MeshModel::moveModel(TransformationDirection direction, TransAxis axis)
 {
 	mat4 tranlateMatrix;
-	GLfloat move = 0.1; //(x_bound_lenght + y_bound_lenght + z_bound_lenght) / 3;
+	GLfloat move = (x_bound_lenght + y_bound_lenght + z_bound_lenght) / 3;
 	if (dynamic_cast<LightModel*>(this))
 	{
 		move = move * 10;

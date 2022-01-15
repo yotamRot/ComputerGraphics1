@@ -83,6 +83,7 @@
 #define FROM_FILE					1
 #define PLANAR						2
 #define CYLINDER					3
+#define SPHERE						4
 
 #define WHEEL_SCROLL_UP				3
 #define WHEEL_SCROLL_DOWN			4
@@ -826,6 +827,9 @@ void textureWrapMenu(int id)
 	case CYLINDER:
 		scene->ChangeActiveModelTextureWrap(Cylinder);
 		break;
+	case SPHERE:
+		scene->ChangeActiveModelTextureWrap(Sphere);
+		break;
 	}
 	scene->draw();
 }
@@ -967,6 +971,7 @@ void CreateTextureMenu()
 	glutAddMenuEntry("obj cords", FROM_FILE);
 	glutAddMenuEntry("planar", PLANAR);
 	glutAddMenuEntry("cylandar", CYLINDER);
+	glutAddMenuEntry("sphere", SPHERE);
 
 
 	menuTexture = glutCreateMenu(textureMenu);

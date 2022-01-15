@@ -25,7 +25,8 @@ enum TextureWrap
 {
 	from_file,
 	planar,
-	Cylinder
+	Cylinder,
+	Sphere
 };
 
 struct Texture {
@@ -126,6 +127,7 @@ public:
 	void FileMapping();
 	void CylinderMapping();
 	void PlanarMapping();
+	void SphereMapping();
 };
 
 class PrimMeshModel : public MeshModel

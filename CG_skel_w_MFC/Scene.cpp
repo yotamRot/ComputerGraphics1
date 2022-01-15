@@ -747,6 +747,9 @@ void Scene::ChangeActiveModelTextureWrap(TextureWrap wrap)
 	case Cylinder:
 		cur_model->CylinderMapping();
 		break;
+	case Sphere:
+		cur_model->SphereMapping();
+		break;
 	default:
 		break;
 	}
