@@ -366,7 +366,9 @@ void Scene::draw()
 	glUniform1f(uToonT, toon_thickness);
 	GLint uColorAnimation = glGetUniformLocation(program, "useColorAnimation"); // Find the useColorAnimation variable
 	glUniform1i(uColorAnimation, is_color_animation);
-	GLint uVertexAnimation = glGetUniformLocation(program, "useVertexAnimation"); // Find the useColorAnimation variable
+	GLint uVertexAnimation = glGetUniformLocation(program, "useColorAnimationGradient"); // Find the useColorAnimation variable
+	glUniform1i(uVertexAnimation, is_color_animation_gradient);
+	GLint uColorAnimationGradient = glGetUniformLocation(program, "useVertexAnimation"); // Find the useColorAnimation variable
 	glUniform1i(uVertexAnimation, is_vertex_animation);
 	GLint uTime = glGetUniformLocation(program, "time"); // Find the time variable
 	timer = timer - delta;
@@ -545,6 +547,7 @@ Scene::Scene() : current_shadow(FLAT),toon_color_number(4),toon_thickness(0.05)
 	isShowWireFrame = false;
 	isSuperSample = false;
 	is_color_animation = 0;
+	is_color_animation_gradient = 0;
 	is_vertex_animation = 0;
 	axis = MODEL;
 
@@ -838,6 +841,18 @@ void Scene::ApplyVertexAnimation()
 	}
 }
 
+
+void Scene::ApplyColorAnimationGradient()
+{
+	if (is_color_animation_gradient == 1)
+	{
+		is_color_animation_gradient = 0;
+	}
+	else
+	{
+		is_color_animation_gradient = 1;
+	}
+}
 
 void Scene::ChangeShadow(Shadow s)
 {

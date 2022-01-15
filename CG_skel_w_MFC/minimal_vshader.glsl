@@ -65,6 +65,7 @@ uniform sampler2D normalMap;
 
 uniform float toonTickness;
 uniform int useVertexAnimation;
+uniform int useColorAnimationGradient;
 uniform vec3 random;
 varying vec3 normal;
 
@@ -314,14 +315,23 @@ float cnoise(vec3 P){
 vec3 calcColorSpeciel()
 {
     float precent;
-	if(2*vPosition.y < MaxY)
+    float curY;
+    if(useColorAnimationGradient == 1)
+    {
+        curY =mod((vPosition.y + time * MaxY),MaxY);
+    }
+    else
+    {
+        curY = vPosition.y;
+    }
+	if(2*curY < MaxY)
 	{
-		precent = 2* vPosition.y/MaxY;
+		precent = 2* curY/MaxY;
 		return vec3(1,0,0) *  precent + (1-precent) * vec3(0,1,0);
 	}
 	else
 	{
-		precent = 2*( vPosition.y - 0.5*MaxY)/(MaxY - 0.5*MaxY);
+		precent = 2*( curY- 0.5*MaxY)/(MaxY - 0.5*MaxY);
 		return vec3(0,1,0) *  precent + (1-precent) * vec3(1,0,0);
 	}
 }

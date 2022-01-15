@@ -47,6 +47,8 @@
 #define NON_UNIFORM					9
 #define COLOR_ANIMATION				10
 #define VERTEX_ANIMATION			11
+#define COLOR_ANIMATION_GRADIENT	12
+
 
 #define ORTHOGRPHIC_PARAMETERS		1
 #define PRESPECTIVE_PARAMETERS		2
@@ -327,15 +329,9 @@ void CreateNonUniform()
 
 void animation(int id)
 {
-	if (scene->is_color_animation)
+	if (scene->is_color_animation || scene->is_vertex_animation || scene->is_color_animation_gradient)
 	{
 		glutTimerFunc(30, animation, -1); // call animation() again in 30 milliseconds
-		scene->draw();
-		glutPostRedisplay();
-	}
-	if (scene->is_vertex_animation)
-	{
-		glutTimerFunc(300, animation, -1); // call animation() again in 30 milliseconds
 		scene->draw();
 		glutPostRedisplay();
 	}
@@ -344,6 +340,12 @@ void animation(int id)
 void CreateColorAnimation()
 {
 	scene->ApplyColorAnimation();
+	animation(0);
+}
+
+void CreateColorAnimationGradient()
+{
+	scene->ApplyColorAnimationGradient();
 	animation(0);
 }
 
@@ -757,6 +759,9 @@ void rendererMenu(int id)
 		case VERTEX_ANIMATION:
 			CreateVertexAnimation();
 			break;
+		case COLOR_ANIMATION_GRADIENT:
+			CreateColorAnimationGradient();
+			break;
 	}
 
 	scene->draw();
@@ -993,6 +998,7 @@ void CreateRendererMenu()
 	//glutAddMenuEntry("Apply Crazy Colors", CRAZY_COLORS);
 	glutAddMenuEntry("Apply Non Uniform", NON_UNIFORM);
 	glutAddMenuEntry("Apply Color Animation", COLOR_ANIMATION);
+	glutAddMenuEntry("Apply Color Animation Gradient", COLOR_ANIMATION_GRADIENT);
 	glutAddMenuEntry("Apply Vertex Animation", VERTEX_ANIMATION);
 }
 

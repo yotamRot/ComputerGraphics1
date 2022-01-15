@@ -67,6 +67,7 @@ public:
 	float toon_thickness;
 	int toon_color_number;
 	int is_color_animation;
+	int is_color_animation_gradient;
 	int is_vertex_animation;
 	Scene();
 	//Scene(Renderer* renderer);
@@ -133,6 +134,7 @@ public:
 	void ApplyNonUniform();
 	void ApplyColorAnimation();
 	void ApplyVertexAnimation();
+	void ApplyColorAnimationGradient();
 	void ChangeActiveModelTextureWrap(TextureWrap wrap);
 	void ChangeShadow(Shadow s);
 	vec4 GetAmbientRGB();

@@ -55,6 +55,7 @@ uniform bool useEnviromentTexture;
 
 uniform float time;
 uniform int useColorAnimation;
+uniform int useColorAnimationGradient;
 
 uniform int toonColorNumber;
 
@@ -365,6 +366,7 @@ vec3 marble(vec3 p)
 
 vec3 calcColorSpeciel()
 {
+
     float precent;
 	if(2*vOriginalPosition.y < MaxY)
 	{
