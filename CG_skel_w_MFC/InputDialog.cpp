@@ -71,6 +71,7 @@ vec3 rtf;
 vec3 lbn;
 vec4 l; //la,ld,ls,alpha
 vec3 RGB;
+vec3 light_RGB;
 vec4 ambient_rgbl;
 vec4 k;
 int toon_number;
@@ -103,6 +104,12 @@ void SetToonParams(int number,float thick)
 void SetRGBLa(vec4& rgbl)
 {
     ambient_rgbl = rgbl;
+
+}
+
+void SetLightRGB(vec3& rgb)
+{
+    light_RGB = rgb;
 
 }
 
@@ -711,6 +718,70 @@ void RgbDialog::OnPaint()
     
     CRect l_rect(100, 282, 450, 300);
     dc.DrawText(CString(L_A_EDIT_TITLE), -1, &l_rect, DT_SINGLELINE);
+
+    mRedEdit.SetFocus();
+}
+
+
+// ----------------------
+//    Class LightRGBDialog
+// ----------------------
+
+LightRGBDialog::LightRGBDialog(CString title)
+    : CInputDialog(title), mRed(light_RGB.x), mGreen(light_RGB.y), mBlue(light_RGB.z)
+{ }
+
+LightRGBDialog::~LightRGBDialog()
+{ }
+
+
+vec3 LightRGBDialog::GetRGB()
+{
+    return vec3(mRed, mGreen, mBlue);
+}
+
+void LightRGBDialog::DoDataExchange(CDataExchange* pDX)
+{
+    CInputDialog::DoDataExchange(pDX);
+    DDX_Text(pDX, IDC_RED_EDIT, mRed);
+    DDX_Text(pDX, IDC_GREEN_EDIT, mGreen);
+    DDX_Text(pDX, IDC_BLUE_EDIT, mBlue);
+}
+
+// LightRGBDialog message handlers
+BEGIN_MESSAGE_MAP(LightRGBDialog, CInputDialog)
+    ON_WM_CREATE()
+    ON_WM_PAINT()
+END_MESSAGE_MAP()
+
+int LightRGBDialog::OnCreate(LPCREATESTRUCT lpcs)
+{
+
+    mRedEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(150, 70, 340, 90), this, IDC_RED_EDIT);
+
+    mGreenEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(150, 140, 340, 160), this, IDC_GREEN_EDIT);
+
+    mBlueEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(150, 210, 340, 230), this, IDC_BLUE_EDIT);
+
+    return 0;
+}
+
+void LightRGBDialog::OnPaint()
+{
+    CPaintDC dc(this);
+    dc.SetBkMode(TRANSPARENT);
+
+    CRect r_rect(100, 72, 450, 90);
+    dc.DrawText(CString(RED_EDIT_TITLE), -1, &r_rect, DT_SINGLELINE);
+
+    CRect g_rect(100, 142, 450, 160);
+    dc.DrawText(CString(GREEN_EDIT_TITLE), -1, &g_rect, DT_SINGLELINE);
+
+    CRect b_rect(100, 212, 450, 230);
+    dc.DrawText(CString(BLUE_EDIT_TITLE), -1, &b_rect, DT_SINGLELINE);
 
     mRedEdit.SetFocus();
 }

@@ -1123,7 +1123,7 @@ LightModel::LightModel(int model_id, int lightIndex, GLuint program) : lightInde
 
 vec4 LightModel::GetL()
 {
-	return vec4();
+	return vec4(La,Ld,Ls,l_alpha);
 }
 
 mat4 matrixInverse(mat4& mat , Transformation T)

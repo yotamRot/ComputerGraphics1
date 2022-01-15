@@ -62,6 +62,7 @@
 #define CONTROL_ACTIVE_LIGHT		2
 #define CHANGE_PARAMETERS			3
 #define CHANGE_AMBIENT				4
+#define CHANGE_LIGHT_COLOR			5
 
 //shadow menu
 #define FLAT_SHADOW					1
@@ -182,6 +183,16 @@ void ChangeAmbientColors()
 	if (dlg.DoModal() == IDOK) {
 		vec4 rgbl = dlg.GetRGBLa();
 		scene->ChangeAmbientRgbLa(rgbl);
+	}
+}
+
+void ChangeLightColors()
+{
+	SetLightRGB(scene->GetLightRGB());
+	LightRGBDialog dlg;
+	if (dlg.DoModal() == IDOK) {
+		vec3 rgb = dlg.GetRGB();
+		scene->ChangeLightRgb(rgb);
 	}
 }
 
@@ -624,6 +635,9 @@ void lightsMenu(int id)
 		case CHANGE_PARAMETERS:
 			ChangeLightLParams();
 			break;
+		case CHANGE_LIGHT_COLOR:
+			ChangeLightColors();
+			break;
 		case CHANGE_AMBIENT:
 			ChangeAmbientColors();
 			break;
@@ -887,6 +901,7 @@ void CreateLightMenu()
 	glutAddSubMenu("Look At Light", menuLookAtLightId);
 	glutAddSubMenu("Select Light", menuSwitchToLightId);
 	glutAddMenuEntry("Change Active Light L Parameters", CHANGE_PARAMETERS);
+	glutAddMenuEntry("Change Active Light Color", CHANGE_LIGHT_COLOR);
 	glutAddSubMenu("Select Active Light Type", menuSwitchLightType);
 	glutAddMenuEntry("Edit Ambient Light", CHANGE_AMBIENT);
 }
@@ -941,8 +956,8 @@ void CreateRendererMenu()
 	glutAddMenuEntry("Show Bounding Box", SHOW_BOUNDING_BOX);
 	glutAddMenuEntry("Change Color", CHANGE_OBJECT_COLOR);
 	glutAddMenuEntry("Show Wire Frame", WIRE_FRAME);
-	glutAddMenuEntry("Show Fog", FOG);
-	glutAddMenuEntry("Use SuperSample", SUPER_SAMPLE);
+	//glutAddMenuEntry("Show Fog", FOG);
+	//glutAddMenuEntry("Use SuperSample", SUPER_SAMPLE);
 	glutAddMenuEntry("Apply Crazy Colors", CRAZY_COLORS);
 	glutAddMenuEntry("Apply Non Uniform", NON_UNIFORM);
 	glutAddMenuEntry("Apply Color Animation", COLOR_ANIMATION);

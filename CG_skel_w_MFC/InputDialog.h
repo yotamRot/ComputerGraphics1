@@ -10,6 +10,7 @@ void SetLbnRtf(vec3& Ilbn, vec3& Irtf);
 void SetLightL(vec4& l_params);
 void SetColorParam(vec3& colors, vec4& k_params);
 void SetRGBLa(vec4& rgbl);
+void SetLightRGB(vec3& rgb);
 void SetToonParams(int number, float thick);
 // ------------------------
 //    Class CInputDialog
@@ -258,6 +259,30 @@ protected:
     CEdit mGreenEdit;
     CEdit mBlueEdit;
     CEdit mLaEdit;
+
+
+    virtual void DoDataExchange(CDataExchange* pDX);
+
+    afx_msg int OnCreate(LPCREATESTRUCT lpcs);
+    afx_msg void OnPaint();
+    DECLARE_MESSAGE_MAP()
+};
+
+class LightRGBDialog : public CInputDialog
+{
+public:
+    LightRGBDialog(CString title = "Input Dialog");
+    virtual ~LightRGBDialog();
+
+    vec3 GetRGB();  //R G B
+
+protected:
+    float mRed;
+    float mGreen;
+    float mBlue;
+    CEdit mRedEdit;
+    CEdit mGreenEdit;
+    CEdit mBlueEdit;
 
 
     virtual void DoDataExchange(CDataExchange* pDX);

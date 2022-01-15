@@ -112,6 +112,13 @@ void Scene::ChangeAmbientRgbLa(vec4 & rgbl)
 	lights.at(0)->La = rgbl.w;
 }
 
+void Scene::ChangeLightRgb(vec3& rgb)
+{
+	lights.at(activeLight)->light_color.x = rgb.x;
+	lights.at(activeLight)->light_color.y = rgb.y;
+	lights.at(activeLight)->light_color.z = rgb.z;
+}
+
 
 
 void Scene::Zoom(ZoomDirection direction)
@@ -838,6 +845,11 @@ void Scene::ChangeShadow(Shadow s)
 vec4 Scene::GetAmbientRGB()
 {
 	return vec4(lights.at(0)->light_color, lights.at(0)->La);
+}
+
+vec3 Scene::GetLightRGB()
+{
+	return lights.at(activeLight)->light_color;
 }
 
 void Camera::MaintainRatio(float widthRatio, float heightRatio, Projection proj)

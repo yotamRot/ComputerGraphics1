@@ -116,6 +116,7 @@ public:
 	void ChangeActiveLightL(vec4& l_params);
 	void ChangeToonParams(int number, float thick);
 	void ChangeAmbientRgbLa(vec4& rgbl);
+	void ChangeLightRgb(vec3& rgb);
 	void Zoom(ZoomDirection direction);
 	int activeModel;
 	int activeLight;
@@ -135,6 +136,7 @@ public:
 	void ChangeActiveModelTextureWrap(TextureWrap wrap);
 	void ChangeShadow(Shadow s);
 	vec4 GetAmbientRGB();
+	vec3 GetLightRGB();
 	GLuint program;
 	GLuint light_program;
 	GLuint enviroment_texture_program;
