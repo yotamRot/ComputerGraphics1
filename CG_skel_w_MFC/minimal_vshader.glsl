@@ -182,10 +182,19 @@ void main()
                 v_Ks = Ks;
                 Ccolor = vertexColor;
             }
+            float shininess;
+            if(lights_number > 1)
+            {
+                shininess = alpha;
+            }
+            else
+            {
+                shininess = 2;
+            }
 	        reflectDir = reflect(-lightDirection, normalizeNormal); 
 	        ambient  = v_Ka * La[i] * lightColor[i];
 	        diffuse  = v_Kd * Ld[i] * max(dot(normalizeNormal, lightDirection), 0.0) * lightColor[i]; 
-            specular = v_Ks * Ls[i] * pow(max(dot(viewDirection, reflectDir), 0.0), alpha) * lightColor[i]; 
+            specular = v_Ks * Ls[i] * pow(max(dot(viewDirection, reflectDir), 0.0), shininess) * lightColor[i]; 
 	        result += (ambient + diffuse + specular) * Ccolor;
         }
 
