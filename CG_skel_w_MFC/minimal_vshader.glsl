@@ -169,6 +169,7 @@ void main()
                     lightDirection = normalize(lightPosition[i]);
                 }
             }
+
             if(isNonUniform)
             {
                 v_Ka = cnoise(fragmentPosition);
@@ -181,7 +182,14 @@ void main()
                 v_Ka = Ka;
                 v_Kd = Kd;
                 v_Ks = Ks;
-                Ccolor = vertexColor;
+                if (useColorAnimationGradient == 1)
+		        {
+			        Ccolor =  calcColorSpeciel();
+		        }
+		        else
+		        {
+			        Ccolor = vertexColor;
+		        }
             }
             float shininess;
             if(lights_number > 1)
@@ -206,6 +214,7 @@ void main()
         }
         else // FLAT
         {
+            
             polygonColor = result;
             shadow = FLAT;
         }
@@ -222,10 +231,7 @@ void main()
 	    }
 
     }
-//	if(useVertexAnimation == 1)
-//	{
-//		fragmentPosition = fragmentPosition;
-//	}
+
     gl_Position = projectionMatrix * vec4(fragmentPosition,1.0);
 }
 

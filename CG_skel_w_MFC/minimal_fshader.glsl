@@ -108,7 +108,7 @@ void main()
 	}
 	else if(shadow == PHONG)
 	{
-		if(isNonUniform)
+		if(isNonUniform || useColorAnimationGradient == 1)
 		{
 			curColor =  calcColorSpeciel();
 		}
@@ -120,7 +120,7 @@ void main()
 	}
 	else if(shadow == TOON)
 	{
-		if(isNonUniform)
+		if(isNonUniform ||  useColorAnimationGradient == 1)
 		{
 			curColor =  calcColorSpeciel();
 		}
@@ -375,16 +375,24 @@ vec3 marble(vec3 p)
 
 vec3 calcColorSpeciel()
 {
-
     float precent;
-	if(2*vOriginalPosition.y < MaxY)
+    float curY;
+    if(useColorAnimationGradient == 1)
+    {
+        curY =mod((vOriginalPosition.y + time * MaxY),MaxY);
+    }
+    else
+    {
+        curY = vOriginalPosition.y;
+    }
+	if(2*curY < MaxY)
 	{
-		precent = 2* vOriginalPosition.y/MaxY;
+		precent = 2* curY/MaxY;
 		return vec3(1,0,0) *  precent + (1-precent) * vec3(0,1,0);
 	}
 	else
 	{
-		precent = 2*( vOriginalPosition.y - 0.5*MaxY)/(MaxY - 0.5*MaxY);
+		precent = 2*( curY- 0.5*MaxY)/(MaxY - 0.5*MaxY);
 		return vec3(0,1,0) *  precent + (1-precent) * vec3(1,0,0);
 	}
 }
