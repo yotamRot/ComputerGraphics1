@@ -154,7 +154,7 @@ class CameraModel : public MeshModel
 		int cameraIndex;
 		mat4 _w_TransformInv;
 		mat4 _m_TransformInv;
-		CameraModel(int cameraIndex, GLuint program);
+		CameraModel(int model_id, int cameraIndex, GLuint program);
 
 
 };

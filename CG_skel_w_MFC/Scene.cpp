@@ -883,7 +883,8 @@ vec3 Camera::Getrtf()
 int Scene::addCamera()
 {
 	int newCameraIndex = cameras.size();
-	CameraModel* cameraModel = new CameraModel(newCameraIndex, program);
+	int activeModel = models.size();
+	CameraModel* cameraModel = new CameraModel(activeModel, newCameraIndex, program);
 	Camera* newCamera = new Camera(vec3(-2, -2, 0.5), vec3(2, 2, 50), models.size(), cameraModel);
 	cameras.push_back(newCamera);
 	models.push_back(cameraModel);

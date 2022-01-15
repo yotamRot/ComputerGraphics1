@@ -995,7 +995,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	//UpdateTriangleIlluminationParams();
 }
 
-CameraModel::CameraModel(int cameraIndex, GLuint program) : cameraIndex(cameraIndex)
+CameraModel::CameraModel(int model_id, int cameraIndex, GLuint program) : cameraIndex(cameraIndex)
 {
 	ka = 0.5;
 	kd = 0.8;
@@ -1003,34 +1003,77 @@ CameraModel::CameraModel(int cameraIndex, GLuint program) : cameraIndex(cameraIn
 	has_normal_map = has_texture = use_normal_map = use_texture = false;
 	//ke = 1.0;
 	//is_non_unfiorm = false;
-	//triangles = new vector<Triangle>;
 	//Normal curFaceNormal;
-	//vec3 p1, p2, p3;
-	//mesh_color = GREEN;
+
 	////faces_normal_end_positions = new vector<vec3>;
 
 	//Triangle curTriangle;
 	//_world_transform[2][3] = 2; //initialized same as camera regarding location
 
-
-	//// first triangle
-	//p1 = vec3(0.1, 0, 0); // bottom left
-	//p2 = vec3(-0.1, 0, 0); // top left
-	//p3 = vec3(0, 0, -0.5); // bottom right
-	//curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 1, 0), false, face_normal);
-	//curTriangle = Triangle(p1, p2, p3, mesh_color, false, curFaceNormal);
-	//triangles->push_back(curTriangle);
-
-	//// second triangle
-	//p1 = vec3(0, 0.1, 0); // bottom left
-	//p2 = vec3(0, -0.1, 0); // top left
-	//p3 = vec3(0, 0, -0.5); // bottom right
-	//curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(1, 0, 0), false, face_normal);
-	//curTriangle = Triangle(p1, p2, p3, mesh_color, false, curFaceNormal);
-	//triangles->push_back(curTriangle);
-	//
 	//bound_box_vertices = CalcBounds();
 	//UpdateTriangleIlluminationParams();
+	modelId = model_id;
+	my_program = program;
+	mesh_color = GREEN;
+	has_normal_map = has_texture = use_normal_map = use_texture = false;
+	//triangles = new vector<Triangle>;
+	//Normal curFaceNormal;
+	vec3 p1, p2, p3;
+	////faces_normal_end_positions = new vector<vec3>;
+
+	//Triangle curTriangle;
+	//_world_transform[2][3] = -2; //initialized same as camera regarding location
+
+	Vertex temp;
+	// first triangle
+	p1 = vec3(0.1, 0, 0); // bottom left
+	temp.Position = p1;
+	vertices.push_back(temp);
+	p2 = vec3(-0.1, 0, 0); // top left
+	temp.Position = p2;
+	vertices.push_back(temp);
+	p3 = vec3(0, 0, -0.1); // bottom right
+	temp.Position = p3;
+	vertices.push_back(temp);
+	// first triangle other side
+	p1 = vec3(0.1, 0, 0); // bottom left
+	temp.Position = p1;
+	vertices.push_back(temp);
+	p2 = vec3(-0.1, 0, 0); // top left
+	temp.Position = p2;
+	vertices.push_back(temp);
+	p3 = vec3(0, 0, -0.1); // bottom right
+	temp.Position = p3;
+	vertices.push_back(temp);
+
+	// second triangle
+	p1 = vec3(0, 0.1, 0); // bottom left
+	temp.Position = p1;
+	vertices.push_back(temp);
+	p2 = vec3(0, -0.1, 0); // top left
+	temp.Position = p2;
+	vertices.push_back(temp);
+	p3 = vec3(0, 0, -0.1); // bottom right
+	temp.Position = p3;
+	vertices.push_back(temp);
+	// second triangle other side
+	p1 = vec3(0, 0.1, 0); // bottom left
+	temp.Position = p1;
+	vertices.push_back(temp);
+	p2 = vec3(0, -0.1, 0); // top left
+	temp.Position = p2;
+	vertices.push_back(temp);
+	p3 = vec3(0, 0, -0.1); // bottom right
+	temp.Position = p3;
+	vertices.push_back(temp);
+
+	for (int i = 0; i < vertices.size(); i++)
+	{
+		indices.push_back(i);
+	}
+
+	CalcBounds();
+	SetupMesh();
 }
 
 LightModel::LightModel(int model_id, int lightIndex, GLuint program) : 
