@@ -78,6 +78,7 @@ enum Transformation
 	SCALE,
 	MOVE,
 	ROTATE,
+	MOVEMENT_PARAM
 };
 
 enum Projection

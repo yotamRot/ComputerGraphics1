@@ -104,7 +104,7 @@
 
 
 Scene *scene;
-
+float movment_power = 1;
 int last_x,last_y;
 int oldWidth,oldHeight;
 bool newRotate = false;
@@ -538,7 +538,7 @@ void keyboard( unsigned char key, int x, int y )
 		AfxMessageBox(_T("Check Language is English and Caps Lock is disable"));
 		return;
 	}
-	scene->manipulateActiveModel(curTramsformation, axis,scene->GetTrasformationAxis(),10);
+	scene->manipulateActiveModel(curTramsformation, axis,scene->GetTrasformationAxis(),10, movment_power);
 	scene->draw();
 	glutPostRedisplay();
 }
@@ -584,8 +584,8 @@ void motion(int x, int y)
 	
 	if (newRotate)
 	{
-		scene->manipulateActiveModel(ROTATE, Y_dir, MODEL, dx);
-		scene->manipulateActiveModel(ROTATE, X_dir, MODEL, dy);
+		scene->manipulateActiveModel(ROTATE, Y_dir, MODEL, dx, movment_power);
+		scene->manipulateActiveModel(ROTATE, X_dir, MODEL, dy, movment_power);
 		//scene->rotateAroundActiveModel(dx, dy);
 		scene->draw();
 		glutPostRedisplay();
@@ -700,7 +700,19 @@ void fileMenu(int id)
 
 void transformationMenu(int id)
 {
-	curTramsformation = (Transformation)id;
+	if (id = MOVEMENT_PARAM)
+	{
+		SetMovementStep(movment_power);
+		CMovementDialog dlg;
+		if (dlg.DoModal() == IDOK) {
+			movment_power = dlg.GetMovement();
+		}
+	}
+	else
+	{
+		curTramsformation = (Transformation)id;
+	}
+	
 }
 
 void transAxiesMenu(int id)
@@ -952,6 +964,7 @@ void CreateTransformationMenus()
 	glutAddMenuEntry("Move", MOVE);
 	glutAddMenuEntry("Rotate", ROTATE);
 	glutAddMenuEntry("Scale", SCALE);
+	glutAddMenuEntry("Change Movement Step", MOVEMENT_PARAM);
 	menuTransformationAxies = glutCreateMenu(transAxiesMenu);
 	glutAddMenuEntry("Model Axies", MODEL);
 	glutAddMenuEntry("World Axies", WORLD);

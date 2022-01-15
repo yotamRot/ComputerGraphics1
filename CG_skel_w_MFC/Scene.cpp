@@ -582,7 +582,7 @@ void Scene::InitScene()
 	envBox.Init(enviroment_texture_program);
 }
 void Scene::manipulateActiveModel(Transformation T, TransformationDirection direction
-									, TransAxis axis, float power)
+									, TransAxis axis, float power, float movment)
 {
 	if (activeModel == ILLEGAL_ACTIVE_MOVEL)
 	{
@@ -590,7 +590,7 @@ void Scene::manipulateActiveModel(Transformation T, TransformationDirection dire
 	}
 
 	MeshModel* curModel = (MeshModel*)models.at(activeModel);
-	mat4 cameraInverseMat = curModel->manipulateModel(T, direction, axis,power);
+	mat4 cameraInverseMat = curModel->manipulateModel(T, direction, axis,power, movment);
 	
 	if (CameraModel* cameraModel = dynamic_cast<CameraModel*>(curModel))
 	{

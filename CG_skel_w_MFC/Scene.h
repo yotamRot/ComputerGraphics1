@@ -90,7 +90,7 @@ public:
 	void ControlActiveCamera();
 	void ControlActiveLight();
 	void manipulateActiveModel(Transformation T,TransformationDirection direction,
-								TransAxis axis, float power);
+								TransAxis axis, float power, float movment);
 	void setActiveCameraProjection(Projection proj);
 	const Projection GetProjection();
 	bool toggleShowVerticesNormals();

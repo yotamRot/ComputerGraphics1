@@ -12,6 +12,7 @@ void SetColorParam(vec3& colors, vec4& k_params);
 void SetRGBLa(vec4& rgbl);
 void SetLightRGB(vec3& rgb);
 void SetToonParams(int number, float thick);
+void SetMovementStep(float step);
 // ------------------------
 //    Class CInputDialog
 // ------------------------
@@ -81,6 +82,30 @@ protected:
     virtual void DoDataExchange(CDataExchange* pDX);
 
     afx_msg int OnCreate (LPCREATESTRUCT lpcs);
+    afx_msg void OnPaint();
+    DECLARE_MESSAGE_MAP()
+};
+
+// ----------------------
+//    Class CMovementDialog
+// ----------------------
+
+class CMovementDialog : public CInputDialog
+{
+public:
+    CMovementDialog(CString title = "Input Dialog");
+    virtual ~CMovementDialog();
+
+    float GetMovement();
+
+protected:
+    float mMovement;
+    CEdit mMovementEdit;
+
+
+    virtual void DoDataExchange(CDataExchange* pDX);
+
+    afx_msg int OnCreate(LPCREATESTRUCT lpcs);
     afx_msg void OnPaint();
     DECLARE_MESSAGE_MAP()
 };

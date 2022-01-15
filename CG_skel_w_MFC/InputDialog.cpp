@@ -36,6 +36,7 @@
 
 #define IDC_TOON_N_EDIT             223
 #define IDC_TOON_T_EDIT             224
+#define IDC_MOVEMENT_EDIT           225
 
 #define CMD_EDIT_TITLE              "Command"
 #define X_EDIT_TITLE                "X ="
@@ -65,6 +66,7 @@
 #define K_E_EDIT_TITLE              "Ke "
 #define TOON_N_EDIT_TITLE           "Number of colors "
 #define TOON_T_EDIT_TITLE           "Line Thickness "
+#define MOVEMENT_TITLE              "Movement Step Size "
 
 
 vec3 rtf;
@@ -76,6 +78,13 @@ vec4 ambient_rgbl;
 vec4 k;
 int toon_number;
 float toon_tickness;
+float movement_step;
+
+
+void SetMovementStep(float step)
+{
+    movement_step = step;
+}
 
 void SetLbnRtf(vec3& Ilbn, vec3& Irtf)
 {
@@ -251,6 +260,56 @@ void CXyzDialog::OnPaint()
     dc.DrawText(CString(Z_EDIT_TITLE), -1, &z_rect, DT_SINGLELINE);
 
     mXEdit.SetFocus();
+}
+
+
+
+// ----------------------
+//    Class CXyzDialog
+// ----------------------
+
+CMovementDialog::CMovementDialog(CString title)
+    : CInputDialog(title), mMovement(movement_step)
+{ }
+
+CMovementDialog::~CMovementDialog()
+{ }
+
+float CMovementDialog::GetMovement()
+{
+    return mMovement;
+}
+
+void CMovementDialog::DoDataExchange(CDataExchange* pDX)
+{
+    CInputDialog::DoDataExchange(pDX);
+    DDX_Text(pDX, IDC_MOVEMENT_EDIT, mMovement);
+
+}
+
+// CMovementDialog message handlers
+BEGIN_MESSAGE_MAP(CMovementDialog, CInputDialog)
+    ON_WM_CREATE()
+    ON_WM_PAINT()
+END_MESSAGE_MAP()
+
+int CMovementDialog::OnCreate(LPCREATESTRUCT lpcs)
+{
+    mMovementEdit.Create(ES_MULTILINE | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER,
+        CRect(300, 70, 340, 90), this, IDC_MOVEMENT_EDIT);
+
+    return 0;
+}
+
+void CMovementDialog::OnPaint()
+{
+    CPaintDC dc(this);
+    dc.SetBkMode(TRANSPARENT);
+
+    CRect x_rect(100, 72, 450, 90);
+    dc.DrawText(CString(MOVEMENT_TITLE), -1, &x_rect, DT_SINGLELINE);
+
+    mMovementEdit.SetFocus();
 }
 
 // -------------------------

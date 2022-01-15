@@ -1151,33 +1151,33 @@ mat4 matrixInverse(mat4& mat , Transformation T)
 	return InverseMat;
 }
 
-mat4 MeshModel::moveModel(TransformationDirection direction, TransAxis axis)
+mat4 MeshModel::moveModel(TransformationDirection direction, TransAxis axis, float power)
 {
 	mat4 tranlateMatrix;
-	GLfloat move = (x_bound_lenght + y_bound_lenght + z_bound_lenght) / 3;
+	//GLfloat move = (x_bound_lenght + y_bound_lenght + z_bound_lenght) / 3;
 	if (dynamic_cast<LightModel*>(this))
 	{
-		move = move * 10;
+		//move = move * 10;
 	}
 	switch (direction)
 	{
 		case X_dir:
-			tranlateMatrix = Translate(move*0.1, 0, 0);
+			tranlateMatrix = Translate(power *0.1, 0, 0);
 			break;
 		case Xn_dir:
-			tranlateMatrix = Translate(-move * 0.1, 0, 0);
+			tranlateMatrix = Translate(-power * 0.1, 0, 0);
 			break;
 		case Y_dir:
-			tranlateMatrix = Translate(0, move *0.1, 0);
+			tranlateMatrix = Translate(0, power *0.1, 0);
 			break;
 		case Yn_dir:
-			tranlateMatrix = Translate(0, -move * 0.1, 0);
+			tranlateMatrix = Translate(0, -power * 0.1, 0);
 			break;
 		case Z_dir:
-			tranlateMatrix = Translate(0, 0, move * 0.1);
+			tranlateMatrix = Translate(0, 0, power * 0.1);
 			break;
 		case Zn_dir:
-			tranlateMatrix = Translate(0, 0, -move * 0.1);
+			tranlateMatrix = Translate(0, 0, -power * 0.1);
 			break;
 		default:
 			break;
@@ -1372,7 +1372,7 @@ void MeshModel::UpdateTriangleIlluminationParams()
 }
 
 mat4 MeshModel::manipulateModel(Transformation T, TransformationDirection direction,
-								TransAxis axis, float power)
+								TransAxis axis, float power, float movment)
 {
 	mat4 cameraInverseMatrix;
 	switch (T)
@@ -1381,7 +1381,7 @@ mat4 MeshModel::manipulateModel(Transformation T, TransformationDirection direct
 			cameraInverseMatrix = rotateModel(direction, power, axis);
 			break;
 		case MOVE:
-			cameraInverseMatrix = moveModel(direction, axis);
+			cameraInverseMatrix = moveModel(direction, axis, movment);
 			break;
 		case SCALE:
 			cameraInverseMatrix = scaleModel(direction, axis);

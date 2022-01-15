@@ -54,7 +54,7 @@ class MeshModel : public Model
 {
 protected :
 	MeshModel() = default;
-	mat4 moveModel(TransformationDirection direction, TransAxis axis);
+	mat4 moveModel(TransformationDirection direction, TransAxis axis, float power);
 	mat4 scaleModel(TransformationDirection direction, TransAxis axis);
 	mat4 rotateModel(TransformationDirection direction, int angle, TransAxis axis);
 	//add more attributes
@@ -120,7 +120,7 @@ public:
 	GLfloat GetZBoundLength();
 	vec3 GetBoundsLength();
 	mat4 manipulateModel(Transformation T, TransformationDirection direction,
-						TransAxis axis, float power);
+						TransAxis axis, float power, float movment);
 	mat4 GetObjectMatrix();
 	mat4 GetNormalMatrix();
 	GLfloat GetProportionalValue();
