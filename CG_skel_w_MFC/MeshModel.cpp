@@ -898,7 +898,24 @@ vec3 MeshModel::CenteringTranslation(TransAxis axis)
 	}
 }
 
+void CalcFaceNormal(vec3 p1, vec3 p2, vec3 p3, vector<SimpleVertex> &faceNormals)
+{
+	vec3 curCenter;
+	vec3 curNormalEnd;
 
+	Vertex tempVertix;
+	SimpleVertex tempSimpleVertix;
+
+	curCenter = (p1 + p2 + p3) / 3;
+	tempSimpleVertix.Position = curCenter;
+	tempSimpleVertix.isNormal = false;
+	faceNormals.push_back(tempSimpleVertix);
+
+	curNormalEnd = normalize(cross(p2 - p1, p3 - p1));
+	tempSimpleVertix.Position = curCenter + 0.3 * curNormalEnd;
+	tempSimpleVertix.isNormal = true;
+	faceNormals.push_back(tempSimpleVertix);
+}
 PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat lenX, GLfloat lenY, GLfloat lenZ, int model_id, GLuint program, GLuint simpleShader) : posX(posX), posY(posY), posZ(posZ), lenX(lenX), lenY(lenY), lenZ(lenZ)
 {
 	ka = 0.5;
@@ -920,6 +937,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	Vertex temp;
 
 
+
 	//// front face triangels
 	p1 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // bottom left
 	temp.Position = p1;
@@ -930,6 +948,8 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p3 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom right
 	temp.Position = p3;
 	vertices.push_back(temp);
+	CalcFaceNormal(p1, p3, p2, face_normals);
+
 
 	p1 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // bottom left
 	temp.Position = p1;
@@ -940,6 +960,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p3 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom right
 	temp.Position = p3;
 	vertices.push_back(temp);
+	CalcFaceNormal(p1, p3, p2, face_normals);
 
 	//// back face triangels
 	p1 = vec3(posX - halfX, posY - halfY, posZ - halfZ); // bottom left
@@ -951,6 +972,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // b,ottom right
 	temp.Position = p3;
 	vertices.push_back(temp);
+	CalcFaceNormal(p1, p2, p3, face_normals);
 
 	p1 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
 	temp.Position = p1;
@@ -961,6 +983,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
 	temp.Position = p3;
 	vertices.push_back(temp);
+	CalcFaceNormal(p1, p2, p3, face_normals);
 
 	//// left face triangels
 	p1 = vec3(posX - halfX, posY - halfY, posZ - halfZ); // bottom left
@@ -972,6 +995,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p3 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // bottom right
 	temp.Position = p3;
 	vertices.push_back(temp);
+	CalcFaceNormal(p1, p3, p2, face_normals);
 
 	p1 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
 	temp.Position = p1;
@@ -982,6 +1006,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p3 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // bottom right
 	temp.Position = p3;
 	vertices.push_back(temp);
+	CalcFaceNormal(p1, p3, p2, face_normals);
 
 	//// right face triangels
 	////high triangle
@@ -994,6 +1019,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p3 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // top right
 	temp.Position = p3;
 	vertices.push_back(temp);
+	CalcFaceNormal(p1, p3, p2, face_normals);
 
 	////low triangle
 	p1 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom left
@@ -1005,6 +1031,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
 	temp.Position = p3;
 	vertices.push_back(temp);
+	CalcFaceNormal(p1, p3, p2, face_normals);
 
 
 	//// top face triangels
@@ -1017,6 +1044,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p3 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // bottom right
 	temp.Position = p3;
 	vertices.push_back(temp);
+	CalcFaceNormal(p1, p2, p3, face_normals);
 
 	p1 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top left
 	temp.Position = p1;
@@ -1027,6 +1055,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p3 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // bottom right
 	temp.Position = p3;
 	vertices.push_back(temp);
+	CalcFaceNormal(p1, p2, p3, face_normals);
 
 	
 	// down face triangels
@@ -1039,6 +1068,7 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
 	temp.Position = p3;
 	vertices.push_back(temp);
+	CalcFaceNormal(p1, p3, p2, face_normals);
 
 	p1 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // top left
 	temp.Position = p1;
@@ -1049,12 +1079,15 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
 	temp.Position = p3;
 	vertices.push_back(temp);
- //
-	//bound_box_vertices = CalcBounds();
-	//UpdateTriangleIlluminationParams();
+	CalcFaceNormal(p1, p3, p2, face_normals);
+
 	for (int i = 0; i < vertices.size(); i++)
 	{
 		indices.push_back(i);
+	}
+	for (int i = 0; i < face_normals.size(); i++)
+	{
+		faces_normals_indices.push_back(i);
 	}
 
 	CalcBounds();
