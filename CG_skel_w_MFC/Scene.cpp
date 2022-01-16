@@ -56,8 +56,9 @@ int Scene::loadOBJModel(string fileName)
 
 int Scene::loadCubeModel()
 {
-	PrimMeshModel* cube = new PrimMeshModel(0, 0, 0, 1 , 1, 1);
 	activeModel = models.size();
+	PrimMeshModel* cube = new PrimMeshModel(0, 0, 0, 1 , 1, 1, activeModel, program, light_program);
+
 	modelToVectorId.push_back(activeModel);
 	models.push_back(cube);
 	return modelToVectorId.size() - 1; // new model index

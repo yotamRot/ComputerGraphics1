@@ -899,124 +899,166 @@ vec3 MeshModel::CenteringTranslation(TransAxis axis)
 }
 
 
-PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat lenX, GLfloat lenY, GLfloat lenZ) : posX(posX), posY(posY), posZ(posZ), lenX(lenX), lenY(lenY), lenZ(lenZ)
+PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat lenX, GLfloat lenY, GLfloat lenZ, int model_id, GLuint program, GLuint simpleShader) : posX(posX), posY(posY), posZ(posZ), lenX(lenX), lenY(lenY), lenZ(lenZ)
 {
-	//ka = 0.5;
-	//kd = 0.8;
-	//ks = 1.0;
+	ka = 0.5;
+	kd = 0.8;
+	ks = 1.0;
 	//ke = 0;
-	//is_non_unfiorm = false;
-	//triangles = new vector<Triangle>;
-	//vec3 p1, p2, p3;
+	is_non_unfiorm = false;
+	my_program = program;
+	simple_shader = simpleShader;
+	vec3 p1, p2, p3;
+	modelId = model_id;
+	_world_transform[2][3] = -5;
+	has_normal_map = has_texture = use_normal_map = use_texture = false;
 
-	//_world_transform[2][3] = -5;
-	////faces_normal_end_positions = new vector<vec3>;
-
-	//Triangle curTriangle;
-	//Normal curFaceNormal;
-	//GLfloat halfX = lenX * 0.5f;
-	//GLfloat halfY = lenY * 0.5f;
-	//GLfloat halfZ = lenZ * 0.5f;
-	//mesh_color = RED;
-
+	GLfloat halfX = lenX * 0.5f;
+	GLfloat halfY = lenY * 0.5f;
+	GLfloat halfZ = lenZ * 0.5f;
+	mesh_color = RED;
+	Vertex temp;
 
 
 	//// front face triangels
-	//p1 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // bottom left
-	//p2 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top left
-	//p3 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom right
-	//curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 0, 1), false, face_normal);
-	//curTriangle = Triangle(p1, p2, p3, mesh_color, false, curFaceNormal);
-	//triangles->push_back(curTriangle);
+	p1 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // bottom left
+	temp.Position = p1;
+	vertices.push_back(temp);
+	p2 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top left
+	temp.Position = p2;
+	vertices.push_back(temp);
+	p3 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom right
+	temp.Position = p3;
+	vertices.push_back(temp);
 
-	//p1 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // bottom left
-	//p2 = vec3(posX + halfX, posY + halfY, posZ + halfZ); // top left
-	//p3 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom right
-	//curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 0, 1), false, face_normal);
-	//curTriangle = Triangle(p1, p2, p3, mesh_color, false, curFaceNormal);
-	//triangles->push_back(curTriangle);
+	p1 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // bottom left
+	temp.Position = p1;
+	vertices.push_back(temp);
+	p2 = vec3(posX + halfX, posY + halfY, posZ + halfZ); // top left
+	temp.Position = p2;
+	vertices.push_back(temp);
+	p3 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom right
+	temp.Position = p3;
+	vertices.push_back(temp);
 
 	//// back face triangels
-	//p1 = vec3(posX - halfX, posY - halfY, posZ - halfZ); // bottom left
-	//p2 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
-	//p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // b,ottom right
-	//curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 0, -1), false, face_normal);
-	//curTriangle = Triangle(p1, p2, p3, mesh_color, false, curFaceNormal);
-	//triangles->push_back(curTriangle);
+	p1 = vec3(posX - halfX, posY - halfY, posZ - halfZ); // bottom left
+	temp.Position = p1;
+	vertices.push_back(temp);
+	p2 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
+	temp.Position = p2;
+	vertices.push_back(temp);
+	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // b,ottom right
+	temp.Position = p3;
+	vertices.push_back(temp);
 
-	//p1 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
-	//p2 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // top right
-	//p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
-	//curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 0, -1), false, face_normal);
-	//curTriangle = Triangle(p1, p2, p3 , mesh_color, false, curFaceNormal);
-	//triangles->push_back(curTriangle);
+	p1 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
+	temp.Position = p1;
+	vertices.push_back(temp);
+	p2 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // top right
+	temp.Position = p2;
+	vertices.push_back(temp);
+	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
+	temp.Position = p3;
+	vertices.push_back(temp);
 
 	//// left face triangels
-	//p1 = vec3(posX - halfX, posY - halfY, posZ - halfZ); // bottom left
-	//p2 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
-	//p3 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // bottom right
-	//curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(-1, 0, 0), false, face_normal);
-	//curTriangle = Triangle(p1, p2, p3, mesh_color, false, curFaceNormal);
-	//triangles->push_back(curTriangle);
+	p1 = vec3(posX - halfX, posY - halfY, posZ - halfZ); // bottom left
+	temp.Position = p1;
+	vertices.push_back(temp);
+	p2 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
+	temp.Position = p2;
+	vertices.push_back(temp);
+	p3 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // bottom right
+	temp.Position = p3;
+	vertices.push_back(temp);
 
-	//p1 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
-	//p2 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top right
-	//p3 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // bottom right
-	//curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(-1, 0, 0), false, face_normal);
-	//curTriangle = Triangle(p1, p2, p3, mesh_color, false, curFaceNormal);
-	//triangles->push_back(curTriangle);
+	p1 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
+	temp.Position = p1;
+	vertices.push_back(temp);
+	p2 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top right
+	temp.Position = p2;
+	vertices.push_back(temp);
+	p3 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // bottom right
+	temp.Position = p3;
+	vertices.push_back(temp);
 
 	//// right face triangels
 	////high triangle
-	//p1 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom left
-	//p2 = vec3(posX + halfX, posY + halfY, posZ + halfZ); // top left
-	//p3 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // top right
-	//curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(1, 0, 0), false, face_normal);
-	//curTriangle = Triangle(p1, p2, p3, mesh_color, false, curFaceNormal);
-	//triangles->push_back(curTriangle);
-
+	p1 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom left
+	temp.Position = p1;
+	vertices.push_back(temp);
+	p2 = vec3(posX + halfX, posY + halfY, posZ + halfZ); // top left
+	temp.Position = p2;
+	vertices.push_back(temp);
+	p3 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // top right
+	temp.Position = p3;
+	vertices.push_back(temp);
 
 	////low triangle
-	//p1 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom left
-	//p2 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // top right
-	//p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
-	//curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(1, 0, 0), false, face_normal);
-	//curTriangle = Triangle(p1, p2, p3, mesh_color, false, curFaceNormal);
-	//triangles->push_back(curTriangle);
+	p1 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom left
+	temp.Position = p1;
+	vertices.push_back(temp);
+	p2 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // top right
+	temp.Position = p2;
+	vertices.push_back(temp);
+	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
+	temp.Position = p3;
+	vertices.push_back(temp);
 
 
 	//// top face triangels
-	//p1 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // bottom left
-	//p2 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top left
-	//p3 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // bottom right
-	//curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 1, 0), false, face_normal);
-	//curTriangle = Triangle(p1, p2, p3, mesh_color, false, curFaceNormal);
-	//triangles->push_back(curTriangle);
+	p1 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // bottom left
+	temp.Position = p1;
+	vertices.push_back(temp);
+	p2 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top left
+	temp.Position = p2;
+	vertices.push_back(temp);
+	p3 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // bottom right
+	temp.Position = p3;
+	vertices.push_back(temp);
 
-	//p1 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top left
-	//p2 = vec3(posX + halfX, posY + halfY, posZ + halfZ); // top right
-	//p3 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // bottom right
-	//curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, 1, 0), false, face_normal);
-	//curTriangle = Triangle(p1, p2, p3, mesh_color, false, curFaceNormal);
-	//triangles->push_back(curTriangle);
-	//
-	//// down face triangels
-	//p1 = vec3(posX - halfX, posY - halfY, posZ - halfZ); // bottom left
-	//p2 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // top left
-	//p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
-	//curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, -1, 0), false, face_normal);
-	//curTriangle = Triangle(p1, p2, p3, mesh_color, false, curFaceNormal);
-	//triangles->push_back(curTriangle);
+	p1 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top left
+	temp.Position = p1;
+	vertices.push_back(temp);
+	p2 = vec3(posX + halfX, posY + halfY, posZ + halfZ); // top right
+	temp.Position = p2;
+	vertices.push_back(temp);
+	p3 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // bottom right
+	temp.Position = p3;
+	vertices.push_back(temp);
 
-	//p1 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // top left
-	//p2 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // top right
-	//p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
-	//curFaceNormal = Normal((p1 + p2 + p3) / 3, vec3(0, -1, 0), false, face_normal);
-	//curTriangle = Triangle(p1, p2, p3, mesh_color, false, curFaceNormal);
-	//triangles->push_back(curTriangle);
+	
+	// down face triangels
+	p1 = vec3(posX - halfX, posY - halfY, posZ - halfZ); // bottom left
+	temp.Position = p1;
+	vertices.push_back(temp);
+	p2 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // top left
+	temp.Position = p2;
+	vertices.push_back(temp);
+	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
+	temp.Position = p3;
+	vertices.push_back(temp);
+
+	p1 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // top left
+	temp.Position = p1;
+	vertices.push_back(temp);
+	p2 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // top right
+	temp.Position = p2;
+	vertices.push_back(temp);
+	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
+	temp.Position = p3;
+	vertices.push_back(temp);
  //
 	//bound_box_vertices = CalcBounds();
 	//UpdateTriangleIlluminationParams();
+	for (int i = 0; i < vertices.size(); i++)
+	{
+		indices.push_back(i);
+	}
+
+	CalcBounds();
+	SetupMesh();
 }
 
 CameraModel::CameraModel(int model_id, int cameraIndex, GLuint program) : cameraIndex(cameraIndex)

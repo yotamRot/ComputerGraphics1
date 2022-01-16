@@ -155,7 +155,7 @@ class PrimMeshModel : public MeshModel
 	GLfloat lenZ;
 public:
 	PrimMeshModel();
-	PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat lenX, GLfloat lenY, GLfloat lenZ);
+	PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat lenX, GLfloat lenY, GLfloat lenZ,int model_id, GLuint program, GLuint simpleShader);
 };
 
 class CameraModel : public MeshModel
