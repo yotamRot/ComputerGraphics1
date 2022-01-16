@@ -39,6 +39,7 @@ uniform int light_type[LIGHT_SOURCES];
 uniform float Ka;
 uniform float Kd;
 uniform float Ks;
+uniform float Ke;
 uniform float alpha;
 
 //texture
@@ -178,9 +179,9 @@ void phong_shadow()
 
 		if(isNonUniform)
         {
-            v_Ka = 0.4 + cnoise(fragmentPosition);
-            v_Kd = cnoise(2*fragmentPosition);
-            v_Ks = cnoise(3*fragmentPosition);  
+            v_Ka = 0.4 + sin(cnoise(fragmentPosition));
+            v_Kd = sin(cnoise(2*fragmentPosition));
+            v_Ks = sin(cnoise(3*fragmentPosition));  
         }
         else
         {
@@ -201,7 +202,7 @@ void phong_shadow()
 		ambient  = v_Ka * La[i] * lightColor[i];
 		diffuse  = v_Kd * Ld[i] * max(dot(normalizeNormal, lightDirection), 0.0) * lightColor[i]; 
 		specular = v_Ks * Ls[i] * pow(max(dot(viewDirection, reflectDir), 0.0), shininess) * lightColor[i]; 
-		result += (ambient + diffuse + specular) * curColor;
+		result += (ambient + diffuse + specular) * curColor + Ke;
     }
 
 	if(useColorAnimation == 1)

@@ -739,7 +739,8 @@ void MeshModel::draw(bool draw_bounding_box, bool draw_vertix_normals, bool draw
 	glUniform1f(uKd, kd);
 	GLint uKs = glGetUniformLocation(my_program, "Ks"); // Find the Ks variable
 	glUniform1f(uKs, ks);
-
+	GLint uKe = glGetUniformLocation(my_program, "Ke"); // Find the Ks variable
+	glUniform1f(uKe, ke);
 
 	if (use_texture && has_texture)
 	{

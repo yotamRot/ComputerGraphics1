@@ -54,6 +54,7 @@ uniform int light_type[LIGHT_SOURCES];
 uniform float Ka;
 uniform float Kd;
 uniform float Ks;
+uniform float Ke;
 
 
 uniform float time;
@@ -172,9 +173,9 @@ void main()
 
             if(isNonUniform)
             {
-                v_Ka = cnoise(fragmentPosition);
-                v_Kd = cnoise(2*fragmentPosition);
-                v_Ks = cnoise(3*fragmentPosition);  
+                v_Ka = sin(cnoise(fragmentPosition));
+                v_Kd = sin(cnoise(2*fragmentPosition));
+                v_Ks = sin(cnoise(3*fragmentPosition));  
                 Ccolor = calcColorSpeciel();
             }
             else
@@ -204,7 +205,7 @@ void main()
 	        ambient  = v_Ka * La[i] * lightColor[i];
 	        diffuse  = v_Kd * Ld[i] * max(dot(normalizeNormal, lightDirection), 0.0) * lightColor[i]; 
             specular = v_Ks * Ls[i] * pow(max(dot(viewDirection, reflectDir), 0.0), shininess) * lightColor[i]; 
-	        result += (ambient + diffuse + specular) * Ccolor;
+	        result += (ambient + diffuse + specular) * Ccolor + Ke;
         }
 
         if(shadow_type == GOURAUD)
@@ -324,7 +325,7 @@ float cnoise(vec3 P){
   vec4 n_z = mix(vec4(n000, n100, n010, n110), vec4(n001, n101, n011, n111), fade_xyz.z);
   vec2 n_yz = mix(n_z.xy, n_z.zw, fade_xyz.y);
   float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x); 
-  return sin(2.2 * n_xyz);
+  return 2.2 * n_xyz;
 }
 
 vec3 calcColorSpeciel()

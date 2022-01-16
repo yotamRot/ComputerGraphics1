@@ -142,6 +142,7 @@ bool lb_down,rb_down,mb_down;
 bool prv_lb_down = false;
 
 
+
 void switchToCameraMenu(int id)
 {
 	scene->switchToCamera(id);
