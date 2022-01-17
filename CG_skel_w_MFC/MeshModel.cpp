@@ -201,6 +201,20 @@ int check_key(map<int, int> &m, int key, int val)
 		
 	return m[key];
 }
+
+
+vec2 check_keyVec2(map<int, vec2>& m, int key, vec2 val)
+{
+	// Key is not present
+	if (m.find(key) == m.end())
+	{
+		m[key] = val;
+		return val;
+	}
+
+	return m[key];
+}
+
 void MeshModel::loadFile(string fileName)
 {
 	ifstream ifile(fileName.c_str());
@@ -210,7 +224,7 @@ void MeshModel::loadFile(string fileName)
 	vector<vec2> v_textures;
 	vec3 curCenter;
 	vec3 curNormalEnd;
-	std::map<int, int> u;
+	std::map<int, int> n;
 
 	Vertex tempVertix;
 	SimpleVertex tempSimpleVertix;
@@ -286,11 +300,11 @@ void MeshModel::loadFile(string fileName)
 
 		if (v_normals.size() != 0)
 		{
-			p1_nomral = (normalize(v_normals.at(check_key(u, it->v[0] - 1, it->vn[0] - 1))));
+			p1_nomral = (normalize(v_normals.at(check_key(n, it->v[0] - 1, it->vn[0] - 1))));
 			
-			p2_nomral = (normalize(v_normals.at(check_key(u, it->v[1] - 1, it->vn[1] - 1))));
+			p2_nomral = (normalize(v_normals.at(check_key(n, it->v[1] - 1, it->vn[1] - 1))));
 			
-			p3_nomral = (normalize(v_normals.at(check_key(u, it->v[2] - 1, it->vn[2] - 1))));
+			p3_nomral = (normalize(v_normals.at(check_key(n, it->v[2] - 1, it->vn[2] - 1))));
 		
 		}
 		else
@@ -321,12 +335,13 @@ void MeshModel::loadFile(string fileName)
 
 		if (v_textures.size() != 0)
 		{
-			p1_texture = v_textures[it->vt[0] - 1];
-			p2_texture = v_textures[it->vt[1] - 1];
-			p3_texture = v_textures[it->vt[2] - 1];
-			fileTexCord.push_back(p1_texture);
-			fileTexCord.push_back(p2_texture);
-			fileTexCord.push_back(p3_texture);
+			p1_texture = v_textures.at(it->vt[0] - 1);
+			check_keyVec2(fileTexCord, it->v[0] - 1, p1_texture);
+			p2_texture = v_textures.at(it->vt[1] - 1);
+			check_keyVec2(fileTexCord, it->v[1] - 1, p2_texture);
+			p3_texture = v_textures.at(it->vt[2] - 1);
+			check_keyVec2(fileTexCord, it->v[2] - 1, p3_texture);
+		
 		}
 		else
 		{

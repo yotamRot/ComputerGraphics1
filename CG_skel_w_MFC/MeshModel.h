@@ -109,7 +109,7 @@ public:
 	vector<SimpleVertex> face_normals;
 	vector<unsigned int> faces_normals_indices;
 
-	vector<vec2> fileTexCord;
+	map<int, vec2> fileTexCord;
 
 	vec3 mesh_color;
 	vec3 matirials; // x - emissive, y - diffuse, z - specular
