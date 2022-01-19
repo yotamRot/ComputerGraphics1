@@ -215,6 +215,108 @@ vec2 check_keyVec2(map<int, vec2>& m, int key, vec2 val)
 	return m[key];
 }
 
+void  MeshModel::fillVertixStruct(vec3& p1, vec3& p2, vec3& p3)
+{
+	vec3 curCenter;
+	vec3 curNormalEnd;
+	vec3 p1_nomral, p2_nomral, p3_nomral;
+	vec2 p1_texture, p2_texture, p3_texture;
+	float f, t;
+
+	//normal map variables
+	vec3 tangent, bitangent;
+	vec3 edge1, edge2;
+	vec2 deltaUV1, deltaUV2;
+
+	Vertex tempVertix;
+	SimpleVertex tempSimpleVertix;
+
+	curCenter = (p1 + p2 + p3) / 3;
+	tempSimpleVertix.Position = curCenter;
+	tempSimpleVertix.isNormal = false;
+
+	curNormalEnd = normalize(cross(p2 - p1, p3 - p1));
+	tempSimpleVertix.Position = curCenter + 0.3 * curNormalEnd;
+	tempSimpleVertix.isNormal = true;
+	face_normals.push_back(tempSimpleVertix);
+
+
+
+	p1_nomral = p2_nomral = p3_nomral = curNormalEnd;
+
+	tempSimpleVertix.Position = p1;
+	tempSimpleVertix.isNormal = false;
+	vertices_normals.push_back(tempSimpleVertix);
+	tempSimpleVertix.Position = p1 + 0.3 * p1_nomral;
+	tempSimpleVertix.isNormal = true;
+	vertices_normals.push_back(tempSimpleVertix);
+
+	tempSimpleVertix.Position = p2;
+	tempSimpleVertix.isNormal = false;
+	vertices_normals.push_back(tempSimpleVertix);
+	tempSimpleVertix.Position = p2 + 0.3 * p2_nomral;
+	tempSimpleVertix.isNormal = true;
+	vertices_normals.push_back(tempSimpleVertix);
+
+	tempSimpleVertix.Position = p3;
+	tempSimpleVertix.isNormal = false;
+	vertices_normals.push_back(tempSimpleVertix);
+	tempSimpleVertix.Position = p3 + 0.3 * p3_nomral;
+	tempSimpleVertix.isNormal = true;
+	vertices_normals.push_back(tempSimpleVertix);
+
+	// create planar mapping
+	p1_texture = vec2(p1.x, p1.y);
+	p2_texture = vec2(p2.x, p2.y);
+	p3_texture = vec2(p3.x, p3.y);
+
+	edge1 = p2 - p1;
+	edge2 = p3 - p2;
+	deltaUV1 = p2_texture - p1_texture;
+	deltaUV2 = p3_texture - p1_texture;
+	t = deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y;
+	if (t == 0)
+	{
+		f = 100.0f; // stam randmolay
+	}
+	else
+	{
+		f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+	}
+
+
+	tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+	tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+	tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+
+	bitangent.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+	bitangent.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+	bitangent.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+
+
+
+	tempVertix.Position = p1;
+	tempVertix.V_Normal = p1_nomral;
+	tempVertix.TexCoords = p1_texture;
+	tempVertix.Tangent = tangent;
+	tempVertix.Bitangent = bitangent;
+	this->vertices.push_back(tempVertix);
+
+	tempVertix.Position = p2;
+	tempVertix.V_Normal = p2_nomral;
+	tempVertix.TexCoords = p2_texture;
+	tempVertix.Tangent = tangent;
+	tempVertix.Bitangent = bitangent;
+	this->vertices.push_back(tempVertix);
+
+	tempVertix.Position = p3;
+	tempVertix.V_Normal = p3_nomral;
+	tempVertix.TexCoords = p3_texture;
+	tempVertix.Tangent = tangent;
+	tempVertix.Bitangent = bitangent;
+	this->vertices.push_back(tempVertix);
+}
+
 void MeshModel::loadFile(string fileName)
 {
 	ifstream ifile(fileName.c_str());
@@ -937,15 +1039,19 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	ka = 0.5;
 	kd = 0.8;
 	ks = 1.0;
-	//ke = 0;
-	is_non_unfiorm = false;
+	ke = 0;
 	my_program = program;
 	simple_shader = simpleShader;
 	vec3 p1, p2, p3;
 	modelId = model_id;
 	_world_transform[2][3] = -5;
-	has_normal_map = has_texture = use_normal_map = use_texture = false;
-
+	is_non_unfiorm = false;
+	use_normal_map = false;
+	use_enviroment_texture = false;
+	use_marble_texture = false;
+	use_texture = false;
+	has_texture = false;
+	has_normal_map = false;
 	GLfloat halfX = lenX * 0.5f;
 	GLfloat halfY = lenY * 0.5f;
 	GLfloat halfZ = lenZ * 0.5f;
@@ -956,146 +1062,86 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 
 	//// front face triangels
 	p1 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // bottom left
-	temp.Position = p1;
-	vertices.push_back(temp);
 	p2 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top left
-	temp.Position = p2;
-	vertices.push_back(temp);
 	p3 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom right
-	temp.Position = p3;
-	vertices.push_back(temp);
-	CalcFaceNormal(p1, p3, p2, face_normals);
+	fillVertixStruct(p1, p2, p3);
 
 
 	p1 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // bottom left
-	temp.Position = p1;
-	vertices.push_back(temp);
 	p2 = vec3(posX + halfX, posY + halfY, posZ + halfZ); // top left
-	temp.Position = p2;
-	vertices.push_back(temp);
 	p3 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom right
-	temp.Position = p3;
-	vertices.push_back(temp);
-	CalcFaceNormal(p1, p3, p2, face_normals);
+	fillVertixStruct(p1, p2, p3);
 
 	//// back face triangels
 	p1 = vec3(posX - halfX, posY - halfY, posZ - halfZ); // bottom left
-	temp.Position = p1;
-	vertices.push_back(temp);
 	p2 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
-	temp.Position = p2;
-	vertices.push_back(temp);
 	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // b,ottom right
-	temp.Position = p3;
-	vertices.push_back(temp);
-	CalcFaceNormal(p1, p2, p3, face_normals);
+	fillVertixStruct(p1, p2, p3);
+
 
 	p1 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
-	temp.Position = p1;
-	vertices.push_back(temp);
 	p2 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // top right
-	temp.Position = p2;
-	vertices.push_back(temp);
 	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
-	temp.Position = p3;
-	vertices.push_back(temp);
-	CalcFaceNormal(p1, p2, p3, face_normals);
+	fillVertixStruct(p1, p2, p3);
+
+
 
 	//// left face triangels
 	p1 = vec3(posX - halfX, posY - halfY, posZ - halfZ); // bottom left
-	temp.Position = p1;
-	vertices.push_back(temp);
 	p2 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
-	temp.Position = p2;
-	vertices.push_back(temp);
 	p3 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // bottom right
-	temp.Position = p3;
-	vertices.push_back(temp);
-	CalcFaceNormal(p1, p3, p2, face_normals);
+	fillVertixStruct(p1, p2, p3);
+
 
 	p1 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
-	temp.Position = p1;
-	vertices.push_back(temp);
 	p2 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top right
-	temp.Position = p2;
-	vertices.push_back(temp);
 	p3 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // bottom right
-	temp.Position = p3;
-	vertices.push_back(temp);
-	CalcFaceNormal(p1, p3, p2, face_normals);
+	fillVertixStruct(p1, p2, p3);
+
 
 	//// right face triangels
 	////high triangle
 	p1 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom left
-	temp.Position = p1;
-	vertices.push_back(temp);
 	p2 = vec3(posX + halfX, posY + halfY, posZ + halfZ); // top left
-	temp.Position = p2;
-	vertices.push_back(temp);
 	p3 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // top right
-	temp.Position = p3;
-	vertices.push_back(temp);
-	CalcFaceNormal(p1, p3, p2, face_normals);
+	fillVertixStruct(p1, p2, p3);
+
 
 	////low triangle
 	p1 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom left
-	temp.Position = p1;
-	vertices.push_back(temp);
 	p2 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // top right
-	temp.Position = p2;
-	vertices.push_back(temp);
 	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
-	temp.Position = p3;
-	vertices.push_back(temp);
-	CalcFaceNormal(p1, p3, p2, face_normals);
+	fillVertixStruct(p1, p2, p3);
+
 
 
 	//// top face triangels
 	p1 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // bottom left
-	temp.Position = p1;
-	vertices.push_back(temp);
 	p2 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top left
-	temp.Position = p2;
-	vertices.push_back(temp);
 	p3 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // bottom right
-	temp.Position = p3;
-	vertices.push_back(temp);
-	CalcFaceNormal(p1, p2, p3, face_normals);
+	fillVertixStruct(p1, p2, p3);
+
+
 
 	p1 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top left
-	temp.Position = p1;
-	vertices.push_back(temp);
 	p2 = vec3(posX + halfX, posY + halfY, posZ + halfZ); // top right
-	temp.Position = p2;
-	vertices.push_back(temp);
 	p3 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // bottom right
-	temp.Position = p3;
-	vertices.push_back(temp);
-	CalcFaceNormal(p1, p2, p3, face_normals);
+	fillVertixStruct(p1, p2, p3);
+
 
 	
 	// down face triangels
 	p1 = vec3(posX - halfX, posY - halfY, posZ - halfZ); // bottom left
-	temp.Position = p1;
-	vertices.push_back(temp);
 	p2 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // top left
-	temp.Position = p2;
-	vertices.push_back(temp);
 	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
-	temp.Position = p3;
-	vertices.push_back(temp);
-	CalcFaceNormal(p1, p3, p2, face_normals);
+	fillVertixStruct(p1, p2, p3);
+
 
 	p1 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // top left
-	temp.Position = p1;
-	vertices.push_back(temp);
 	p2 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // top right
-	temp.Position = p2;
-	vertices.push_back(temp);
 	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
-	temp.Position = p3;
-	vertices.push_back(temp);
-	CalcFaceNormal(p1, p3, p2, face_normals);
+	fillVertixStruct(p1, p2, p3);
+
 
 	for (int i = 0; i < vertices.size(); i++)
 	{
@@ -1104,6 +1150,11 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	for (int i = 0; i < face_normals.size(); i++)
 	{
 		faces_normals_indices.push_back(i);
+	}
+
+	for (int i = 0; i < vertices_normals.size(); i++)
+	{
+		vertices_normals_indices.push_back(i);
 	}
 
 	CalcBounds();

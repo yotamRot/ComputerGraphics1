@@ -143,6 +143,7 @@ public:
 	void CylinderMapping();
 	void PlanarMapping();
 	void SphereMapping();
+	void fillVertixStruct(vec3& p1, vec3& p2, vec3& p3);
 };
 
 class PrimMeshModel : public MeshModel
