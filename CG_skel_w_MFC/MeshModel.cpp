@@ -432,7 +432,9 @@ void MeshModel::loadFile(string fileName)
 		}
 		else
 		{
-			p1_nomral = p2_nomral = p3_nomral = curNormalEnd;
+			p1_nomral = check_keyVec3(vecNoramls, p1, curNormalEnd);
+			p2_nomral = check_keyVec3(vecNoramls, p2, curNormalEnd);
+			p3_nomral = check_keyVec3(vecNoramls, p3, curNormalEnd);
 		}
 
 		tempSimpleVertix.Position = p1;

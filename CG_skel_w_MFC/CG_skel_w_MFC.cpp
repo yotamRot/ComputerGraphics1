@@ -1055,7 +1055,7 @@ void CreateTextureMenu()
 	glutSetMenu(menuTexture);
 	glutAddSubMenu("Choose Wrap", menuChooseWrap);
 	glutAddMenuEntry("Use Normal Map", USE_NORMAL_MAP);
-	glutAddMenuEntry("Hide texture", USE_TEXTURE);
+	glutAddMenuEntry("Show texture", USE_TEXTURE);
 	glutAddMenuEntry("Load environment cube", LOAD_ENVIRNONMENT_CUBE);
 	glutAddMenuEntry("Use environment cube", USE_ENVIRNONMENT_CUBE);
 	glutAddMenuEntry("Use environment texture", USE_ENVIRNONMENT_TEXTURE);
