@@ -203,6 +203,24 @@ int check_key(map<int, int> &m, int key, int val)
 }
 
 
+vec3 check_keyVec3(map<vec3, vec3>& m, vec3 key, vec3 val)
+{
+	// Key is not present
+	map<vec3, vec3>::iterator it;
+
+	for (it = m.begin(); it != m.end(); it++)
+	{
+		if (it->first == key)
+		{
+			return it->second;
+		}
+	}
+	
+	m[key] = val;
+	return val;
+}
+
+
 vec2 check_keyVec2(map<int, vec2>& m, int key, vec2 val)
 {
 	// Key is not present
@@ -234,6 +252,7 @@ void  MeshModel::fillVertixStruct(vec3& p1, vec3& p2, vec3& p3)
 	curCenter = (p1 + p2 + p3) / 3;
 	tempSimpleVertix.Position = curCenter;
 	tempSimpleVertix.isNormal = false;
+	face_normals.push_back(tempSimpleVertix);
 
 	curNormalEnd = normalize(cross(p2 - p1, p3 - p1));
 	tempSimpleVertix.Position = curCenter + 0.3 * curNormalEnd;
@@ -242,7 +261,9 @@ void  MeshModel::fillVertixStruct(vec3& p1, vec3& p2, vec3& p3)
 
 
 
-	p1_nomral = p2_nomral = p3_nomral = curNormalEnd;
+	p1_nomral = check_keyVec3(vecNoramls,p1, tempSimpleVertix.Position);
+	p2_nomral = check_keyVec3(vecNoramls, p2, tempSimpleVertix.Position);
+	p3_nomral = check_keyVec3(vecNoramls, p3, tempSimpleVertix.Position);
 
 	tempSimpleVertix.Position = p1;
 	tempSimpleVertix.isNormal = false;

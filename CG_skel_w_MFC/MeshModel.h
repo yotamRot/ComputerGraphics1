@@ -110,6 +110,7 @@ public:
 	vector<unsigned int> faces_normals_indices;
 
 	map<int, vec2> fileTexCord;
+	map<vec3, vec3> vecNoramls;
 
 	vec3 mesh_color;
 	vec3 matirials; // x - emissive, y - diffuse, z - specular
