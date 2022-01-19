@@ -210,7 +210,7 @@ vec3 check_keyVec3(map<vec3, vec3>& m, vec3 key, vec3 val)
 
 	for (it = m.begin(); it != m.end(); it++)
 	{
-		if (it->first == key)
+		if (it->first.x == key.x && it->first.y == key.y && it->first.z == key.z)
 		{
 			return it->second;
 		}
@@ -261,9 +261,9 @@ void  MeshModel::fillVertixStruct(vec3& p1, vec3& p2, vec3& p3)
 
 
 
-	p1_nomral = check_keyVec3(vecNoramls,p1, tempSimpleVertix.Position);
-	p2_nomral = check_keyVec3(vecNoramls, p2, tempSimpleVertix.Position);
-	p3_nomral = check_keyVec3(vecNoramls, p3, tempSimpleVertix.Position);
+	p1_nomral = check_keyVec3(vecNoramls,p1, curNormalEnd);
+	p2_nomral = check_keyVec3(vecNoramls, p2, curNormalEnd);
+	p3_nomral = check_keyVec3(vecNoramls, p3, curNormalEnd);
 
 	tempSimpleVertix.Position = p1;
 	tempSimpleVertix.isNormal = false;
@@ -1085,13 +1085,13 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p1 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // bottom left
 	p2 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top left
 	p3 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom right
-	fillVertixStruct(p1, p2, p3);
+	fillVertixStruct(p1, p3, p2);
 
 
 	p1 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // bottom left
 	p2 = vec3(posX + halfX, posY + halfY, posZ + halfZ); // top left
 	p3 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom right
-	fillVertixStruct(p1, p2, p3);
+	fillVertixStruct(p1, p3, p2);
 
 	//// back face triangels
 	p1 = vec3(posX - halfX, posY - halfY, posZ - halfZ); // bottom left
@@ -1111,13 +1111,13 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p1 = vec3(posX - halfX, posY - halfY, posZ - halfZ); // bottom left
 	p2 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
 	p3 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // bottom right
-	fillVertixStruct(p1, p2, p3);
+	fillVertixStruct(p1, p3, p2);
 
 
 	p1 = vec3(posX - halfX, posY + halfY, posZ - halfZ); // top left
 	p2 = vec3(posX - halfX, posY + halfY, posZ + halfZ); // top right
 	p3 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // bottom right
-	fillVertixStruct(p1, p2, p3);
+	fillVertixStruct(p1, p3, p2);
 
 
 	//// right face triangels
@@ -1125,14 +1125,14 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p1 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom left
 	p2 = vec3(posX + halfX, posY + halfY, posZ + halfZ); // top left
 	p3 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // top right
-	fillVertixStruct(p1, p2, p3);
+	fillVertixStruct(p1, p3, p2);
 
 
 	////low triangle
 	p1 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // bottom left
 	p2 = vec3(posX + halfX, posY + halfY, posZ - halfZ); // top right
 	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
-	fillVertixStruct(p1, p2, p3);
+	fillVertixStruct(p1, p3, p2);
 
 
 
@@ -1155,13 +1155,13 @@ PrimMeshModel::PrimMeshModel(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat l
 	p1 = vec3(posX - halfX, posY - halfY, posZ - halfZ); // bottom left
 	p2 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // top left
 	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
-	fillVertixStruct(p1, p2, p3);
+	fillVertixStruct(p1, p3, p2);
 
 
 	p1 = vec3(posX - halfX, posY - halfY, posZ + halfZ); // top left
 	p2 = vec3(posX + halfX, posY - halfY, posZ + halfZ); // top right
 	p3 = vec3(posX + halfX, posY - halfY, posZ - halfZ); // bottom right
-	fillVertixStruct(p1, p2, p3);
+	fillVertixStruct(p1, p3, p2);
 
 
 	for (int i = 0; i < vertices.size(); i++)
