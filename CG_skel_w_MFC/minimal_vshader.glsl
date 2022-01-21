@@ -98,13 +98,13 @@ void main()
         fragmentPosition = vec3(modelViewMatrix * modelMatrix * vec4(vPosition, 1.0));
     }
     if(shadow_type == FLAT)
-        {
-            vertexNormal = mat3(modelViewMatrix * normalMatrix ) * fNormal;
-        }
-        else // GOURAUD or PHONG
-        {
-            vertexNormal = mat3(modelViewMatrix * normalMatrix ) * vNormal;
-        }
+    {
+        vertexNormal = mat3(modelViewMatrix * normalMatrix ) * fNormal;
+    }
+    else // GOURAUD or PHONG
+    {
+        vertexNormal = mat3(modelViewMatrix * normalMatrix ) * vNormal;
+    }
     
     TexCoord = vec2(vTexture.x, vTexture.y);
    

@@ -720,7 +720,7 @@ void fileMenu(int id)
 
 void transformationMenu(int id)
 {
-	if (id = MOVEMENT_PARAM)
+	if (id == MOVEMENT_PARAM)
 	{
 		SetMovementStep(movment_power);
 		CMovementDialog dlg;

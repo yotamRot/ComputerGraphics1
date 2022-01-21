@@ -12,7 +12,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-
+#define NORMAL_SIZE 0.1
 using namespace std;
 
 struct FaceIdcs
@@ -255,7 +255,7 @@ void  MeshModel::fillVertixStruct(vec3& p1, vec3& p2, vec3& p3)
 	face_normals.push_back(tempSimpleVertix);
 
 	curNormalEnd = normalize(cross(p2 - p1, p3 - p1));
-	tempSimpleVertix.Position = curCenter + 0.3 * curNormalEnd;
+	tempSimpleVertix.Position = curCenter + NORMAL_SIZE * curNormalEnd;
 	tempSimpleVertix.isNormal = true;
 	face_normals.push_back(tempSimpleVertix);
 
@@ -268,21 +268,21 @@ void  MeshModel::fillVertixStruct(vec3& p1, vec3& p2, vec3& p3)
 	tempSimpleVertix.Position = p1;
 	tempSimpleVertix.isNormal = false;
 	vertices_normals.push_back(tempSimpleVertix);
-	tempSimpleVertix.Position = p1 + 0.3 * p1_nomral;
+	tempSimpleVertix.Position = p1 + NORMAL_SIZE * p1_nomral;
 	tempSimpleVertix.isNormal = true;
 	vertices_normals.push_back(tempSimpleVertix);
 
 	tempSimpleVertix.Position = p2;
 	tempSimpleVertix.isNormal = false;
 	vertices_normals.push_back(tempSimpleVertix);
-	tempSimpleVertix.Position = p2 + 0.3 * p2_nomral;
+	tempSimpleVertix.Position = p2 + NORMAL_SIZE * p2_nomral;
 	tempSimpleVertix.isNormal = true;
 	vertices_normals.push_back(tempSimpleVertix);
 
 	tempSimpleVertix.Position = p3;
 	tempSimpleVertix.isNormal = false;
 	vertices_normals.push_back(tempSimpleVertix);
-	tempSimpleVertix.Position = p3 + 0.3 * p3_nomral;
+	tempSimpleVertix.Position = p3 + NORMAL_SIZE * p3_nomral;
 	tempSimpleVertix.isNormal = true;
 	vertices_normals.push_back(tempSimpleVertix);
 
@@ -415,7 +415,7 @@ void MeshModel::loadFile(string fileName)
 		face_normals.push_back(tempSimpleVertix);
 
 		curNormalEnd = normalize(cross(p2 - p1, p3 - p1));
-		tempSimpleVertix.Position = curCenter + 0.3*curNormalEnd;
+		tempSimpleVertix.Position = curCenter + NORMAL_SIZE *curNormalEnd;
 		tempSimpleVertix.isNormal = true;
 		face_normals.push_back(tempSimpleVertix);
 
@@ -440,21 +440,21 @@ void MeshModel::loadFile(string fileName)
 		tempSimpleVertix.Position = p1;
 		tempSimpleVertix.isNormal = false;
 		vertices_normals.push_back(tempSimpleVertix);
-		tempSimpleVertix.Position = p1 + 0.3 * p1_nomral;
+		tempSimpleVertix.Position = p1 + NORMAL_SIZE * p1_nomral;
 		tempSimpleVertix.isNormal = true;
 		vertices_normals.push_back(tempSimpleVertix);
 		
 		tempSimpleVertix.Position = p2;
 		tempSimpleVertix.isNormal = false;
 		vertices_normals.push_back(tempSimpleVertix);
-		tempSimpleVertix.Position = p2 + 0.3 * p2_nomral;
+		tempSimpleVertix.Position = p2 + NORMAL_SIZE * p2_nomral;
 		tempSimpleVertix.isNormal = true;
 		vertices_normals.push_back(tempSimpleVertix);
 
 		tempSimpleVertix.Position = p3;
 		tempSimpleVertix.isNormal = false;
 		vertices_normals.push_back(tempSimpleVertix);
-		tempSimpleVertix.Position = p3 + 0.3 * p3_nomral;
+		tempSimpleVertix.Position = p3 + NORMAL_SIZE * p3_nomral;
 		tempSimpleVertix.isNormal = true;
 		vertices_normals.push_back(tempSimpleVertix);
 
@@ -1089,7 +1089,7 @@ void CalcFaceNormal(vec3 p1, vec3 p2, vec3 p3, vector<SimpleVertex> &faceNormals
 	faceNormals.push_back(tempSimpleVertix);
 
 	curNormalEnd = normalize(cross(p2 - p1, p3 - p1));
-	tempSimpleVertix.Position = curCenter + 0.3 * curNormalEnd;
+	tempSimpleVertix.Position = curCenter + NORMAL_SIZE * curNormalEnd;
 	tempSimpleVertix.isNormal = true;
 	faceNormals.push_back(tempSimpleVertix);
 }
