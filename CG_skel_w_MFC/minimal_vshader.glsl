@@ -18,6 +18,7 @@ in  vec3 vNormal;
 in  vec2 vTexture;
 in  vec3 vTangent;
 in  vec3 vBiTangent;
+in  vec3 fNormal;
 
 // Out Arguments
 out vec3 vOriginalPosition;
@@ -64,11 +65,12 @@ uniform float alpha;
 uniform bool useNormalMap;
 uniform sampler2D normalMap;
 
-uniform float toonTickness;
+
+uniform bool is_backface;
 uniform int useVertexAnimation;
 uniform int useColorAnimationGradient;
 uniform vec3 random;
-varying vec3 normal;
+
 
 mat4 RotateY( float theta);
 mat4 Translate( float x, float y, float z);
@@ -95,7 +97,15 @@ void main()
     {
         fragmentPosition = vec3(modelViewMatrix * modelMatrix * vec4(vPosition, 1.0));
     }
-    vertexNormal = mat3(modelViewMatrix * normalMatrix ) * vNormal;
+    if(shadow_type == FLAT)
+        {
+            vertexNormal = mat3(modelViewMatrix * normalMatrix ) * fNormal;
+        }
+        else // GOURAUD or PHONG
+        {
+            vertexNormal = mat3(modelViewMatrix * normalMatrix ) * vNormal;
+        }
+    
     TexCoord = vec2(vTexture.x, vTexture.y);
    
    if (useNormalMap)
@@ -220,19 +230,6 @@ void main()
             shadow = FLAT;
         }
     }
-    vec4 tmpNormal = normalMatrix*vec4(vNormal,1.0);
-    normal = normalize((tmpNormal / tmpNormal.w).xyz);
-    if (shadow_type == TOON)
-    {
-
-    	back_face = dot(-fragmentPosition,normal); // if < 0 back facing
-        if(back_face < 0)
-	    {
-		    fragmentPosition = fragmentPosition + toonTickness* normal;
-	    }
-
-    }
-
     gl_Position = projectionMatrix * vec4(fragmentPosition,1.0);
 }
 

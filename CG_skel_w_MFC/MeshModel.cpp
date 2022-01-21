@@ -501,6 +501,8 @@ void MeshModel::loadFile(string fileName)
 		bitangent.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
 
 
+		tempVertix.F_Normal = curNormalEnd;
+
 
 		tempVertix.Position = p1;
 		tempVertix.V_Normal = p1_nomral;
@@ -525,6 +527,7 @@ void MeshModel::loadFile(string fileName)
 		tempVertix.Bitangent = bitangent;
 		this->vertices[it->v[2] - 1] = tempVertix;
 		this->indices.push_back(it->v[2] - 1);
+
 	}
 
 	for (int i = 0; i < face_normals.size(); i++)
@@ -659,6 +662,10 @@ void MeshModel::SetupMesh()
 	loc = glGetAttribLocation(my_program, "vBiTangent");
 	glEnableVertexAttribArray(loc);
 	glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
+	// Face Normal coords
+	loc = glGetAttribLocation(my_program, "fNormal");
+	glEnableVertexAttribArray(loc);
+	glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, F_Normal));
 
 	if (bound_box_vertices.size() != 0)
 	{
@@ -855,7 +862,7 @@ vec3 MeshModel::GetBoundsLength()
 }
 
 
-void MeshModel::draw(bool draw_bounding_box, bool draw_vertix_normals, bool draw_faces_normals)
+void MeshModel::draw(bool draw_bounding_box, bool draw_vertix_normals, bool draw_faces_normals, bool is_toon, float toon_thickness)
 {	
 	glUseProgram(my_program);
 	GLint my_color_location = glGetUniformLocation(my_program, "color");
@@ -899,7 +906,7 @@ void MeshModel::draw(bool draw_bounding_box, bool draw_vertix_normals, bool draw
 
 	glUniform1i(glGetUniformLocation(my_program, "useNormalMap"), use_normal_map && has_normal_map);
 
-	glUniform1i(glGetUniformLocation(my_program, "useTexture"), use_texture && has_texture);
+	glUniform1i(glGetUniformLocation(my_program, "useTexture"), ((use_texture && has_texture)|| use_marble_texture));
 
 	glUniform1i(glGetUniformLocation(my_program, "useEnviromentTexture"), use_enviroment_texture);
 
@@ -909,6 +916,8 @@ void MeshModel::draw(bool draw_bounding_box, bool draw_vertix_normals, bool draw
 
 	glUniform1f(glGetUniformLocation(my_program, "MaxY"), local_maxY);
 
+	glUniform1i(glGetUniformLocation(my_program, "is_backface"), false);
+
 
 
 	 
@@ -917,7 +926,34 @@ void MeshModel::draw(bool draw_bounding_box, bool draw_vertix_normals, bool draw
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
 	
+	if (is_toon)
+	{
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_FRONT);
+		glUseProgram(my_program);
+		my_color_location = glGetUniformLocation(my_program, "color");
+		glUniform3f(my_color_location, 0,0,0);
+		umM = glGetUniformLocation(my_program, "modelMatrix"); // Find the modelMatrix variable
+		float size = 1 + toon_thickness;
+		modelTrans = this->_world_transform * Scale(size, size, size) * this->_model_transform;
+		modelMatrix[16];
+		MattoArr(modelMatrix, modelTrans);
+		glUniformMatrix4fv(umM, 1, GL_FALSE, modelMatrix);
+		glUniform1i(glGetUniformLocation(my_program, "is_backface"), true);
+		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 
+
+		my_color_location = glGetUniformLocation(my_program, "color");
+		glUniform3f(my_color_location, mesh_color.x, mesh_color.y, mesh_color.z);
+		umM = glGetUniformLocation(my_program, "modelMatrix"); // Find the modelMatrix variable
+		modelTrans = this->_world_transform * this->_model_transform;
+		modelMatrix[16];
+		MattoArr(modelMatrix, modelTrans);
+		glUniformMatrix4fv(umM, 1, GL_FALSE, modelMatrix);
+		glUniform1i(glGetUniformLocation(my_program, "is_backface"), false);	
+		glCullFace(GL_BACK);
+		glDisable(GL_CULL_FACE);
+	}
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 	glFlush();
 	if (draw_bounding_box)

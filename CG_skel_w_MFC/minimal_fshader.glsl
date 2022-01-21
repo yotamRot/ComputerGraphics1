@@ -23,7 +23,6 @@ in  vec2 TexCoord;
 in  vec3 TangentLightPos[LIGHT_SOURCES];
 in  vec3 TangentViewPos;
 in  vec3 TangentFragPos;
-in  float back_face;
 // Out Arguments
 out vec4 fColor;
 
@@ -57,10 +56,10 @@ uniform bool useEnviromentTexture;
 uniform float time;
 uniform int useColorAnimation;
 uniform int useColorAnimationGradient;
-
+uniform bool is_backface;
 uniform int toonColorNumber;
 
-varying vec3 normal;
+
 
 // marble
 uniform bool isMarble;
@@ -261,10 +260,10 @@ void toon_shadow()
         }
 	}
 
-	intensity = dot(lightDirection, normal);
+	intensity = dot(lightDirection, vertexNormal);
 
 
-	if(back_face < 0)
+	if(is_backface)
 	{
 		color = vec4(0,0,0,1.0);
 	}

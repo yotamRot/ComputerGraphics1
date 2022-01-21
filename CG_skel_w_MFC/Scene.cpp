@@ -367,8 +367,6 @@ void Scene::draw()
 	glUniform1i(ulightNumber, lights.size());
 	GLint uToonN = glGetUniformLocation(program, "toonColorNumber"); // Find the toonColorNumber variable
 	glUniform1i(uToonN, toon_color_number);
-	GLint uToonT = glGetUniformLocation(program, "toonTickness"); // Find the toonTickness variable
-	glUniform1f(uToonT, toon_thickness);
 	GLint uColorAnimation = glGetUniformLocation(program, "useColorAnimation"); // Find the useColorAnimation variable
 	glUniform1i(uColorAnimation, is_color_animation);
 	GLint uVertexAnimation = glGetUniformLocation(program, "useVertexAnimation"); // Find the useVertexAnimation variable
@@ -428,7 +426,7 @@ void Scene::draw()
 		{
 			if (isRenderCameras && cameraIndex != activeCamera) //dont want to draw active camera
 			{
-				(*it)->draw(false, false, false); // draw camera
+				(*it)->draw(false, false, false,(this->current_shadow == TOON),this->toon_thickness); // draw camera
 			}
 			cameraIndex++;
 		}
@@ -458,12 +456,12 @@ void Scene::draw()
 			{
 				GLint ul_alpha = glGetUniformLocation(program, "alpha");
 				glUniform1f(ul_alpha, light_model->l_alpha);
-				(*it)->draw(false, false, false);// draw models
+				(*it)->draw(false, false, false, (this->current_shadow == TOON), this->toon_thickness);// draw models
 			}
 		}
 		else
 		{
-			(*it)->draw(isDrawBoundBox, isShowVerticsNormals, isShowFacesNormals);// draw models
+			(*it)->draw(isDrawBoundBox, isShowVerticsNormals, isShowFacesNormals, (this->current_shadow == TOON), this->toon_thickness);// draw models
 		}
 	}
 	

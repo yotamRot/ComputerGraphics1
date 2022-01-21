@@ -99,7 +99,7 @@ class Model {
 public:
 	mat4 _model_transform;
 	mat4 _world_transform;
-	void virtual draw(bool draw_bounding_box, bool draw_vertix_normals, bool draw_faces_normals) = 0;
+	void virtual draw(bool draw_bounding_box, bool draw_vertix_normals, bool draw_faces_normals, bool is_toon, float toon_thickness) = 0;
 	vec3 virtual CenteringTranslation(TransAxis axis) = 0;
 protected:
 	virtual ~Model() {}

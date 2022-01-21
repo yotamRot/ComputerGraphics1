@@ -50,6 +50,7 @@ struct Vertex {
 	vec2 TexCoords;
 	vec3 Tangent;
 	vec3 Bitangent;
+	vec3 F_Normal;
 };
 
 struct SimpleVertex {
@@ -119,7 +120,7 @@ public:
 	~MeshModel(void);
 	void loadFile(string fileName);
 	void loadTexture(string fileName, TextureType type);
-	void draw(bool draw_bounding_box, bool draw_vertix_normals, bool draw_faces_normals);
+	void draw(bool draw_bounding_box, bool draw_vertix_normals, bool draw_faces_normals, bool is_toon, float toon_thickness);
 	void drawBoundingBox();
 	void drawVerticesNormals();
 	void drawFacesNormals();
