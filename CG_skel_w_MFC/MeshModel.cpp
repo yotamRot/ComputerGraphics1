@@ -314,7 +314,7 @@ void  MeshModel::fillVertixStruct(vec3& p1, vec3& p2, vec3& p3)
 	bitangent.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
 	bitangent.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
 
-
+	tempVertix.F_Normal = curNormalEnd;
 
 	tempVertix.Position = p1;
 	tempVertix.V_Normal = p1_nomral;
