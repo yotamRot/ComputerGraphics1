@@ -400,7 +400,7 @@ void MeshModel::loadFile(string fileName)
 	//Then vertex_positions should contain:
 	//vertex_positions={v1,v2,v3,v1,v3,v4}
 		// iterate through all stored faces and create triangles
-	vertices = vector<Vertex>(l_vertices.size(), tempVertix);
+	//vertices = vector<Vertex>(l_vertices.size(), tempVertix);
 
 	// iterate through all stored faces and create triangles
 	for (vector<FaceIdcs>::iterator it = faces.begin(); it != faces.end(); ++it)
@@ -509,25 +509,30 @@ void MeshModel::loadFile(string fileName)
 		tempVertix.TexCoords = p1_texture;
 		tempVertix.Tangent = tangent;
 		tempVertix.Bitangent = bitangent;
-		this->vertices[it->v[0] - 1] = tempVertix;
-		this->indices.push_back(it->v[0] - 1);
+		this->vertices.push_back(tempVertix);
+		//this->indices.push_back(it->v[0] - 1);
 
 		tempVertix.Position = p2;
 		tempVertix.V_Normal = p2_nomral;
 		tempVertix.TexCoords = p2_texture;
 		tempVertix.Tangent = tangent;
 		tempVertix.Bitangent = bitangent;
-		this->vertices[it->v[1] - 1] = tempVertix;
-		this->indices.push_back(it->v[1] - 1);
+		this->vertices.push_back(tempVertix);
+		//this->indices.push_back(it->v[1] - 1);
 
 		tempVertix.Position = p3;
 		tempVertix.V_Normal = p3_nomral;
 		tempVertix.TexCoords = p3_texture;
 		tempVertix.Tangent = tangent;
 		tempVertix.Bitangent = bitangent;
-		this->vertices[it->v[2] - 1] = tempVertix;
-		this->indices.push_back(it->v[2] - 1);
+		this->vertices.push_back(tempVertix);
+		//this->indices.push_back(it->v[2] - 1);
 
+	}
+
+	for (int i = 0; i < vertices.size(); i++)
+	{
+		indices.push_back(i);
 	}
 
 	for (int i = 0; i < face_normals.size(); i++)
