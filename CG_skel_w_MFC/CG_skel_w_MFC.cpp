@@ -806,7 +806,7 @@ void UseTexture()
 {
 	if (scene->ToggleActiveModelIsUseTexture())
 	{
-		glutChangeToMenuEntry(USE_TEXTURE, "Hide Texture", USE_TEXTURE);
+		glutChangeToMenuEntry(USE_TEXTURE, "Use Texture", USE_TEXTURE);
 	}
 	else
 	{
@@ -1016,7 +1016,7 @@ void CreateRendererMenu()
 	glutAddMenuEntry("Show Faces Normal", SHOW_FACES_NORMAL);
 	glutAddMenuEntry("Show Bounding Box", SHOW_BOUNDING_BOX);
 	glutAddMenuEntry("Change Color", CHANGE_OBJECT_COLOR);
-	glutAddMenuEntry("Show Wire Frame", WIRE_FRAME);
+	//glutAddMenuEntry("Show Wire Frame", WIRE_FRAME);
 	//glutAddMenuEntry("Show Fog", FOG);
 	//glutAddMenuEntry("Use SuperSample", SUPER_SAMPLE);
 	//glutAddMenuEntry("Apply Crazy Colors", CRAZY_COLORS);

@@ -201,7 +201,7 @@ void phong_shadow()
 		ambient  = v_Ka * La[i] * lightColor[i];
 		diffuse  = v_Kd * Ld[i] * max(dot(normalizeNormal, lightDirection), 0.0) * lightColor[i]; 
 		specular = v_Ks * Ls[i] * pow(max(dot(viewDirection, reflectDir), 0.0), shininess) * lightColor[i]; 
-		result += (ambient + diffuse + specular) * curColor + Ke;
+		result += (ambient + diffuse + specular) * curColor + Ke * curColor;
     }
 
 	if(useColorAnimation == 1)
@@ -210,7 +210,7 @@ void phong_shadow()
 	}
 	else
 	{
-		fColor = vec4(result, 1.0)* (useTexture ? textureColor : vec4(1,1,1,1));
+		fColor = vec4(result, 1.0) * (useTexture ? textureColor : vec4(1,1,1,1));
 	}
 }
 

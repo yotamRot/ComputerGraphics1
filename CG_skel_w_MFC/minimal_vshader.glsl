@@ -215,7 +215,7 @@ void main()
 	        ambient  = v_Ka * La[i] * lightColor[i];
 	        diffuse  = v_Kd * Ld[i] * max(dot(normalizeNormal, lightDirection), 0.0) * lightColor[i]; 
             specular = v_Ks * Ls[i] * pow(max(dot(viewDirection, reflectDir), 0.0), shininess) * lightColor[i]; 
-	        result += (ambient + diffuse + specular) * Ccolor + Ke;
+	        result += (ambient + diffuse + specular) * Ccolor + Ke * Ccolor;
         }
 
         if(shadow_type == GOURAUD)

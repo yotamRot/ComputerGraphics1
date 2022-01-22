@@ -911,7 +911,7 @@ void MeshModel::draw(bool draw_bounding_box, bool draw_vertix_normals, bool draw
 
 	glUniform1i(glGetUniformLocation(my_program, "useNormalMap"), use_normal_map && has_normal_map);
 
-	glUniform1i(glGetUniformLocation(my_program, "useTexture"), ((use_texture && has_texture)|| use_marble_texture));
+	glUniform1i(glGetUniformLocation(my_program, "useTexture"), ((use_texture && has_texture)|| use_marble_texture || use_enviroment_texture));
 
 	glUniform1i(glGetUniformLocation(my_program, "useEnviromentTexture"), use_enviroment_texture);
 
@@ -1307,7 +1307,7 @@ CameraModel::CameraModel(int model_id, int cameraIndex, GLuint program) : camera
 }
 
 LightModel::LightModel(int model_id, int lightIndex, GLuint program) : 
-	lightIndex(lightIndex), light_color(vec3(1,1,1)), La(0.5), Ld(0.8), Ls(1.0), l_alpha(2), type(POINT_SOURCE)
+	lightIndex(lightIndex), light_color(vec3(1,1,1)), La(0.5), Ld(0.5), Ls(0.5), l_alpha(2), type(POINT_SOURCE)
 {
 	ka = 1;
 	kd = 1;
@@ -1754,7 +1754,7 @@ bool enviromentBox::load(string directoryPath)
 	int width, height, nrChannels;
 	for (unsigned int i = 0; i < faces.size(); i++)
 	{
-		unsigned char* data = stbi_load((directoryPath +"\\" + faces.at(i) + ".png").c_str(), &width, &height, &nrChannels, 0);
+		unsigned char* data = stbi_load((directoryPath +"\\" + faces.at(i) + ".jpg").c_str(), &width, &height, &nrChannels, 0);
 		if (data)
 		{
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
